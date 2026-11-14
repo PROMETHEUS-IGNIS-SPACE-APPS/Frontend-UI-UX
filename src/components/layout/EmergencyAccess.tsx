@@ -25,10 +25,10 @@ export default function EmergencyAccess() {
     </button>
 
     {isOpen && <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4"
       onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}
     >
-      <section role="dialog" aria-modal="true" aria-labelledby="emergency-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-red-500/50 bg-[#080e19] text-slate-100 shadow-2xl shadow-black/50">
+      <section role="dialog" aria-modal="true" aria-labelledby="emergency-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-red-500/50 bg-card text-slate-100 shadow-2xl shadow-black/50">
         <header className="flex items-start justify-between gap-3 border-b border-slate-800 bg-red-950/30 p-4">
           <div className="flex items-center gap-3">
             <span className="rounded-xl bg-red-600 p-2 text-white"><ShieldAlert className="h-4 w-4" aria-hidden /></span>

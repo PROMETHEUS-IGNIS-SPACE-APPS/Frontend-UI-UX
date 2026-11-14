@@ -1,4 +1,4 @@
-import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Satellite, TrendingUp } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Radar, Satellite, TrendingUp } from 'lucide-react';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
@@ -17,6 +17,7 @@ interface HeaderProps {
 const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   explorer: Layers,
   predictability: TrendingUp,
+  'markov-heatmap': Radar,
   calendar: CalendarDays,
   analytics: Activity,
   comparison: HeartHandshake,
@@ -27,6 +28,7 @@ const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
 const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
   predictability: 'Predictibilidad',
+  'markov-heatmap': 'Mapa de Calor Markov',
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula Pedagógica',
@@ -36,6 +38,7 @@ const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
   predictability: 'Predicción',
+  'markov-heatmap': 'Calor Markov',
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula',
@@ -51,7 +54,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
 
   return (
-    <header className="sticky top-0 z-40 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card/95 text-text-primary shadow-xs backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card text-text-primary shadow-xs">
       <div className="mx-auto w-full max-w-[1440px] px-2.5 sm:px-4">
         {/* Fila superior: marca, navegación y herramientas */}
         <div className="flex flex-wrap items-center justify-between gap-2 py-2 xl:flex-nowrap">
@@ -60,18 +63,18 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="whitespace-nowrap font-noto text-sm font-extrabold tracking-wide text-text-primary sm:text-[15px]">PROMETHEUS IGNIS</span>
-                <span className="whitespace-nowrap rounded border border-cyan-500/40 bg-cyan-500/10 px-1.5 py-0.5 font-source text-[10px] font-bold tracking-wide text-cyan-400">MODIS · VIIRS</span>
+                <span className="whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 font-source text-[10px] font-bold tracking-wide text-accent">MODIS · VIIRS</span>
               </div>
               <p className="truncate text-[11px] leading-tight text-text-secondary">Plataforma de Inteligencia Territorial · Semillero ITM</p>
             </div>
           </div>
 
-          <nav aria-label="Módulos" role="tablist" className="order-3 hidden w-full max-w-full items-center justify-center gap-0.5 rounded-xl border border-slate-800 bg-[#070E1A] p-1 lg:flex xl:order-2 xl:w-auto">
+          <nav aria-label="Módulos" role="tablist" className="order-3 hidden w-full max-w-full items-center justify-center gap-0.5 rounded-xl border border-border bg-card p-1 lg:flex xl:order-2 xl:w-auto">
             {renderTabs('desktop')}
           </nav>
 
           <div className="order-2 flex shrink-0 items-center gap-1.5 xl:order-3">
-            <button type="button" onClick={onOpenGlossary} aria-label="Abrir glosario científico" title="Guía y Glosario Científico" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+            <button type="button" onClick={onOpenGlossary} aria-label="Abrir glosario científico" title="Guía y Glosario Científico" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
               <BookOpen className="h-4 w-4" aria-hidden />
             </button>
           </div>
@@ -82,19 +85,19 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
           <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             <div className="flex items-center gap-1 overflow-x-auto lg:hidden">{renderTabs('mobile')}</div>
             <ConnectionIndicator />
-            <span className={`${SMALL_BUTTON} border border-border-strong bg-surface text-text-primary`}>
-              <Satellite className="h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden />
+            <span className={`${SMALL_BUTTON} bg-card text-text-primary`}>
+              <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
               <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>
             </span>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-1.5">
             <EmergencyAccess />
             <NoveltyReportAccess />
-            <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-slate-700 bg-[#0B1322] text-slate-100 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50`}>
-              <Download className="h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden />
+            <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
+              <Download className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
               <span className="hidden sm:inline">Descargar Reportes (.CSV)</span>
               <span className="sm:hidden">CSV</span>
-              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1.5 font-source text-[10px] font-extrabold tabular-nums text-slate-950">{totalVisibleCount}</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount}</span>
             </button>
           </div>
         </div>
@@ -117,7 +120,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
         aria-label={variant === 'desktop' ? module.label : undefined}
         title={module.label}
         onClick={() => onModuleChange(module.id)}
-        className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] transition-all duration-200 sm:text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${isActive ? 'bg-gradient-to-r from-orange-500 to-amber-500 font-bold text-slate-950 shadow-sm' : 'font-medium text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+        className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 font-noto text-[11px] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${isActive ? 'bg-accent-solid font-bold text-accent-fg shadow-sm' : 'font-medium text-text-primary/80 hover:bg-surface-hover hover:text-text-primary'}`}
       >
         <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
         <span>{visibleLabel}</span>

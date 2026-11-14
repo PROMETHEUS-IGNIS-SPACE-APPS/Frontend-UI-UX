@@ -20,7 +20,7 @@ export default function TimelineControls({ dates, countsByDate, activeDate, isPl
   const stepLabel = activeIndex >= 0 ? `Paso temporal: ${activeIndex + 1} de ${dates.length}` : `${dates.length} fechas disponibles`;
 
   return (
-    <div className="shrink-0 select-none border-t border-border bg-card/95 p-3 text-xs backdrop-blur-md">
+    <div className="shrink-0 select-none border-t border-border bg-card p-3 text-xs">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 md:flex-row">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -57,7 +57,7 @@ export default function TimelineControls({ dates, countsByDate, activeDate, isPl
               return <div key={date} style={{ height: `${Math.max(10, Math.round((count / maxCount) * 100))}%` }} className={`flex-1 rounded-t-xs transition-colors ${isPassed ? 'bg-accent-solid' : 'bg-border-strong'}`} title={`${date}: ${count} observaciones`} />;
             })}
           </div>
-          <input type="range" aria-label="Fecha de la línea de tiempo" min={0} max={Math.max(0, dates.length - 1)} value={activeIndex < 0 ? Math.max(0, dates.length - 1) : activeIndex} onChange={(event) => onSelectIndex(Number(event.target.value))} disabled={!dates.length} className="h-1.5 w-full cursor-pointer rounded-lg bg-border-strong accent-[#D9692B]" />
+          <input type="range" aria-label="Fecha de la línea de tiempo" min={0} max={Math.max(0, dates.length - 1)} value={activeIndex < 0 ? Math.max(0, dates.length - 1) : activeIndex} onChange={(event) => onSelectIndex(Number(event.target.value))} disabled={!dates.length} className="h-1.5 w-full cursor-pointer rounded-lg bg-border-strong accent-[#CE8C67]" />
         </div>
 
         <div className="hidden max-w-[235px] items-center gap-1.5 text-[10px] leading-tight text-text-secondary lg:flex">

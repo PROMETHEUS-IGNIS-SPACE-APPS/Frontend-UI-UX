@@ -13,10 +13,10 @@ const DOT_CLASSES: Record<ConnectionOutcome, string> = {
 };
 
 const BUTTON_CLASSES: Record<ConnectionOutcome, string> = {
-  checking: 'bg-slate-900/80 border-slate-700 text-slate-400 hover:border-slate-500',
+  checking: 'bg-card border-border text-text-secondary hover:bg-surface-hover',
   connected:
-    'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/40',
-  unavailable: 'bg-slate-900/80 border-slate-700 text-slate-400 hover:border-slate-500',
+    'bg-success-soft border-success/40 text-success hover:bg-surface-hover',
+  unavailable: 'bg-card border-border text-text-secondary hover:bg-surface-hover',
 };
 
 /**

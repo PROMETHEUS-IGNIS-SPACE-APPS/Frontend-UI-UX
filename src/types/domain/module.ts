@@ -15,6 +15,11 @@ export const APP_MODULES = [
     description: 'Estado de publicación de modelos predictivos y sus validaciones.',
   },
   {
+    id: 'markov-heatmap',
+    label: 'Mapa de Calor Markov',
+    description: 'Predictibilidad espacial por subregiones de Antioquia cuando exista un modelo publicado.',
+  },
+  {
     id: 'calendar',
     label: 'Calendario',
     description: 'Actividad diaria y mensual de observaciones por instrumento.',

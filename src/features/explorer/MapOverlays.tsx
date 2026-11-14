@@ -17,7 +17,7 @@ interface MapOverlaysProps {
   onToggleHeatmap: () => void;
 }
 
-const GLASS = 'border border-border-strong bg-card/25 shadow-2xl backdrop-blur-md';
+const GLASS = 'border border-border-strong bg-card shadow-2xl';
 
 export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap }: MapOverlaysProps) {
   const [layersOpen, setLayersOpen] = useState(true);
@@ -78,7 +78,7 @@ function LayerToggle({ label, detail, color, count, checked, onChange }: { label
     </span>
     <span className="flex items-center gap-2">
       <span className="min-w-5 rounded border border-border-strong bg-input-bg px-1 text-center font-source text-[10px] text-text-secondary">{count}</span>
-      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-[#D9692B]" />
+      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-[#CE8C67]" />
     </span>
   </label>;
 }

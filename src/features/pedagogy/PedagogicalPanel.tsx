@@ -74,34 +74,34 @@ export default function PedagogicalPanel() {
     setSubmitted(false);
   };
 
-  return <main className="ignis-page mx-auto w-full max-w-[1200px] space-y-5 p-4 text-slate-100 sm:p-6">
-    <header className="rounded-2xl border border-slate-800 bg-[#0b1220] p-5 sm:p-7">
-      <span className="rounded-full border border-emerald-800/60 bg-emerald-950/30 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wide text-emerald-300">Aula científica</span>
-      <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Aprende a leer las observaciones</h1>
-      <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400 sm:text-sm">Conceptos básicos para interpretar MODIS, VIIRS, confianza y FRP con cuidado científico.</p>
+  return <main className="mx-auto w-full max-w-6xl space-y-8 p-4 text-text-primary sm:p-6 lg:p-8">
+    <header className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <span className="rounded-full border border-success/30 bg-success-soft px-3 py-1 text-xs font-bold uppercase tracking-wide text-success">Aula científica</span>
+      <h1 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">Aprende a leer las observaciones</h1>
+      <p className="mt-2 max-w-3xl text-xs leading-5 text-text-secondary sm:text-sm">Conceptos básicos para interpretar MODIS, VIIRS, confianza y FRP con cuidado científico.</p>
     </header>
 
-    <section aria-labelledby="lesson-heading" className="space-y-4 rounded-2xl border border-slate-800 bg-[#0b1220] p-4 sm:p-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-800 pb-4">
-        <div><p className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300">Lección {lessonIndex + 1} de {LESSONS.length}</p><h2 id="lesson-heading" className="mt-1 text-lg font-semibold">Conceptos satelitales</h2></div>
-        <div className="flex gap-1.5" aria-label="Seleccionar lección">{LESSONS.map((item, index) => <button key={item.title} type="button" aria-label={`Lección ${index + 1}: ${item.title}`} aria-current={lessonIndex === index ? 'step' : undefined} onClick={() => setLessonIndex(index)} className={`h-2 rounded-full transition-all ${lessonIndex === index ? 'w-7 bg-amber-400' : 'w-2 bg-slate-700 hover:bg-slate-500'}`} />)}</div>
+    <section aria-labelledby="lesson-heading" className="space-y-6 rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
+        <div><p className="font-noto text-xs font-bold uppercase tracking-wider text-accent">Lección {lessonIndex + 1} de {LESSONS.length}</p><h2 id="lesson-heading" className="mt-1 font-noto text-xl font-bold sm:text-2xl">Conceptos satelitales</h2></div>
+        <div className="flex gap-1.5" aria-label="Seleccionar lección">{LESSONS.map((item, index) => <button key={item.title} type="button" aria-label={`Lección ${index + 1}: ${item.title}`} aria-current={lessonIndex === index ? 'step' : undefined} onClick={() => setLessonIndex(index)} className={`h-2 rounded-full transition-all ${lessonIndex === index ? 'w-7 bg-accent-solid' : 'w-2 bg-slate-700 hover:bg-slate-500'}`} />)}</div>
       </div>
-      <article className={`rounded-xl border p-4 sm:p-6 ${lesson.tone}`}>
-        <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-black/20"><LessonIcon className="h-5 w-5" /></span><div><p className="text-[9px] font-semibold uppercase tracking-wider opacity-75">{lesson.subtitle}</p><h3 className="mt-1 text-base font-bold sm:text-lg">{lesson.title}</h3></div></div>
+      <article className={`space-y-4 rounded-2xl border p-6 sm:p-8 ${lesson.tone}`}>
+        <div className="flex items-start gap-3"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-black/20"><LessonIcon className="h-5 w-5" /></span><div><p className="text-[10px] font-semibold uppercase tracking-wider opacity-75">{lesson.subtitle}</p><h3 className="mt-1 text-lg font-extrabold sm:text-xl">{lesson.title}</h3></div></div>
         <p className="mt-4 text-xs leading-6 text-slate-200 sm:text-sm">{lesson.description}</p>
-        <p className="mt-4 flex items-start gap-2 rounded-lg border border-white/10 bg-black/20 p-3 text-[11px] leading-5 text-slate-100"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" /><span><strong>Para recordar: </strong>{lesson.takeaway}</span></p>
+        <p className="mt-4 flex items-start gap-2 rounded-lg border border-white/10 bg-black/20 p-3 text-[11px] leading-5 text-text-primary"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" /><span><strong>Para recordar: </strong>{lesson.takeaway}</span></p>
       </article>
-      <div className="flex items-center justify-between gap-3"><button type="button" onClick={() => setLessonIndex((index) => (index - 1 + LESSONS.length) % LESSONS.length)} className="ignis-action ignis-action-secondary"><ChevronLeft className="h-3.5 w-3.5" />Anterior</button><span className="text-[9px] text-slate-500">{lessonIndex + 1} / {LESSONS.length}</span>      <button type="button" onClick={() => setLessonIndex((index) => (index + 1) % LESSONS.length)} className="ignis-action ignis-action-primary">Siguiente<ChevronRight className="h-3.5 w-3.5" /></button></div>
+      <div className="flex items-center justify-between gap-3"><button type="button" onClick={() => setLessonIndex((index) => (index - 1 + LESSONS.length) % LESSONS.length)} className="ignis-action ignis-action-secondary"><ChevronLeft className="h-3.5 w-3.5" />Anterior</button><span className="text-[10px] text-text-secondary">{lessonIndex + 1} / {LESSONS.length}</span>      <button type="button" onClick={() => setLessonIndex((index) => (index + 1) % LESSONS.length)} className="ignis-action ignis-action-primary">Siguiente<ChevronRight className="h-3.5 w-3.5" /></button></div>
     </section>
 
-    <section aria-labelledby="quiz-heading" className="space-y-4 rounded-2xl border border-slate-800 bg-[#0b1220] p-4 sm:p-6">
-      <div><h2 id="quiz-heading" className="flex items-center gap-2 text-lg font-semibold"><CircleHelp className="h-5 w-5 text-amber-400" />Comprueba lo aprendido</h2><p className="mt-1 text-[10px] text-slate-500">Caso {quizIndex + 1} de {QUIZ.length}</p></div>
-      <fieldset><legend className="text-sm font-medium text-slate-200">{question.question}</legend><div className="mt-3 space-y-2">{question.options.map((option, index) => { const correctOption = submitted && index === question.answer; const incorrectSelection = submitted && index === selectedAnswer && !isCorrect; return <button key={option} type="button" disabled={submitted} aria-pressed={selectedAnswer === index} onClick={() => setSelectedAnswer(index)} className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left text-xs transition ${correctOption ? 'border-emerald-700 bg-emerald-950/30 text-emerald-100' : incorrectSelection ? 'border-red-800 bg-red-950/25 text-red-100' : selectedAnswer === index ? 'border-amber-600 bg-amber-950/20 text-amber-100' : 'border-slate-800 bg-[#080d17] text-slate-300 hover:border-slate-600'}`}><span>{option}</span>{correctOption && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />}</button>; })}</div></fieldset>
+    <section aria-labelledby="quiz-heading" className="space-y-6 rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
+      <div><h2 id="quiz-heading" className="flex items-center gap-2 font-noto text-xl font-bold sm:text-2xl"><CircleHelp className="h-5 w-5 text-accent" />Comprueba lo aprendido</h2><p className="mt-1 text-[10px] text-text-secondary">Caso {quizIndex + 1} de {QUIZ.length}</p></div>
+      <fieldset><legend className="text-sm font-medium text-slate-200">{question.question}</legend><div className="mt-3 space-y-2">{question.options.map((option, index) => { const correctOption = submitted && index === question.answer; const incorrectSelection = submitted && index === selectedAnswer && !isCorrect; return <button key={option} type="button" disabled={submitted} aria-pressed={selectedAnswer === index} onClick={() => setSelectedAnswer(index)} className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left text-xs transition ${correctOption ? 'border-emerald-700 bg-emerald-950/30 text-emerald-100' : incorrectSelection ? 'border-red-800 bg-red-950/25 text-red-100' : selectedAnswer === index ? 'border-amber-600 bg-amber-950/20 text-amber-100' : 'border-border bg-surface text-text-primary hover:border-accent'}`}><span>{option}</span>{correctOption && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />}</button>; })}</div></fieldset>
       {submitted && <p role="status" className={`rounded-lg border p-3 text-xs leading-5 ${isCorrect ? 'border-emerald-900 bg-emerald-950/20 text-emerald-100' : 'border-amber-900 bg-amber-950/20 text-amber-100'}`}>{isCorrect ? '¡Correcto! ' : 'Repasa esta idea. '}{question.explanation}</p>}
-      {!submitted ? <button type="button" disabled={selectedAnswer === null} onClick={() => setSubmitted(true)} className="ignis-action ignis-action-primary">Revisar respuesta</button> : <button type="button" onClick={moveQuiz} className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800">{quizIndex === QUIZ.length - 1 ? 'Volver al inicio' : 'Siguiente pregunta'}</button>}
+      {!submitted ? <button type="button" disabled={selectedAnswer === null} onClick={() => setSubmitted(true)} className="ignis-action ignis-action-primary">Revisar respuesta</button> : <button type="button" onClick={moveQuiz} className="ignis-action ignis-action-secondary">{quizIndex === QUIZ.length - 1 ? 'Volver al inicio' : 'Siguiente pregunta'}</button>}
     </section>
 
     <section aria-label="Matriz educativa de gestión del riesgo"><RiskMatrixPanel /></section>
-    <p className="text-[10px] leading-4 text-slate-500">Contenido educativo. La matriz es un esquema ordinal de planificación y no una probabilidad ni una instrucción de respuesta a emergencias.</p>
+    <p className="text-[10px] leading-4 text-text-secondary">Contenido educativo. La matriz es un esquema ordinal de planificación y no una probabilidad ni una instrucción de respuesta a emergencias.</p>
   </main>;
 }

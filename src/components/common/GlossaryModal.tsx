@@ -69,7 +69,7 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
       onClick={onClose}
     >
       <div
@@ -77,11 +77,11 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
         aria-modal="true"
         aria-labelledby="glossary-modal-title"
         aria-describedby="glossary-modal-subtitle"
-        className="bg-[#070e1a] border border-slate-700/80 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="bg-card border border-border-strong/80 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-[#091424]">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border bg-card">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
               <BookOpen className="w-5 h-5" aria-hidden />
@@ -111,7 +111,7 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
             {TERMS.map((entry) => (
               <div
                 key={entry.term}
-                className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1.5"
+                className="bg-slate-900/70 border border-border/80 rounded-xl p-3.5 space-y-1.5"
               >
                 <h3 className="font-mono font-bold text-amber-300 text-sm">{entry.term}</h3>
                 <p className="text-slate-300 leading-relaxed text-[11px]">{entry.definition}</p>
@@ -121,7 +121,7 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-[#091424] flex items-center justify-between text-xs">
+        <div className="p-4 border-t border-border bg-card flex items-center justify-between text-xs">
           <span className="text-[11px] text-slate-400 font-mono">
             Fuentes: Giglio et al. (2016), Schroeder et al. (2014), NASA FIRMS, UNDRR Sendai
             Framework (2015).

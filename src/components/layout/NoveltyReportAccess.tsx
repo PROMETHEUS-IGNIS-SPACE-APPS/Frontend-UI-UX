@@ -5,13 +5,13 @@ export default function NoveltyReportAccess() {
   const [isOpen, setIsOpen] = useState(false);
 
   return <>
-    <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-orange-500 to-red-600 px-3 py-1.5 font-noto text-[11px] font-bold text-white shadow-sm transition-all hover:from-orange-600 hover:to-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+    <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent-solid px-3 py-1.5 font-noto text-[11px] font-bold text-accent-fg shadow-sm transition-all hover:bg-[#b87956] focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
       <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span>Reportar Novedad</span>
     </button>
 
-    {isOpen && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="novelty-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-orange-500/50 bg-[#080e19] text-slate-100 shadow-2xl shadow-black/50">
+    {isOpen && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="novelty-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-orange-500/50 bg-card text-slate-100 shadow-2xl shadow-black/50">
         <header className="flex items-start justify-between gap-3 border-b border-slate-800 bg-orange-950/25 p-4">
           <div className="flex items-center gap-3"><span className="rounded-xl bg-orange-600/20 p-2 text-orange-300"><MapPin className="h-4 w-4" aria-hidden /></span><div><h2 id="novelty-title" className="font-mono text-sm font-bold">Reporte de novedad</h2><p className="mt-1 text-[10px] text-slate-400">Recepción de reportes en desarrollo</p></div></div>
           <button type="button" onClick={() => setIsOpen(false)} aria-label="Cerrar aviso de reporte" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"><X className="h-4 w-4" aria-hidden /></button>

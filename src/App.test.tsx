@@ -95,6 +95,16 @@ describe('App shell de pestañas', () => {
     expect(screen.getByText('Sin modelo publicado')).toBeInTheDocument();
   });
 
+  it('abre el Mapa de Calor Markov sin probabilidades inventadas', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('tab', { name: 'Mapa de Calor Markov' }));
+
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Mapa de Calor Markov');
+    expect(await screen.findByText('Capa predictiva pendiente')).toBeInTheDocument();
+  });
+
   it('abre el módulo Calendario desde la navegación', async () => {
     const user = userEvent.setup();
     renderApp();
