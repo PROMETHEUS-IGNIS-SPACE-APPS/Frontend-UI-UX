@@ -39,6 +39,7 @@ interface ExplorerSidebarProps {
 
 export default function ExplorerSidebar(props: ExplorerSidebarProps) {
   const [advanced, setAdvanced] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const departments = [...new Set(props.observations.map((item) => item.department).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'es'));
   const municipalities = [...new Set(props.observations.filter((item) => props.department === 'ALL' || item.department === props.department).map((item) => item.municipality).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'es'));
   const confidenceValues = [...new Set(props.observations.map((item) => String(item.confidence_raw)))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
@@ -46,8 +47,13 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
   const historicalMode = props.sourceMode === 'historical';
 
   return <aside className="flex w-full shrink-0 flex-col gap-3 border-b border-slate-800 bg-[#080e19] p-3 text-xs lg:h-full lg:w-[310px] lg:overflow-y-auto lg:border-b-0 lg:border-r">
+    <button type="button" aria-expanded={mobileExpanded} onClick={() => setMobileExpanded((value) => !value)} className="flex items-center justify-between rounded-xl border border-slate-800 bg-[#0e1726] px-3 py-2.5 text-left font-semibold text-slate-200 lg:hidden">
+      <span className="flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5 text-amber-400" />Filtros ({props.visibleCount.toLocaleString()} observaciones)</span>
+      <span className="text-[10px] text-amber-300">{mobileExpanded ? 'Ocultar ▲' : 'Mostrar ▼'}</span>
+    </button>
+    <div className={`${mobileExpanded ? 'flex' : 'hidden'} flex-col gap-3 lg:flex`}>
     <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-[#0e1726] p-1">
-      <button type="button" aria-pressed={!advanced} onClick={() => setAdvanced(false)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${!advanced ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}`}><Sparkles className="h-3.5 w-3.5" />Modo FÃ¡cil</button>
+      <button type="button" aria-pressed={!advanced} onClick={() => setAdvanced(false)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${!advanced ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}`}><Sparkles className="h-3.5 w-3.5" />Modo Fácil</button>
       <button type="button" aria-pressed={advanced} onClick={() => setAdvanced(true)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${advanced ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}><SlidersHorizontal className="h-3.5 w-3.5" />Filtros Pro</button>
     </div>
 
@@ -91,6 +97,7 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
       <fieldset><legend className="mb-1 text-[10px] text-slate-400">Paso orbital</legend><div className="grid grid-cols-3 gap-1">{([{ key: 'ALL', label: 'Todos' }, { key: 'D', label: 'DÃ­a' }, { key: 'N', label: 'Noche' }] as const).map(({ key, label }) => <button key={key} type="button" aria-pressed={props.daynight === key} onClick={() => props.onDaynightChange(key)} className={`rounded-md px-2 py-1.5 text-[9px] font-semibold ${props.daynight === key ? 'bg-cyan-800/70 text-cyan-100' : 'bg-[#050a12] text-slate-500 hover:text-slate-200'}`}>{label}</button>)}</div></fieldset>
     </section>}
 
-    <div className="mt-auto border-t border-slate-800 pt-3 text-[9px] leading-4 text-slate-500"><p className="font-semibold text-slate-400">Lectura de los datos</p><p className="mt-1">Una observaciÃ³n no equivale necesariamente a un incendio independiente. Los conteos se mantienen separados por sensor.</p></div>
+    <div className="mt-auto border-t border-slate-800 pt-3 text-[9px] leading-4 text-slate-500"><p className="font-semibold text-slate-400">Lectura de los datos</p><p className="mt-1">Una observación no equivale necesariamente a un incendio independiente. Los conteos se mantienen separados por sensor.</p></div>
+    </div>
   </aside>;
 }

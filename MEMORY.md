@@ -7,6 +7,7 @@
 - Header muestra botones 123 SOS, Reportar Novedad y Descargar Reportes (.CSV); CSV exporta la selección visible. El aviso de novedades explica que no hay endpoint de recepción y no guarda nada.
 - SOS abre opciones voluntarias `tel:123` y `tel:119`; no inicia llamadas por sí solo.
 - Filtros incluyen fuente, cobertura, fechas UTC cuando aplican, sensor, departamento, municipio, día/noche, FRP y confianza original.
+- El explorador replica del ejemplo el panel de filtros colapsable en móvil y ofrece presets de cámara para Antioquia, Colombia, Valle de Aburrá, Bajo Cauca y Urabá.
 - Se conserva procedencia y `confidence_raw`; no se usa `confidence_score` provisional. FRP null continúa como no disponible.
 
 ## Decisiones y dependencias
@@ -20,3 +21,4 @@
 - Verificar visualmente histórico con backend activo y 9.000 observaciones; confirmar rendimiento.
 - Evaluar división del bundle de producción (advertencia de chunk JS >500 kB).
 - Integrar artefactos AI-Pipeline revisados cuando estén publicados.
+- La carpeta `Ejemplo` sirve como referencia visual, pero no se portan sus datos sintéticos, FastAPI Lab ni el selector Demo/Lab Real porque están excluidos por el contrato del frontend.

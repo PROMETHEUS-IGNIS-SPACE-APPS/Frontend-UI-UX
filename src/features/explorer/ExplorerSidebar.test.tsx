@@ -55,4 +55,17 @@ describe('ExplorerSidebar', () => {
     expect(callbacks.onDaynightChange).toHaveBeenCalledWith('N');
     expect(screen.getByRole('spinbutton')).toBeEnabled();
   });
+
+  it('allows mobile users to expand and collapse the filters', async () => {
+    const user = userEvent.setup();
+    renderSidebar();
+
+    const toggle = screen.getByRole('button', { name: /Filtros \(4 observaciones\)/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Modo Fácil' })).toBeVisible();
+  });
 });
