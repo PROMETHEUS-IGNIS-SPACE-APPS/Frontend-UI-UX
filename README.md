@@ -37,7 +37,7 @@ cp .env.example .env
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Las variables `VITE_*` se incorporan al bundle público: nunca coloques secretos, tokens ni credenciales en ellas. Los endpoints vigentes del backend son `GET /api/v1/health` y `GET /api/v1/observations` (contrato real en su `docs/api-contracts.md` y OpenAPI).
+Las variables `VITE_*` se incorporan al bundle público: nunca coloques secretos, tokens ni credenciales en ellas. El frontend usa la API v0.2 para `/api/health`, `/api/ideam/observations`, `/api/firms/observations` y `/api/fusion/observations`. El contrato vigente está en `Backend-API/docs/api-contracts.md` y OpenAPI; `/api/v1/observations` permanece como endpoint de demostración heredado y no alimenta la vista principal.
 
 ## Decisión de base y alcance
 

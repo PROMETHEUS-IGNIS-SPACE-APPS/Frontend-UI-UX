@@ -9,6 +9,15 @@ export interface Observation {
   frp_mw: number | null;
   confidence_raw: string | number;
   source: string;
+  department?: string | null;
+  municipality?: string | null;
+  daynight?: string | null;
+  satellite?: string | null;
+  source_origin?: 'IDEAM' | 'NASA_FIRMS' | string;
+  reference_url?: string | null;
+  is_synthetic?: boolean;
+  concordance?: string | null;
+  brightness_k?: number | null;
 }
 
 export interface ObservationCollection {
@@ -16,4 +25,9 @@ export interface ObservationCollection {
   count: number;
   total_matching: number;
   data_provenance: string;
+  warning?: string | null;
+  degradedMode?: boolean;
+  sourceMode?: 'fusion' | 'ideam' | 'firms';
 }
+
+export type ObservationSourceMode = 'fusion' | 'ideam' | 'firms';

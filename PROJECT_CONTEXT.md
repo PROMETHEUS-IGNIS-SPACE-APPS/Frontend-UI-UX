@@ -190,20 +190,26 @@ Reglas transversales del modelo:
 
 - Repositorio: https://github.com/PROMETHEUS-IGNIS/Backend-API
 - Tecnología: Python + FastAPI + Pydantic.
-- Base URL local documentada: `http://127.0.0.1:8000`; prefijo de API `/api/v1`.
+- Base URL local documentada: `http://127.0.0.1:8000`; ingesta real en `/api`, endpoints demo heredados en `/api/v1`.
 - Swagger: `http://127.0.0.1:8000/docs`; OpenAPI: `http://127.0.0.1:8000/openapi.json`; contrato compartido: `docs/api-contracts.md` del backend.
 - **El OpenAPI servido y `docs/api-contracts.md` son la fuente de verdad.** Si este documento difiere del contrato vigente, no adivines: inspecciona el contrato actual y comunica la discrepancia.
 
-#### Endpoints documentados (API v0.1.0)
+#### Endpoints documentados (API v0.2.0)
 
 | Método | Ruta | Propósito |
 |---|---|---|
 | GET | `/api/v1/health` | Estado del servicio |
 | GET | `/api/v1/observations` | Consulta de observaciones |
+| GET | `/api/health` | Estado y capacidades de ingesta |
+| GET | `/api/ideam/directory` | Directorio de CSV IDEAM |
+| GET | `/api/ideam/observations` | Observaciones IDEAM por rango/área |
+| GET | `/api/firms/observations` | Feed público NASA FIRMS NRT de 7 días |
+| GET | `/api/fusion/observations` | Fusión IDEAM + FIRMS por rango/área |
+| GET | `/api/fusion/historical-all` | Cobertura histórica muestreada con tope documentado |
 
-Parámetros de `GET /api/v1/observations`: `sensor` (MODIS o VIIRS, opcional) y `limit` (entero 1–1000, por defecto 100). La versión documentada no tiene paginación; `total_matching` permite detectar truncamiento. La colección contiene `data`, `count`, `total_matching` y `data_provenance`.
+La interfaz consume IDEAM, FIRMS o fusión en vivo. IDEAM/fusión aceptan `from`, `to` (inclusivos), `region` y `bbox`; el rango IDEAM es de máximo 90 días. FIRMS entrega su feed NRT público de 7 días y acepta `region`/`bbox`. Estos endpoints devuelven `observations` y metadatos de procedencia; no usan la colección demo v0.1 (`data`, `count`, `total_matching`).
 
-Cada observación contiene: `observation_id`, `sensor` (MODIS/VIIRS), `latitude`, `longitude`, `acquired_at` (ISO 8601 UTC), `frp_mw` (MW o `null`), `confidence_raw` (entero o string) y `source`.
+Las observaciones reales incluyen `observation_id`, sensor, coordenadas, `acquired_at`, FRP nullable, `confidence_raw`, `department`, `municipality`, `daynight`, satélite, fuente/procedencia y URL de referencia. `confidence_score` del backend es una heurística provisional: no se presenta como puntuación científica ni se usa para filtrar.
 
 #### Discrepancia conocida con la plantilla
 
@@ -219,7 +225,7 @@ El cliente HTTP exportado de la plantilla (`src/services/fastapiClient.ts`) asum
 
 #### Dependencias solicitadas al backend (contratos futuros)
 
-La tabla completa y priorizada está en `ROADMAP.md` (sección «Dependencias y solicitudes al equipo backend»): campos FIRMS nativos (`satellite`, `daynight`, `brightness_k`, `department`, `municipality`), paginación/cursor, y el contrato de publicación de artefactos del AI-Pipeline.
+Pendientes de contrato adicional: paginación/cursor para consultas con tope y publicación de artefactos del AI-Pipeline. Los campos geográficos y temporales ya están disponibles en los endpoints v0.2.
 
 ### 7. Stack frontend previsto
 

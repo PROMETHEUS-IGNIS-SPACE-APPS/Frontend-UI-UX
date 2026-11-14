@@ -1,10 +1,31 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/services/api/ingestionService', () => ({
+  fetchIngestedObservations: vi.fn().mockResolvedValue({
+    data: [], count: 0, total_matching: 0, data_provenance: 'test_fixture',
+  }),
+}));
+
+vi.mock('@/features/explorer/ObservationMap', () => ({
+  default: function MockObservationMap() { return <div aria-label="Mapa de prueba" />; },
+}));
+
+vi.mock('@/components/layout/ConnectionIndicator', () => ({
+  default: function MockConnectionIndicator() { return <span>Backend de prueba</span>; },
+}));
 
 import App from './App';
 import { useUiStore } from '@/stores/uiStore';
+import { fetchIngestedObservations } from '@/services/api/ingestionService';
+
+const observationDate = new Date().toISOString().slice(0, 10);
+const appObservations = [
+  { observation_id: 'viirs-antioquia', sensor: 'VIIRS' as const, latitude: 6.2, longitude: -75.5, acquired_at: `${observationDate}T18:00:00Z`, frp_mw: 15, confidence_raw: 'Nominal', source: 'IDEAM', department: 'Antioquia', municipality: 'Medellín', daynight: 'D', source_origin: 'IDEAM', is_synthetic: false },
+  { observation_id: 'modis-cordoba', sensor: 'MODIS' as const, latitude: 8.3, longitude: -75.9, acquired_at: `${observationDate}T19:00:00Z`, frp_mw: 45, confidence_raw: 70, source: 'NASA FIRMS', department: 'Córdoba', municipality: 'Montelíbano', daynight: 'N', source_origin: 'NASA_FIRMS', is_synthetic: false },
+];
 
 describe('App shell de pestañas', () => {
   // El shell tiene navegación sin router y estado global (Zustand singleton):
@@ -15,6 +36,9 @@ describe('App shell de pestañas', () => {
 
   beforeEach(() => {
     useUiStore.setState({ activeModule: 'explorer' });
+    vi.mocked(fetchIngestedObservations).mockResolvedValue({
+      data: appObservations, count: 2, total_matching: 2, data_provenance: 'IDEAM + NASA FIRMS',
+    });
   });
 
   function renderApp() {
@@ -69,6 +93,17 @@ describe('App shell de pestañas', () => {
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Calendario' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Calendario');
+  });
+
+  it('filtra observaciones por departamento con campos de la API v0.2', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Departamento' }).querySelector('option[value="Antioquia"]')).not.toBeNull());
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Departamento' }), 'Antioquia');
+
+    expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent?.replace(/\s+/g, ' ').trim() === '1 / 2')).toBeInTheDocument();
   });
 
   it('cambia de módulo con la barra de navegación móvil', async () => {

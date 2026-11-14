@@ -8,7 +8,7 @@ import ConnectionIndicator from './ConnectionIndicator';
 /**
  * El indicador se prueba con stubs de red: nunca solicita el backend real.
  * respuestaJson: la URL base se fija por entorno para que el cliente
- * construya {VITE_API_BASE_URL}/api/v1/health en los casos de conexión.
+ * construya {VITE_API_BASE_URL}/api/health en los casos de conexión.
  */
 describe('ConnectionIndicator', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -46,7 +46,7 @@ describe('ConnectionIndicator', () => {
 
     expect(await screen.findByText('Backend Conectado', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toBe('http://127.0.0.1:8000/api/v1/health');
+    expect(String(fetchMock.mock.calls[0][0])).toBe('http://127.0.0.1:8000/api/health');
   });
 
   it('muestra Backend No disponible cuando /health responde 503', async () => {

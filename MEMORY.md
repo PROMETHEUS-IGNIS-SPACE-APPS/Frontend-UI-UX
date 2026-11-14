@@ -1,25 +1,23 @@
-# MEMORY.md — PROMETHEUS IGNIS Frontend
+﻿# MEMORY.md — PROMETHEUS IGNIS Frontend
 
 ## Estado actual
-- Rama `feature/day`, último push confirmado en `08a0f2f`; mantener nuevos cambios locales hasta que se solicite push.
-- Interfaz de seis pestañas: Mapa, Predictibilidad, Calendario, Aula Pedagógica, Analítica y Laboratorio IA. FastAPI Lab, datos demo y reportes ciudadanos permanecen excluidos.
-- Mapa: cámara Antioquia/Colombia/Bajo Cauca/Urabá, filtros por sensor, heatmap FRP WebGL y estilos OpenFreeMap Liberty/Bright/Positron/Dark. FRP nulo se excluye del heatmap.
-- Calendario: agrupación UTC diaria/mensual, MODIS/VIIRS separados, FRP nullable y acción para abrir una fecha en el mapa.
-- Predictibilidad y Laboratorio IA muestran estados sin modelo/artefactos publicados; no imitar predicciones ni métricas sintéticas de `Ejemplo`.
-- Aula incluye lecciones, quiz y Matriz 5×5 ordinal; no presenta detecciones como incendios confirmados ni inventa perfiles de zona.
-- Analítica mantiene conteos separados, FRP y recurrencia v1.0.
-- Verificación más reciente: lint, typecheck, 28 pruebas y build pasan. Vite advierte bundle JS >500 kB.
+- Rama `feature/day`; el trabajo nuevo queda local, sin push.
+- Interfaz con seis módulos: Mapa, Predictibilidad, Calendario, Aula Pedagógica, Analítica y Laboratorio IA.
+- Mapa: basemaps OpenFreeMap, capas WebGL y filtros por instrumento; `frp_mw: null` no se dibuja como cero.
+- API v0.2 conectada en `/api`: IDEAM, NASA FIRMS NRT y fusión. La app usa fusión por defecto; `/api/v1` queda como demo heredada.
+- Filtros conectados a datos recibidos: fuente, cobertura, fechas UTC, sensor, departamento, municipio, día/noche, FRP mínimo y confianza original exacta.
+- UI conserva procedencia, avisos de fuente/degradación, valores raw y enlaces de referencia. No usa `confidence_score` provisional.
+- Verificación actual: lint, typecheck, 32 pruebas y build pasan. Build avisa que el chunk JS supera 500 kB.
 
 ## Decisiones y dependencias
-- Contrato Backend API v0.1.0 disponible: health y observaciones, limit máximo 1000; no hay paginación ni campos de municipio/departamento, daynight o métricas predictivas.
-- No portar `mockHotspots.ts`, métricas de ejemplo ni `administrativeBoundaries.ts`: son sintéticos/simplificados.
-- Filtros territoriales siguen deshabilitados. La interfaz no comunica días vacíos como ausencia de incendios y conserva `frp_mw: null` como no disponible.
-- Mapas satelitales/topográficos requieren proveedor aprobado, atribución y evaluación de términos. No añadir servicios externos sin aprobación.
-- Predicción requiere artefactos del AI-Pipeline con método, procedencia, horizonte y evaluación.
-- `VITE_API_BASE_URL` puede venir de `.env`; para probar URL ausente usar `vi.stubEnv('VITE_API_BASE_URL', '')`.
+- Contrato API v0.2 ofrece IDEAM, FIRMS, fusión, histórico limitado y `/api/health`; las fechas IDEAM/fusión tienen límite de 90 días. FIRMS entrega NRT de 7 días.
+- Validar y adaptar el contrato en `services/api/ingestionService.ts`; mantener el cliente v0.1 separado para compatibilidad.
+- MODIS y VIIRS no son equivalentes; no combinar confianza ni interpretar observación como incendio independiente.
+- El backend reporta procedencia y algunos datos pueden estar en caché. No presentar los datos sintéticos de `/api/v1` como datos reales.
+- Predicción y modelos IA siguen en estado sin artefactos científicos publicados.
 
 ## Pendientes
-- Coordinar con Backend-API campos geográficos y temporales adicionales si el producto los necesita.
-- Incorporar artefactos del AI-Pipeline cuando estén publicados y revisados.
-- Evaluar proveedor cartográfico para imagery/topografía antes de agregar más basemaps.
-- Tema claro, selector multilingüe, guía PDF y acciones de emergencia aún no están incluidos; agregar solo con alcance/decisión de producto y soporte real.
+- La pantalla aún no integra `/api/fusion/historical-all`; requiere diseño claro para el muestreo máximo de 9000 observaciones.
+- Evaluar división del bundle de producción (actualmente >500 kB).
+- Incorporar artefactos AI-Pipeline revisados cuando estén publicados.
+- Evaluar otros basemaps solo con proveedor, atribución y condiciones aprobadas.

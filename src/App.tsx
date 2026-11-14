@@ -5,9 +5,9 @@ import GlossaryModal from '@/components/common/GlossaryModal';
 import ModulePlaceholder from '@/components/common/ModulePlaceholder';
 import Header from '@/components/layout/Header';
 import ObservationMap from '@/features/explorer/ObservationMap';
-import { fetchObservations } from '@/services/api/observationsService';
+import { fetchIngestedObservations } from '@/services/api/ingestionService';
 import { useUiStore } from '@/stores/uiStore';
-import type { Observation, Sensor } from '@/types/api/observations';
+import type { Observation, ObservationSourceMode, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
 import ActivityCalendarPanel from '@/features/calendar/ActivityCalendarPanel';
@@ -20,11 +20,35 @@ import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStyl
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
+function getDefaultDateRange() {
+  const to = new Date();
+  const from = new Date(to);
+  from.setUTCDate(from.getUTCDate() - 6);
+  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
+}
+
+function shiftDate(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+
 export default function App() {
   const activeModule = useUiStore((state) => state.activeModule);
   const setActiveModule = useUiStore((state) => state.setActiveModule);
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [sensor, setSensor] = useState<Sensor | 'ALL'>('ALL');
+  const [sourceMode, setSourceMode] = useState<ObservationSourceMode>('fusion');
+  const [region, setRegion] = useState<'antioquia_ideam' | 'colombia'>('antioquia_ideam');
+  const defaultRange = useMemo(getDefaultDateRange, []);
+  const [dateFrom, setDateFrom] = useState(defaultRange.from);
+  const [dateTo, setDateTo] = useState(defaultRange.to);
+  const [department, setDepartment] = useState('ALL');
+  const [municipality, setMunicipality] = useState('ALL');
+  const [municipalitySearch, setMunicipalitySearch] = useState('');
+  const [daynight, setDaynight] = useState<'ALL' | 'D' | 'N'>('ALL');
+  const [minimumFrp, setMinimumFrp] = useState('');
+  const [confidenceRaw, setConfidenceRaw] = useState('ALL');
   const [selected, setSelected] = useState<Observation | null>(null);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,13 +58,30 @@ export default function App() {
   const [showModis, setShowModis] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const observationsQuery = useQuery({
-    queryKey: ['observations', 'all', 1000],
-    queryFn: ({ signal }) => fetchObservations({ limit: 1000, signal }),
-    staleTime: 60_000,
+    queryKey: ['observations', sourceMode, dateFrom, dateTo, region],
+    queryFn: ({ signal }) => fetchIngestedObservations({
+      sourceMode,
+      from: dateFrom,
+      to: dateTo,
+      region: sourceMode === 'firms' && region === 'antioquia_ideam' ? 'antioquia' : region,
+      signal,
+    }),
+    staleTime: 15 * 60_000,
   });
   const allObservations = observationsQuery.data?.data ?? EMPTY_OBSERVATIONS;
-  const dates = useMemo(() => [...new Set(allObservations.map((item) => item.acquired_at.slice(0, 10)))].sort(), [allObservations]);
-  const visible = useMemo(() => allObservations.filter((item) => (sensor === 'ALL' || item.sensor === sensor) && (!activeDate || item.acquired_at.startsWith(activeDate))), [allObservations, sensor, activeDate]);
+  const matchingObservations = useMemo(() => {
+    const minFrp = minimumFrp.trim() ? Number(minimumFrp) : null;
+    const search = municipalitySearch.trim().toLocaleLowerCase('es');
+    return allObservations.filter((item) => (sensor === 'ALL' || item.sensor === sensor)
+      && (department === 'ALL' || item.department === department)
+      && (municipality === 'ALL' || item.municipality === municipality)
+      && (!search || item.municipality?.toLocaleLowerCase('es').includes(search))
+      && (daynight === 'ALL' || item.daynight?.toUpperCase() === daynight)
+      && (confidenceRaw === 'ALL' || String(item.confidence_raw) === confidenceRaw)
+      && (minFrp === null || (item.frp_mw !== null && item.frp_mw >= minFrp)));
+  }, [allObservations, sensor, department, municipality, municipalitySearch, daynight, confidenceRaw, minimumFrp]);
+  const dates = useMemo(() => [...new Set(matchingObservations.map((item) => item.acquired_at.slice(0, 10)))].sort(), [matchingObservations]);
+  const visible = useMemo(() => matchingObservations.filter((item) => !activeDate || item.acquired_at.startsWith(activeDate)), [matchingObservations, activeDate]);
   const active = APP_MODULES.find((module) => module.id === activeModule) ?? APP_MODULES[0];
 
   const activeDateIndex = activeDate ? dates.indexOf(activeDate) : -1;
@@ -63,7 +104,7 @@ export default function App() {
 
   const handleExport = () => {
     if (!visible.length) return;
-    const headers = ['observation_id', 'sensor', 'latitude', 'longitude', 'acquired_at', 'frp_mw', 'confidence_raw', 'source'];
+    const headers = ['observation_id', 'sensor', 'latitude', 'longitude', 'acquired_at', 'frp_mw', 'confidence_raw', 'daynight', 'department', 'municipality', 'satellite', 'source_origin', 'source', 'reference_url'];
     const csv = [headers.join(','), ...visible.map((item) => headers.map((key) => csvValue(item[key as keyof Observation])).join(','))].join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
@@ -83,12 +124,35 @@ export default function App() {
               <ExplorerSidebar
                 sensor={sensor}
                 onSensorChange={setSensor}
+                sourceMode={sourceMode}
+                onSourceModeChange={(value) => { setSourceMode(value); setActiveDate(null); setSelected(null); setIsPlaying(false); }}
+                region={region}
+                onRegionChange={(value) => { setRegion(value); setActiveDate(null); setSelected(null); setIsPlaying(false); }}
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                onDateFromChange={(value) => { if (!value) return; setDateFrom(value); if (value > dateTo) setDateTo(value); else if (Date.parse(dateTo) - Date.parse(value) > 89 * 86_400_000) setDateTo(shiftDate(value, 89)); setActiveDate(null); setSelected(null); setIsPlaying(false); }}
+                onDateToChange={(value) => { if (!value) return; setDateTo(value); if (value < dateFrom) setDateFrom(value); else if (Date.parse(value) - Date.parse(dateFrom) > 89 * 86_400_000) setDateFrom(shiftDate(value, -89)); setActiveDate(null); setSelected(null); setIsPlaying(false); }}
+                department={department}
+                onDepartmentChange={(value) => { setDepartment(value); setMunicipality('ALL'); }}
+                municipality={municipality}
+                onMunicipalityChange={setMunicipality}
+                municipalitySearch={municipalitySearch}
+                onMunicipalitySearchChange={setMunicipalitySearch}
+                daynight={daynight}
+                onDaynightChange={setDaynight}
+                minimumFrp={minimumFrp}
+                onMinimumFrpChange={setMinimumFrp}
+                confidenceRaw={confidenceRaw}
+                onConfidenceRawChange={setConfidenceRaw}
+                observations={allObservations}
                 visibleCount={visible.length}
                 recordCount={observationsQuery.data?.count ?? 0}
                 totalMatching={observationsQuery.data?.total_matching ?? 0}
-                provenance={observationsQuery.data?.data_provenance ?? ''}
+                provenance={observationsQuery.data?.data_provenance ?? 'Cargando fuente…'}
+                warning={observationsQuery.data?.warning}
+                degradedMode={observationsQuery.data?.degradedMode}
                 isTruncated={Boolean(observationsQuery.data && observationsQuery.data.count < observationsQuery.data.total_matching)}
-                onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); }}
+                onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
               />
 
               <div className="flex min-h-[580px] min-w-0 flex-1 flex-col overflow-hidden bg-[#080d16] lg:h-full lg:min-h-0">
@@ -108,7 +172,7 @@ export default function App() {
               </div>
               <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="rounded-xl border border-amber-900/50 bg-amber-950/20 p-3 text-xs leading-5 text-amber-100/90"><strong className="text-amber-200">Lectura responsable</strong><p className="mt-1">Una observación satelital no equivale necesariamente a un incendio independiente. Los conteos MODIS y VIIRS se presentan por separado.</p></div>
-                {selected && <aside className="rounded-xl border border-slate-800 bg-[#08111e] p-3"><div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-xs font-semibold"><MapPin className="h-4 w-4 text-amber-400" />Observación seleccionada</h2><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="text-slate-500 hover:text-white"><X className="h-3.5 w-3.5" /></button></div><dl className="mt-3 grid grid-cols-2 gap-2 text-[10px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Fuente', selected.source]].map(([label, value]) => <div key={label}><dt className="text-slate-500">{label}</dt><dd className="mt-0.5 break-words text-slate-200">{value}</dd></div>)}</dl></aside>}
+                {selected && <aside className="rounded-xl border border-slate-800 bg-[#08111e] p-3"><div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-xs font-semibold"><MapPin className="h-4 w-4 text-amber-400" />Observación seleccionada</h2><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="text-slate-500 hover:text-white"><X className="h-3.5 w-3.5" /></button></div><dl className="mt-3 grid grid-cols-2 gap-2 text-[10px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Departamento', selected.department ?? 'No disponible'], ['Municipio', selected.municipality ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label}><dt className="text-slate-500">{label}</dt><dd className="mt-0.5 break-words text-slate-200">{value}</dd></div>)}</dl>{selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[10px] text-cyan-300 underline underline-offset-2">Consultar fuente original</a>}</aside>}
               </div>
               </div>
             </section>
@@ -131,8 +195,9 @@ export default function App() {
   );
 }
 
-function csvValue(value: string | number | null) {
-  if (value === null) return '';
+function csvValue(value: unknown) {
+  if (value === null || value === undefined) return '';
+  if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') return '';
   return `"${String(value).replaceAll('"', '""')}"`;
 }
 
