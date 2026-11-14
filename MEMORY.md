@@ -7,7 +7,9 @@ aporte.
   capas MODIS/VIIRS y timeline funcional por `acquired_at`; detalle, procedencia,
   truncamiento y export CSV. Filtros municipio/departamento disabled por contrato.
   Filtros territoriales sin soporte API siguen deshabilitados. Aula Pedagógica:
-  24 pruebas totales, lint/typecheck/build pasan; build advierte bundle >500 kB.
+  calendario analítico con agregación diaria UTC, sensores separados y FRP nullable;
+  evita agrupar el mismo mes de años distintos. Suite: 25 pruebas; lint/typecheck/build
+  pasan; build mantiene advertencia de bundle >500 kB.
 - Analítica deriva conteos MODIS/VIIRS, FRP y recurrencia v1.0 de la colección API;
   matriz ordinal interactiva P=A×C sin perfiles geográficos inventados. Laboratorio
   señala ausencia de artefactos IA publicados. Nueva pestaña Aula Pedagógica con

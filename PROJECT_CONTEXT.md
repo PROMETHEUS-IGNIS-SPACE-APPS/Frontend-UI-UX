@@ -35,6 +35,7 @@ El producto entregado en esta versión:
 - Explora geográficamente las observaciones del backend (Mapa Territorial) con filtros por departamento/municipio, período, sensor, plataforma, confianza, día/noche, FRP mínimo y búsqueda.
 - Registra la evolución temporal de las observaciones con una línea de tiempo funcional (reproducción, scrubber e histograma diario) que filtra los puntos del mapa.
 - Presenta analítica histórica descriptiva: conteos por sensor (nunca sumados), índice de recurrencia oficial v1.0, FRP promedio/máxima, evolución mensual, distribución día/noche y ficha técnica comparativa de sensores.
+- Resume en un calendario analítico la actividad diaria del conjunto cargado, con conteos separados por sensor y FRP disponible por fecha en UTC; los meses de distintos años se mantienen diferenciados.
 - Sitúa la gestión del riesgo territorial con la Matriz 5×5 oficial (P = Amenaza × Consecuencia) sobre zonas documentadas.
 - Incluye un Aula Pedagógica con lecciones y preguntas de comprensión sobre los conceptos y cautelas científicas del producto; la matriz 5×5 interactiva está integrada en esa pestaña.
 - Expone las fichas de los modelos entrenados por el AI-Pipeline del proyecto (Laboratorio IA), sin ejecutar nada en el navegador.
