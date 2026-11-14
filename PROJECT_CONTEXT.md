@@ -14,7 +14,7 @@ La interfaz de referencia aprobada es la propuesta exportada de Google AI Studio
 
 Reglas de la fuente congelada:
 
-1. **La UI es innegociable.** Las pantallas, componentes, jerarquías, leyendas, microcopy y estructura de los 4 módulos se reproduce fielmente. Los textos de la plantilla (banners científicos, glosario, advertencias, guía rápida) son contenido canónico; solo admiten ajustes mínimos de redacción sin alterar su sentido.
+1. **La UI de referencia guía la implementación.** Las pantallas, componentes, jerarquías, leyendas y microcopy se reproducen fielmente cuando son compatibles con los contratos y las decisiones del equipo. La navegación actual de seis pestañas fue aprobada por solicitud del usuario; no se presentan módulos sin datos como si estuvieran operativos.
 2. **Quedan excluidos del alcance**, por decisión del equipo:
    - La pestaña y el modal **FastAPI Lab** (el backend se consume exclusivamente mediante `VITE_API_BASE_URL`; los errores de conexión se muestran como estados en línea, sin panel de configuración de URL).
    - Las capas de **límites administrativos** (`ANTIOQUIA_SUBREGIONS_GEOJSON` / `COLOMBIA_BOUNDARIES_GEOJSON` y sus checks en el panel Capas). Quedan como extensión futura con geometrías oficiales (IGAC/DANE) y procedencia citada, si el equipo las aprueba.
@@ -28,7 +28,7 @@ Reglas de la fuente congelada:
 
 PROMETHEUS IGNIS es una plataforma de inteligencia territorial para explorar, analizar y comunicar detecciones de focos de calor obtenidas por los instrumentos MODIS y VIIRS, con alcance territorial **Antioquia → Colombia**.
 
-Es una aplicación de **una sola página con navegación por pestañas** (sin React Router en v1). Los cuatro módulos comparten la misma sesión: el mismo estado de filtros, la misma conexión y el mismo conjunto de observaciones descargadas del backend.
+Es una aplicación de **una sola página con navegación por pestañas** (sin React Router en v1). Los módulos comparten la misma sesión: el mismo estado de filtros, la misma conexión y el mismo conjunto de observaciones descargadas del backend.
 
 El producto entregado en esta versión:
 
@@ -36,6 +36,7 @@ El producto entregado en esta versión:
 - Registra la evolución temporal de las observaciones con una línea de tiempo funcional (reproducción, scrubber e histograma diario) que filtra los puntos del mapa.
 - Presenta analítica histórica descriptiva: conteos por sensor (nunca sumados), índice de recurrencia oficial v1.0, FRP promedio/máxima, evolución mensual, distribución día/noche y ficha técnica comparativa de sensores.
 - Resume en un calendario analítico la actividad diaria del conjunto cargado, con conteos separados por sensor y FRP disponible por fecha en UTC; los meses de distintos años se mantienen diferenciados.
+- Presenta la pestaña Predictibilidad como estado informativo hasta que existan modelos publicados y validados; no calcula pronósticos en el frontend.
 - Sitúa la gestión del riesgo territorial con la Matriz 5×5 oficial (P = Amenaza × Consecuencia) sobre zonas documentadas.
 - Incluye un Aula Pedagógica con lecciones y preguntas de comprensión sobre los conceptos y cautelas científicas del producto; la matriz 5×5 interactiva está integrada en esa pestaña.
 - Expone las fichas de los modelos entrenados por el AI-Pipeline del proyecto (Laboratorio IA), sin ejecutar nada en el navegador.
@@ -46,9 +47,11 @@ El producto entregado en esta versión:
 
 #### 2.1 Módulos navegables (pestañas)
 
+La navegación actual organiza seis pestañas: Mapa Territorial, Predictibilidad, Calendario, Aula Pedagógica, Analítica y Laboratorio IA. FastAPI Lab permanece excluido.
+
 1. **Mapa Territorial** (`TerritorialMap.tsx`)
    - Mapa MapLibre GL centrado en Antioquia `[longitude, latitude] = [-75.6, 6.4]`, zoom 7.
-   - 4 basemaps intercambiables: OpenFreeMap Liberty, Satélite (Esri World Imagery + etiquetas), Topográfico (Esri World Topo) y Oscuro (Carto dark). Se conservan las atribuciones de cada proveedor y las capas de datos se re-agregan tras el cambio de estilo.
+   - Selector de estilos OpenFreeMap Liberty, Bright, Positron y Dark. Los estilos comparten proveedor para conservar atribución y comportamiento coherente; imagery satelital/topográfica de otros proveedores sigue pendiente de evaluación.
    - Vistas rápidas de cámara (`flyTo`): Antioquia (z 7.2), Colombia [-73.5, 4.5] (z 5.2), Valle de Aburrá [-75.58, 6.25] (z 11.0), Bajo Cauca [-75.1, 7.75] (z 8.6) y Urabá [-76.7, 8.1] (z 8.8). Son presets de cámara, no capas de límites.
    - Capas de focos sobre una única source GeoJSON (render WebGL, nunca un marcador DOM por punto): puntos por sensor (VIIRS naranja `#ea580c`, MODIS ámbar `#fbbf24`), halo según sensor y capa de densidad térmica (heatmap FRP) activable.
    - Colores de datos: halo MODIS `#f59e0b`, halo VIIRS `#ff5722`; bordes de punto blancos, en cian `#38bdf8` cuando la concordancia sea `coincident_high` (ver definiciones).
@@ -59,16 +62,24 @@ El producto entregado en esta versión:
    - Modal de ayuda «¿Cómo usar PROMETHEUS IGNIS en 3 pasos?» (texto canónico de la plantilla).
    - Sin capas de límites administrativos (excluidas por decisión del equipo).
 
-2. **Analítica & Tiempos** (`AnalyticsPanel.tsx`)
+2. **Predictibilidad** (`PredictabilityPanel.tsx`)
+   - Comunica que no hay modelos predictivos publicados y explica qué validación falta.
+   - No calcula probabilidades a partir de conteos históricos ni copia los resultados sintéticos de `Ejemplo`.
+
+3. **Calendario** (`ActivityCalendarPanel.tsx`)
+   - Agrega actividad diaria y mensual por fecha UTC, separando VIIRS y MODIS y conservando FRP nula como no disponible.
+   - Permite abrir una fecha seleccionada en el mapa. Resume como máximo los registros recibidos; una consulta truncada puede omitir observaciones.
+
+4. **Analítica** (`AnalyticsPanel.tsx`)
    - Título con la zona evaluada (municipio → departamento → conjunto nacional).
    - Banner metodológico canónico: resoluciones y horarios de MODIS/VIIRS difieren; contar detecciones de ambos sensores junto sin armonización sesga el análisis; una mayor cantidad de detecciones no implica más incendios.
    - 4 tarjetas KPI: detecciones VIIRS, detecciones MODIS (siempre separadas), Índice de Recurrencia (score 0–100 + nivel oficial v1.0) y FRP promedio/máxima.
-   - Histograma mensual con barras agrupadas VIIRS/MODIS, tooltip por mes (conteo y FRP promedio) y leyenda.
-   - Distribución por horario orbital (pases diurnos/nocturnos), condicionada a la disponibilidad del campo `daynight` (ver modelo de datos).
-   - Ficha técnica comparativa de sensores (plataformas, resoluciones, implicación territorial) con referencias Giglio et al. (2016) y Schroeder et al. (2014).
+   - Tarjetas KPI para conteos VIIRS/MODIS, recurrencia v1.0 y FRP disponible.
+   - Distribución día/noche no disponible porque el contrato actual no contiene `daynight`.
+   - Ficha técnica comparativa de sensores sigue pendiente de su integración visual en esta pestaña.
    - Exportación CSV del conjunto filtrado.
 
-3. **Aula Pedagógica** (`PedagogicalPanel.tsx`)
+5. **Aula Pedagógica** (`PedagogicalPanel.tsx`)
    - Lecciones breves y preguntas de comprensión sobre observaciones frente a incendios, diferencias entre MODIS y VIIRS, confianza original y FRP.
    - Integra la matriz interactiva descrita abajo. El contenido educativo no presenta detecciones como incendios confirmados ni inventa equivalencias entre sensores.
 
@@ -79,7 +90,7 @@ El producto entregado en esta versión:
    - Advertencia metodológica canónica: el producto ordinal es un esquema ilustrativo de priorización; no estima riesgo probabilístico futuro; la distinción se comunica con texto y nivel ordinal, nunca solo con color.
    - Pie: orientaciones de planificación; no son instrucciones operativas para emergencias.
 
-4. **Laboratorio IA** (`AILaboratory.tsx`)
+6. **Laboratorio IA** (`AILaboratory.tsx`)
    - Muestra las fichas documentadas de los modelos publicados por el **AI-Pipeline** (ver «Arquitectura del sistema»): objetivo (`targetName`), versión, algoritmo, muestras, dataset, métrica base, CV F1 / CV accuracy / recall de la clase minoritaria, importancia de variables por permutación con descripción, variables excluidas por regla anti-fuga, matriz de confusión y nota de cautela científica.
    - Auditoría de ingesta (registros limpios/descartados por producto y año).
    - Control de reentrenamiento **bloqueado**: los modelos nunca se entrenan ni ejecutan en el navegador.

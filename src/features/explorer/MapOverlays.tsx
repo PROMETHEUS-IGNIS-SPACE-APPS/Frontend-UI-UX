@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Layers, LocateFixed } from 'lucide-react';
-import { MAP_FOCUS_PRESETS, type MapFocusPreset } from './mapPresets';
+import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
   focusId: string;
+  styleId: MapStylePreset['id'];
+  onStyleChange: (style: MapStylePreset) => void;
   onFocusChange: (preset: MapFocusPreset) => void;
   observationCounts: { MODIS: number; VIIRS: number };
   frpCount: number;
@@ -15,13 +17,20 @@ interface MapOverlaysProps {
   onToggleHeatmap: () => void;
 }
 
-export default function MapOverlays({ focusId, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap }: MapOverlaysProps) {
+export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap }: MapOverlaysProps) {
   const [layersOpen, setLayersOpen] = useState(true);
   return <>
     <div className="absolute left-3 top-3 z-20 flex max-w-[calc(100%-5rem)] items-center gap-1 overflow-x-auto rounded-xl border border-slate-700 bg-[#0b1422]/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur sm:left-4 sm:top-4">
       <span className="flex shrink-0 items-center gap-1 px-2 font-mono text-[9px] text-amber-300"><LocateFixed className="h-3 w-3" />Zona:</span>
       {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[9px] font-semibold transition sm:text-[10px] ${focusId === preset.id ? 'bg-amber-500 text-slate-950' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>{preset.label}</button>)}
     </div>
+
+    <label className="absolute right-3 top-[5rem] z-20 flex items-center gap-2 rounded-xl border border-slate-700 bg-[#0b1422]/95 px-3 py-2 font-mono text-[9px] text-slate-300 shadow-xl backdrop-blur sm:right-4 sm:top-[5rem]">
+      <span>Mapa base</span>
+      <select aria-label="Estilo del mapa base" value={styleId} onChange={(event) => { const style = MAP_STYLE_PRESETS.find((item) => item.id === event.target.value); if (style) onStyleChange(style); }} className="max-w-24 bg-transparent font-semibold text-amber-200 outline-none focus-visible:ring-1 focus-visible:ring-cyan-400">
+        {MAP_STYLE_PRESETS.map((style) => <option key={style.id} value={style.id} className="bg-slate-900 text-slate-100">{style.label}</option>)}
+      </select>
+    </label>
 
     <section className="absolute left-3 top-[3.65rem] z-20 w-[216px] overflow-hidden rounded-xl border border-slate-700 bg-[#0b1422]/95 shadow-xl shadow-black/30 backdrop-blur sm:left-4 sm:top-[4.25rem] sm:w-[230px]">
       <button type="button" aria-expanded={layersOpen} onClick={() => setLayersOpen((value) => !value)} className="flex w-full items-center justify-between px-3 py-2.5 text-left font-mono text-[9px] font-semibold text-slate-200"><span className="flex items-center gap-2"><Layers className="h-3.5 w-3.5 text-amber-400" />Filtro por color / sensor</span>{layersOpen ? <ChevronUp className="h-3.5 w-3.5 text-slate-400" /> : <ChevronDown className="h-3.5 w-3.5 text-slate-400" />}</button>

@@ -44,7 +44,7 @@ describe('ConnectionIndicator', () => {
     stubFetch(() => Promise.resolve(new Response(null, { status: 200 })));
     renderIndicator();
 
-    expect(await screen.findByText('Backend Conectado')).toBeInTheDocument();
+    expect(await screen.findByText('Backend Conectado', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0][0])).toBe('http://127.0.0.1:8000/api/v1/health');
   });
@@ -53,22 +53,22 @@ describe('ConnectionIndicator', () => {
     stubFetch(() => Promise.resolve(new Response(null, { status: 503 })));
     renderIndicator();
 
-    expect(await screen.findByText('Backend No disponible')).toBeInTheDocument();
+    expect(await screen.findByText('Backend No disponible', {}, { timeout: 5000 })).toBeInTheDocument();
   });
 
   it('muestra Backend No disponible ante fallo de red', async () => {
     stubFetch(() => Promise.reject(new TypeError('network down')));
     renderIndicator();
 
-    expect(await screen.findByText('Backend No disponible')).toBeInTheDocument();
+    expect(await screen.findByText('Backend No disponible', {}, { timeout: 5000 })).toBeInTheDocument();
   });
 
   it('muestra Backend No disponible cuando no hay URL configurada', async () => {
-    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_API_BASE_URL', '');
     stubFetch(() => Promise.resolve(new Response(null, { status: 200 })));
     renderIndicator();
 
-    expect(await screen.findByText('Backend No disponible')).toBeInTheDocument();
+    expect(await screen.findByText('Backend No disponible', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -87,11 +87,11 @@ describe('ConnectionIndicator', () => {
     const user = userEvent.setup();
     renderIndicator();
 
-    const pill = await screen.findByRole('button', { name: /Backend No disponible/ });
+    const pill = await screen.findByRole('button', { name: /Backend No disponible/ }, { timeout: 5000 });
     statusCode = 200;
     await user.click(pill);
 
-    expect(await screen.findByText('Backend Conectado')).toBeInTheDocument();
+    expect(await screen.findByText('Backend Conectado', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

@@ -50,6 +50,27 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
   });
 
+  it('abre Predictibilidad con una explicación clara de su estado pendiente', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('tab', { name: 'Predictibilidad' }));
+
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Predictibilidad');
+    expect(screen.getByRole('heading', { name: 'Predictibilidad' })).toBeInTheDocument();
+    expect(screen.getByText('Sin modelo publicado')).toBeInTheDocument();
+  });
+
+  it('abre el módulo Calendario desde la navegación', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    const desktopTablist = screen.getByRole('tablist', { name: 'Módulos' });
+
+    await user.click(within(desktopTablist).getByRole('tab', { name: 'Calendario' }));
+
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Calendario');
+  });
+
   it('cambia de módulo con la barra de navegación móvil', async () => {
     const user = userEvent.setup();
     renderApp();

@@ -26,7 +26,7 @@ describe('AnalyticsPanel', () => {
     const withoutFrp = testObservations.map((item) => ({ ...item, frp_mw: null }));
     render(<AnalyticsPanel observations={withoutFrp} totalMatching={3} provenance="test_fixture" />);
 
-    expect(screen.getAllByText('No disponible')).toHaveLength(5);
+    expect(screen.getByText('No disponible')).toBeInTheDocument();
     expect(screen.getAllByText('Muy baja')).toHaveLength(2);
   });
 
@@ -37,17 +37,4 @@ describe('AnalyticsPanel', () => {
     expect(screen.getByText('La consulta no contiene observaciones para resumir.')).toBeInTheDocument();
   });
 
-  it('shows calendar activity by UTC date and keeps years separate in monthly summaries', () => {
-    const acrossYears: Observation[] = [
-      { ...testObservations[0], observation_id: 'old-year', acquired_at: '2025-01-12T10:00:00Z', frp_mw: null },
-      { ...testObservations[2], observation_id: 'new-year', acquired_at: '2026-01-12T11:00:00Z', frp_mw: 12 },
-    ];
-    render(<AnalyticsPanel observations={acrossYears} totalMatching={2} provenance="test_fixture" />);
-
-    expect(screen.getByRole('heading', { name: 'Calendario de actividad' })).toBeInTheDocument();
-    expect(screen.getByText('2025-01-12')).toBeInTheDocument();
-    expect(screen.getByText('2026-01-12')).toBeInTheDocument();
-    expect(screen.getByText('ene 25')).toBeInTheDocument();
-    expect(screen.getByText('ene 26')).toBeInTheDocument();
-  });
 });

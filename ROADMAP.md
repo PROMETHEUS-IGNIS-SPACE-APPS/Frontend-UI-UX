@@ -109,7 +109,7 @@ Se recomienda asignar agentes por responsabilidad y mantener un único agente co
 
 **Tareas delegables**
 - **Diseño UI:** implementar el Header congelado: logo con núcleo de fuego + punto cian, título con degradado ámbar, badge cian «MODIS · VIIRS», subtítulo institucional de Semillero de Astronomía ITM.
-- **Diseño UI:** navegación por pestañas (barra horizontal `md+`, barra compacta en móvil) para los 4 módulos: Mapa Territorial, Analítica & Tiempos, Matriz 5×5, Laboratorio IA.
+- **Diseño UI:** navegación por pestañas (barra horizontal `md+`, barra compacta en móvil) para Mapa Territorial, Predictibilidad, Calendario, Aula Pedagógica, Analítica y Laboratorio IA. Predictibilidad muestra el estado de publicación del modelo; no presenta resultados sin artefactos verificables.
 - **Diseño UI:** indicador pasivo de conexión con el backend (estado disponible/no disponible, sin configuración de URL) y botón de exportación CSV con contador de registros visibles.
 - **Diseño UI:** modal Glosario con los 7 términos canónicos y sus fuentes.
 - **QA:** comprobar contraste, foco visible, navegación por teclado y estados hover/focus/disabled.
@@ -120,7 +120,7 @@ Se recomienda asignar agentes por responsabilidad y mantener un único agente co
 - Todos los controles del header son accesibles por teclado y funcionan.
 - No hay rutas ni pantallas extra.
 
-### HU-01.2 — Como desarrollador, quiero el shell de estado compartido para que los 4 módulos consuman la misma sesión.
+### HU-01.2 — Como desarrollador, quiero el shell de estado compartido para que los módulos consuman la misma sesión.
 
 **Tareas delegables**
 - **Arquitectura:** definir el estado global de interfaz en Zustand: pestaña activa, filtros compartidos, selección de observación, mensaje de estado de conexión.
@@ -370,7 +370,7 @@ Se recomienda asignar agentes por responsabilidad y mantener un único agente co
 - **QA:** estados de carga, vacío, error, timeout, truncamiento y recuperación.
 - **Geoespacial:** rendimiento del mapa con el volumen real del backend (limit 1000); limpieza de listeners/instancias al desmontar.
 - **Arquitectura:** revisar caché, solicitudes duplicadas y persistencia de sesión entre pestañas.
-- **Diseño UI:** responsive y accesibilidad básica en los 4 módulos y modales.
+- **Diseño UI:** responsive y accesibilidad básica en los módulos y modales.
 
 **Criterios de aceptación**
 - Build de producción exitoso; sin errores críticos de consola en los flujos principales.

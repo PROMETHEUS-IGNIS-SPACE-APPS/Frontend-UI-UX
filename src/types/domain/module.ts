@@ -1,6 +1,6 @@
 /**
- * Identificadores de módulos navegables de la interfaz congelada.
- * El orden define el orden visual de las pestañas (Header, Fase 1).
+ * Identificadores de módulos navegables de la interfaz.
+ * El orden define la jerarquía visual de pestañas en Header.
  */
 export const APP_MODULES = [
   {
@@ -10,15 +10,24 @@ export const APP_MODULES = [
       'Exploración geoespacial de observaciones MODIS y VIIRS con línea de tiempo.',
   },
   {
-    id: 'analytics',
-    label: 'Analítica & Tiempos',
-    description:
-      'Resumen descriptivo del conjunto consultado con definiciones oficiales v1.0.',
+    id: 'predictability',
+    label: 'Predictibilidad',
+    description: 'Estado de publicación de modelos predictivos y sus validaciones.',
+  },
+  {
+    id: 'calendar',
+    label: 'Calendario',
+    description: 'Actividad diaria y mensual de observaciones por instrumento.',
   },
   {
     id: 'comparison',
     label: 'Aula Pedagógica',
     description: 'Lecciones interactivas y matriz ordinal para aprender a leer el riesgo territorial.',
+  },
+  {
+    id: 'analytics',
+    label: 'Analítica',
+    description: 'Indicadores descriptivos del conjunto consultado según definiciones oficiales v1.0.',
   },
   {
     id: 'laboratory',

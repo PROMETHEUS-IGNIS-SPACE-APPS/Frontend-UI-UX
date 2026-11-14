@@ -10,11 +10,13 @@ import { useUiStore } from '@/stores/uiStore';
 import type { Observation, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
+import ActivityCalendarPanel from '@/features/calendar/ActivityCalendarPanel';
 import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
 import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
+import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
-import { MAP_FOCUS_PRESETS, type MapFocusPreset } from '@/features/explorer/mapPresets';
+import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from '@/features/explorer/mapPresets';
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
@@ -27,6 +29,7 @@ export default function App() {
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [focusTarget, setFocusTarget] = useState<MapFocusPreset>(MAP_FOCUS_PRESETS[0]);
+  const [mapStyle, setMapStyle] = useState<MapStylePreset>(MAP_STYLE_PRESETS[0]);
   const [showViirs, setShowViirs] = useState(true);
   const [showModis, setShowModis] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -92,9 +95,9 @@ export default function App() {
                 {observationsQuery.isPending && <div className="mb-3 flex items-center gap-2 rounded-xl border border-slate-800 bg-[#08111e] p-4 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones…</div>}
                 {observationsQuery.isError && <div role="alert" className="mb-3 flex items-start gap-3 rounded-xl border border-red-900/70 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-red-200/80">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 text-xs hover:bg-red-900/40" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                 <div className="relative min-h-[420px] flex-1 overflow-hidden bg-[#d9e4e8] lg:min-h-0">
-                  {observationsQuery.isSuccess && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
+                  {observationsQuery.isSuccess && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
                   {observationsQuery.isSuccess && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-[#08111e]/65 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-slate-700 bg-[#0b1422]/95 p-5"><Flame className="mx-auto h-7 w-7 text-slate-500" /><p className="mt-2 font-medium text-slate-200">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-slate-400">La consulta respondió correctamente con una colección vacía.</p></div></div>}
-                  {observationsQuery.isSuccess && <MapOverlays focusId={focusTarget.id} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} />}
+                  {observationsQuery.isSuccess && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} />}
                 </div>
               <div className="border-t border-slate-800 bg-[#080d16] p-3 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -113,7 +116,12 @@ export default function App() {
             observationsQuery.isSuccess
               ? <AnalyticsPanel observations={visible} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
-          ) : activeModule === 'comparison' ? <PedagogicalPanel />
+          ) : activeModule === 'calendar' ? (
+            observationsQuery.isSuccess
+              ? <ActivityCalendarPanel observations={allObservations} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} onSelectDate={(date) => { setActiveDate(date); setSensor('ALL'); setSelected(null); setIsPlaying(false); setActiveModule('explorer'); }} />
+              : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
+          ) : activeModule === 'predictability' ? <PredictabilityPanel />
+            : activeModule === 'comparison' ? <PedagogicalPanel />
             : activeModule === 'laboratory' ? <LaboratoryPanel provenance={observationsQuery.data?.data_provenance ?? 'No disponible'} />
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>

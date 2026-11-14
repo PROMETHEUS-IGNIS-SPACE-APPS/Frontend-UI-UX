@@ -1,4 +1,4 @@
-import { Activity, BookOpen, Cpu, Download, HeartHandshake, Layers } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, TrendingUp } from 'lucide-react';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
@@ -14,6 +14,8 @@ interface HeaderProps {
 
 const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   explorer: Layers,
+  predictability: TrendingUp,
+  calendar: CalendarDays,
   analytics: Activity,
   comparison: HeartHandshake,
   laboratory: Cpu,
@@ -21,6 +23,8 @@ const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
+  predictability: 'Predicción',
+  calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula',
   laboratory: 'Modelos IA',

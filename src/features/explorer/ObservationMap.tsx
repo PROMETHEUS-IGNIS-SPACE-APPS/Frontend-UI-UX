@@ -2,19 +2,20 @@ import { useEffect, useRef } from 'react';
 import { Map as MapLibre, NavigationControl, type GeoJSONSource, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Observation } from '@/types/api/observations';
-import type { MapFocusPreset } from './mapPresets';
+import type { MapFocusPreset, MapStylePreset } from './mapPresets';
 
 interface ObservationMapProps {
   observations: Observation[];
   selected: Observation | null;
   onSelect: (observation: Observation | null) => void;
   focusTarget: MapFocusPreset;
+  mapStyle: MapStylePreset;
   showViirs: boolean;
   showModis: boolean;
   showHeatmap: boolean;
 }
 
-export default function ObservationMap({ observations, selected, onSelect, focusTarget, showViirs, showModis, showHeatmap }: ObservationMapProps) {
+export default function ObservationMap({ observations, selected, onSelect, focusTarget, mapStyle, showViirs, showModis, showHeatmap }: ObservationMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const currentObservations = useRef(observations);
@@ -23,6 +24,7 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   onSelectRef.current = onSelect;
   const focusTargetRef = useRef(focusTarget);
   focusTargetRef.current = focusTarget;
+  const mapStyleUrlRef = useRef(mapStyle.url);
   const layerVisibilityRef = useRef({ showViirs, showModis, showHeatmap });
   layerVisibilityRef.current = { showViirs, showModis, showHeatmap };
 
@@ -30,13 +32,14 @@ export default function ObservationMap({ observations, selected, onSelect, focus
     if (!container.current) return;
     const map = new MapLibre({
       container: container.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      style: mapStyleUrlRef.current,
       center: focusTargetRef.current.center,
       zoom: focusTargetRef.current.zoom,
     });
     mapRef.current = map;
     map.addControl(new NavigationControl(), 'top-right');
-    map.on('load', () => {
+    map.on('style.load', () => {
+      if (map.getSource('observations')) return;
       map.addSource('observations', { type: 'geojson', data: featureCollection(currentObservations.current) });
       map.addLayer({
         id: 'observation-heatmap', type: 'heatmap', source: 'observations',
@@ -67,18 +70,22 @@ export default function ObservationMap({ observations, selected, onSelect, focus
           'circle-stroke-color': '#f8fafc', 'circle-stroke-width': 1.25,
         },
       });
-      for (const layerId of ['observation-points-viirs', 'observation-points-modis']) {
-        map.on('click', layerId, (event) => {
-          const id = event.features?.[0]?.properties?.id;
-          const hit = currentObservations.current.find((item) => item.observation_id === id);
-          if (hit) onSelectRef.current(hit);
-        });
-        map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
-      }
       map.setLayoutProperty('observation-points-viirs', 'visibility', layerVisibilityRef.current.showViirs ? 'visible' : 'none');
       map.setLayoutProperty('observation-points-modis', 'visibility', layerVisibilityRef.current.showModis ? 'visible' : 'none');
       map.setLayoutProperty('observation-heatmap', 'visibility', layerVisibilityRef.current.showHeatmap ? 'visible' : 'none');
+    });
+    map.on('click', (event) => {
+      const layers = ['observation-points-viirs', 'observation-points-modis'].filter((id) => map.getLayer(id));
+      if (!layers.length) return;
+      const feature = map.queryRenderedFeatures(event.point, { layers })[0];
+      const id = feature?.properties?.id;
+      const hit = currentObservations.current.find((item) => item.observation_id === id);
+      if (hit) onSelectRef.current(hit);
+    });
+    map.on('mousemove', (event) => {
+      const layers = ['observation-points-viirs', 'observation-points-modis'].filter((id) => map.getLayer(id));
+      const hit = layers.length && map.queryRenderedFeatures(event.point, { layers }).length > 0;
+      map.getCanvas().style.cursor = hit ? 'pointer' : '';
     });
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -91,6 +98,14 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   useEffect(() => {
     mapRef.current?.flyTo({ center: focusTarget.center, zoom: focusTarget.zoom, duration: 900 });
   }, [focusTarget.center, focusTarget.zoom]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && mapStyle.url !== mapStyleUrlRef.current) {
+      mapStyleUrlRef.current = mapStyle.url;
+      map.setStyle(mapStyle.url);
+    }
+  }, [mapStyle]);
 
   useEffect(() => {
     const map = mapRef.current;
