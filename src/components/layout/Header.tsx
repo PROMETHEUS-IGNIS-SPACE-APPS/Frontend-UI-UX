@@ -2,6 +2,7 @@ import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
+import EmergencyAccess from './EmergencyAccess';
 import logoPng from '@/assets/PROMETHEUS_IGNIS.png';
 
 interface HeaderProps {
@@ -71,7 +72,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             <span className="hidden h-4 w-px bg-slate-700 sm:block" />
             <span className="whitespace-nowrap rounded-md border border-slate-700 bg-[#101827] px-2 py-1 font-mono text-[10px] text-slate-300"><span className="text-cyan-300">▤</span> Observaciones satelitales <span className="text-slate-500">({totalVisibleCount})</span></span>
           </div>
-          <div className="hidden shrink-0 items-center gap-2 lg:flex"><span className="font-mono text-[10px] text-slate-500">VISTA TERRITORIAL</span></div>
+          <div className="ml-auto flex shrink-0 items-center gap-2"><EmergencyAccess /><span className="hidden font-mono text-[10px] text-slate-500 lg:inline">VISTA TERRITORIAL</span></div>
         </div>
       </div>
     </header>
