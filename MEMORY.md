@@ -2,6 +2,22 @@
 Memoria del proyecto entre sesiones. Máximo ~50 líneas: resume o elimina lo que ya no
 aporte.
 ## Estado actual
+- Mapa Territorial adaptado a la composición de `Ejemplo` (2026-11-14): filtros
+  laterales, mapa central MapLibre, timeline funcional por fechas `acquired_at`,
+  detalle, procedencia/truncamiento y export CSV. Consulta `/observations` con
+  `limit=1000`; API validada en `types/api/observations.ts`.
+- Cabecera ahora sigue la estética de `Ejemplo`: dos filas, navegación horizontal,
+  azul petróleo, naranja/cian y controles compactos. Se mantiene el conjunto actual
+  de cuatro módulos; no se agregan los tabs fuera de alcance.
+- Inspección `Ejemplo/src/data`: `mockHotspots.ts` genera ubicaciones/detecciones y
+  specs de modelos sintéticas; `administrativeBoundaries.ts` define polígonos
+  simplificados hardcoded. No importar estos datos como observaciones/zonas reales.
+- Importación de MapLibre debe usar exports nombrados (`Map`, `NavigationControl`);
+  el navegador no encuentra export default en la versión instalada. Tras corregir,
+  typecheck, lint, 16 pruebas y build pasaron el 2026-11-14.
+- `Ejemplo` se usa como referencia visual; no portar sus mocks, endpoints de
+  terceros, valores por defecto ni métricas de modelos sin artefactos válidos.
+- Build produce bundle JS >500 kB (advertencia Vite; compilación completada).
 - Fase 1 COMPLETADA (2026-11-02): Header congelado funcional (logo PNG del usuario
   `src/assets/PROMETHEUS_IGNIS.png`, pestañas escritorio+móvil, indicador pasivo de
   conexión vía `/api/v1/health`, glosario con 7 términos canónicos, CSV deshabilitado
