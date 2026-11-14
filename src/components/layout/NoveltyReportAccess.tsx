@@ -5,8 +5,8 @@ export default function NoveltyReportAccess() {
   const [isOpen, setIsOpen] = useState(false);
 
   return <>
-    <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-orange-500/70 bg-orange-600 px-2.5 py-2 text-[10px] font-bold text-white shadow-sm transition hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 sm:px-3">
-      <MapPin className="h-3.5 w-3.5" aria-hidden />
+    <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-orange-500 to-red-600 px-3 py-1.5 font-noto text-[11px] font-bold text-white shadow-sm transition-all hover:from-orange-600 hover:to-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span>Reportar Novedad</span>
     </button>
 

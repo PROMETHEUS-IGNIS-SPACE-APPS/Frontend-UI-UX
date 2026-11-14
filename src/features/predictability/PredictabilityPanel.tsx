@@ -1,9 +1,9 @@
 import { Activity, CalendarClock, CircleHelp, ShieldAlert, TrendingUp } from 'lucide-react';
 
 export default function PredictabilityPanel() {
-  return <section className="mx-auto w-full max-w-[1200px] space-y-5 p-4 text-slate-100 sm:p-6">
+  return <section className="ignis-page mx-auto w-full max-w-[1200px] space-y-5 p-4 text-slate-100 sm:p-6">
     <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-800 pb-4">
-      <div><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">Modelos y pronósticos</p><h1 className="mt-1 flex items-center gap-2 text-xl font-semibold"><TrendingUp className="h-5 w-5 text-amber-400" />Predictibilidad</h1><p className="mt-1 text-xs text-slate-400">Consulta de predicciones solo cuando exista un modelo publicado y evaluado.</p></div>
+      <div><p className="ignis-eyebrow">Modelos y pronósticos</p><h1 className="mt-1 flex items-center gap-2 text-xl font-semibold"><TrendingUp className="h-5 w-5 text-amber-400" />Predictibilidad</h1><p className="mt-1 text-xs text-slate-400">Consulta de predicciones solo cuando exista un modelo publicado y evaluado.</p></div>
       <span className="rounded-full border border-amber-800/60 bg-amber-950/30 px-3 py-1.5 font-mono text-[9px] uppercase tracking-wider text-amber-200">Sin modelo publicado</span>
     </header>
     <div className="grid gap-4 md:grid-cols-3">

@@ -8,6 +8,7 @@
 - SOS abre opciones voluntarias `tel:123` y `tel:119`; no inicia llamadas por sí solo.
 - Filtros incluyen fuente, cobertura, fechas UTC cuando aplican, sensor, departamento, municipio, día/noche, FRP y confianza original.
 - El explorador replica del ejemplo el panel de filtros colapsable en móvil y ofrece presets de cámara para Antioquia, Colombia, Valle de Aburrá, Bajo Cauca y Urabá.
+- Estilo visual alineado con la carpeta `Ejemplo`: fuentes Inclusive Sans / Noto Sans / Source Sans 3, radios casi rectos (rounded-xl ≈ 3px), botones de cabecera 11px `px-2.5 py-1.5`, panel lateral plegable `w-80`, línea de tiempo con histograma y velocidades 1x/2x/5x, capas y leyenda sobre el mapa, ficha flotante de observación.
 - Se conserva procedencia y `confidence_raw`; no se usa `confidence_score` provisional. FRP null continúa como no disponible.
 
 ## Decisiones y dependencias

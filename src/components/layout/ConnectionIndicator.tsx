@@ -32,7 +32,7 @@ export default function ConnectionIndicator() {
       onClick={checkNow}
       title={STATE_LABELS[outcome]}
       aria-label={`Estado de conexión con el backend: ${STATE_LABELS[outcome]}. Pulsa para comprobar de nuevo.`}
-      className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] border font-mono transition-colors ${BUTTON_CLASSES[outcome]}`}
+      className={`hidden sm:inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border font-noto transition-colors ${BUTTON_CLASSES[outcome]}`}
     >
       <span className={`w-2 h-2 rounded-full ${DOT_CLASSES[outcome]}`} aria-hidden />
       <span>{outcome === 'checking' ? 'Conectando…' : STATE_LABELS[outcome]}</span>

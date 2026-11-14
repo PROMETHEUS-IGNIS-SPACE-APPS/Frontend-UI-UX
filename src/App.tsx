@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Clock3, Flame, LoaderCircle, MapPin, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
+import { AlertCircle, Flame, LoaderCircle, MapPin, X } from 'lucide-react';
 import GlossaryModal from '@/components/common/GlossaryModal';
 import ModulePlaceholder from '@/components/common/ModulePlaceholder';
 import Header from '@/components/layout/Header';
@@ -16,6 +16,7 @@ import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
 import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
+import TimelineControls from '@/features/explorer/TimelineControls';
 import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from '@/features/explorer/mapPresets';
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
@@ -57,6 +58,8 @@ export default function App() {
   const [showViirs, setShowViirs] = useState(true);
   const [showModis, setShowModis] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const observationsQuery = useQuery({
     queryKey: ['observations', sourceMode, dateFrom, dateTo, region],
     queryFn: ({ signal }) => fetchIngestedObservations({
@@ -81,6 +84,7 @@ export default function App() {
       && (minFrp === null || (item.frp_mw !== null && item.frp_mw >= minFrp)));
   }, [allObservations, sensor, department, municipality, municipalitySearch, daynight, confidenceRaw, minimumFrp]);
   const dates = useMemo(() => [...new Set(matchingObservations.map((item) => item.acquired_at.slice(0, 10)))].sort(), [matchingObservations]);
+  const countsByDate = useMemo(() => matchingObservations.reduce<Record<string, number>>((counts, item) => { const date = item.acquired_at.slice(0, 10); counts[date] = (counts[date] ?? 0) + 1; return counts; }, {}), [matchingObservations]);
   const visible = useMemo(() => matchingObservations.filter((item) => !activeDate || item.acquired_at.startsWith(activeDate)), [matchingObservations, activeDate]);
   const active = APP_MODULES.find((module) => module.id === activeModule) ?? APP_MODULES[0];
 
@@ -98,9 +102,9 @@ export default function App() {
         const index = current ? dates.indexOf(current) : -1;
         return dates[(index + 1) % dates.length];
       });
-    }, 900);
+    }, Math.max(200, Math.floor(900 / playbackSpeed)));
     return () => window.clearInterval(interval);
-  }, [isPlaying, dates]);
+  }, [isPlaying, dates, playbackSpeed]);
 
   const handleExport = () => {
     if (!visible.length) return;
@@ -115,13 +119,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#060b13] text-slate-100 font-sans">
+    <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden bg-background font-sans text-text-primary">
       <Header activeModule={activeModule} onModuleChange={setActiveModule} totalVisibleCount={activeModule === 'explorer' ? visible.length : 0} onExportCsv={handleExport} onOpenGlossary={() => setIsGlossaryOpen(true)} />
       <main className="flex-1 flex flex-col overflow-hidden">
         <div key={active.id} id={`panel-${active.id}`} role="tabpanel" aria-labelledby={`tab-${active.id}-desktop`} tabIndex={0} className="flex-1 flex flex-col overflow-y-auto">
           {activeModule === 'explorer' ? (
-            <section className="flex min-h-[calc(100dvh-108px)] flex-1 flex-col overflow-hidden lg:h-[calc(100dvh-108px)] lg:flex-row">
-              <ExplorerSidebar
+            <section className="flex min-h-[calc(100dvh-98px)] flex-1 flex-col overflow-hidden lg:h-[calc(100dvh-98px)] lg:flex-row">
+              {isSidebarOpen && <ExplorerSidebar
                 sensor={sensor}
                 onSensorChange={setSensor}
                 sourceMode={sourceMode}
@@ -154,27 +158,24 @@ export default function App() {
                 sampling={observationsQuery.data?.sampling}
                 isTruncated={sourceMode === 'historical' || Boolean(observationsQuery.data && observationsQuery.data.count < observationsQuery.data.total_matching)}
                 onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
-              />
+              />}
 
-              <div className="flex min-h-[580px] min-w-0 flex-1 flex-col overflow-hidden bg-[#080d16] lg:h-full lg:min-h-0">
-                {observationsQuery.isPending && <div className="mb-3 flex items-center gap-2 rounded-xl border border-slate-800 bg-[#08111e] p-4 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones…</div>}
-                {observationsQuery.isError && <div role="alert" className="mb-3 flex items-start gap-3 rounded-xl border border-red-900/70 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-red-200/80">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 text-xs hover:bg-red-900/40" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
-                <div className="relative min-h-[420px] flex-1 overflow-hidden bg-[#d9e4e8] lg:min-h-0">
+              <div className="relative flex min-h-[580px] min-w-0 flex-1 flex-col overflow-hidden bg-background lg:h-full lg:min-h-0">
+                <button type="button" onClick={() => setIsSidebarOpen((value) => !value)} aria-expanded={isSidebarOpen} aria-label={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} title={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} className="absolute left-0 top-1/2 z-30 hidden h-11 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border bg-card/75 text-[10px] text-text-secondary shadow-sm backdrop-blur-md transition-colors hover:bg-card hover:text-text-primary lg:flex"><span aria-hidden>{isSidebarOpen ? '◀' : '▶'}</span></button>
+                {observationsQuery.isPending && <div className="m-3 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones…</div>}
+                {observationsQuery.isError && <div role="alert" className="m-3 flex items-start gap-3 rounded-xl border border-red-900/70 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-red-200/80">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-red-900/40" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
+                <div className="relative min-h-[360px] flex-1 overflow-hidden bg-background lg:min-h-0">
                   {observationsQuery.isSuccess && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
-                  {observationsQuery.isSuccess && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-[#08111e]/65 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-slate-700 bg-[#0b1422]/95 p-5"><Flame className="mx-auto h-7 w-7 text-slate-500" /><p className="mt-2 font-medium text-slate-200">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-slate-400">La consulta respondió correctamente con una colección vacía.</p></div></div>}
+                  {observationsQuery.isSuccess && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/65 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card/95 p-5"><Flame className="mx-auto h-7 w-7 text-slate-500" /><p className="mt-2 font-medium text-slate-200">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-slate-400">La consulta respondió correctamente con una colección vacía.</p></div></div>}
                   {observationsQuery.isSuccess && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} />}
+                  {selected && <aside aria-label="Observación seleccionada" className="absolute right-4 top-16 z-30 max-h-[calc(100%-5rem)] w-80 space-y-3 overflow-y-auto rounded-2xl border border-accent/60 bg-card/90 p-4 text-xs shadow-2xl backdrop-blur-md sm:w-96">
+                    <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-yellow-400/50 bg-yellow-400/10 text-yellow-300'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
+                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface/60 p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
+                    <p className="flex items-start gap-1.5 text-[10px] leading-4 text-text-secondary"><MapPin className="mt-0.5 h-3 w-3 shrink-0 text-accent" />Una observación satelital no equivale necesariamente a un incendio independiente.</p>
+                    {selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="inline-block text-[11px] font-semibold text-info underline underline-offset-2">Consultar fuente original</a>}
+                  </aside>}
                 </div>
-              <div className="border-t border-slate-800 bg-[#080d16] p-3 text-xs">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3"><div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1"><button type="button" onClick={() => stepDate(-1)} disabled={!dates.length || (activeDateIndex === 0)} aria-label="Paso anterior" className="rounded p-1.5 text-slate-300 hover:bg-slate-800 disabled:opacity-40"><SkipBack className="h-4 w-4" /></button><button type="button" onClick={() => { if (!isPlaying && activeDateIndex === dates.length - 1) setActiveDate(null); setIsPlaying((playing) => !playing); }} disabled={dates.length < 2} aria-label={isPlaying ? 'Pausar línea de tiempo' : 'Reproducir línea de tiempo'} className="rounded-lg bg-amber-500 p-2 text-slate-950 disabled:opacity-40">{isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button><button type="button" onClick={() => stepDate(1)} disabled={!dates.length || activeDateIndex >= dates.length - 1} aria-label="Paso siguiente" className="rounded p-1.5 text-slate-300 hover:bg-slate-800 disabled:opacity-40"><SkipForward className="h-4 w-4" /></button></div><div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-cyan-300" /><div><p className="font-mono font-semibold text-slate-100">{activeDate ?? 'Todos los pasos'}</p><p className="text-[10px] text-slate-500">{activeDateIndex + 1 > 0 ? `Paso ${activeDateIndex + 1} de ${dates.length}` : `${dates.length} fechas disponibles`}</p></div></div></div>
-                  <input type="range" aria-label="Fecha de la línea de tiempo" min={0} max={Math.max(0, dates.length - 1)} value={Math.max(0, activeDateIndex)} onChange={(event) => { setIsPlaying(false); setActiveDate(dates[Number(event.target.value)] ?? null); }} disabled={!dates.length} className="min-w-[180px] flex-1 accent-amber-500" />
-                </div>
-                <p className="mt-2 text-[10px] text-amber-200/80">La ausencia de datos en un paso orbital no equivale a ausencia de incendios.</p>
-              </div>
-              <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="rounded-xl border border-amber-900/50 bg-amber-950/20 p-3 text-xs leading-5 text-amber-100/90"><strong className="text-amber-200">Lectura responsable</strong><p className="mt-1">Una observación satelital no equivale necesariamente a un incendio independiente. Los conteos MODIS y VIIRS se presentan por separado.</p></div>
-                {selected && <aside className="rounded-xl border border-slate-800 bg-[#08111e] p-3"><div className="flex items-center justify-between"><h2 className="flex items-center gap-2 text-xs font-semibold"><MapPin className="h-4 w-4 text-amber-400" />Observación seleccionada</h2><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="text-slate-500 hover:text-white"><X className="h-3.5 w-3.5" /></button></div><dl className="mt-3 grid grid-cols-2 gap-2 text-[10px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Departamento', selected.department ?? 'No disponible'], ['Municipio', selected.municipality ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label}><dt className="text-slate-500">{label}</dt><dd className="mt-0.5 break-words text-slate-200">{value}</dd></div>)}</dl>{selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[10px] text-cyan-300 underline underline-offset-2">Consultar fuente original</a>}</aside>}
-              </div>
+                <TimelineControls dates={dates} countsByDate={countsByDate} activeDate={activeDate} isPlaying={isPlaying} speed={playbackSpeed} onSpeedChange={setPlaybackSpeed} onStep={stepDate} onTogglePlay={() => { if (!isPlaying && activeDateIndex === dates.length - 1) setActiveDate(null); setIsPlaying((playing) => !playing); }} onSelectIndex={(index) => { setIsPlaying(false); setActiveDate(dates[index] ?? null); }} />
               </div>
             </section>
           ) : activeModule === 'analytics' ? (
