@@ -6,10 +6,12 @@ aporte.
   laterales compactos con modo fácil/pro, mapa MapLibre, presets de cámara,
   capas MODIS/VIIRS y timeline funcional por `acquired_at`; detalle, procedencia,
   truncamiento y export CSV. Filtros municipio/departamento disabled por contrato.
-  Suite ahora: 22 pruebas; typecheck/lint/build pasan.
+  Filtros territoriales sin soporte API siguen deshabilitados. Aula Pedagógica:
+  24 pruebas totales, lint/typecheck/build pasan; build advierte bundle >500 kB.
 - Analítica deriva conteos MODIS/VIIRS, FRP y recurrencia v1.0 de la colección API;
   matriz ordinal interactiva P=A×C sin perfiles geográficos inventados. Laboratorio
-  señala ausencia de artefactos IA publicados. Pruebas: 20 verdes; typecheck/lint/build.
+  señala ausencia de artefactos IA publicados. Nueva pestaña Aula Pedagógica con
+  lecciones, quiz y matriz integrada; suite final se verifica en esta tarea.
 - Cabecera ahora sigue la estética de `Ejemplo`: dos filas, navegación horizontal,
   azul petróleo, naranja/cian y controles compactos. Se mantiene el conjunto actual
   de cuatro módulos; no se agregan los tabs fuera de alcance.
@@ -32,10 +34,13 @@ aporte.
 - Stack instalado: React 19.3, Vite 8.3, TS 6.0, Tailwind 4.3 (@tailwindcss/vite),
   MapLibre 6, ECharts 6, TanStack Query 5, Zustand 5, ESLint 10 flat, Vitest 5 + RTL.
 - Shell de pestañas sin router: `src/App.tsx` + `src/stores/uiStore.ts`; módulos
-  Mapa, Analítica y Matriz activos; Laboratorio informa que espera artefactos IA.
+  Mapa, Analítica, Aula Pedagógica y Laboratorio IA (pendiente de artefactos).
 ## Decisiones (y por qué)
 - Usuario seleccionó la estética reciente de `Ejemplo`; conservar módulos aprobados y
   adaptar UI sin importar sus datos de demo ni funciones sin contrato.
+- Aula Pedagógica reemplaza el tab separado de Matriz y la contiene. Sus lecciones
+  siguen el dominio documentado; no copiar afirmaciones causales, teléfonos de
+  emergencia ni perfiles geográficos inventados del ejemplo.
 - Eliminado por decisión del equipo: pestaña+modal «FastAPI Lab», capas de límites
   administrativos y modo «Demostración/Lab Real». Única fuente de datos: Backend-API vía
   `VITE_API_BASE_URL`, sin dataset sintético de producto (fixtures solo en tests).
@@ -67,7 +72,6 @@ aporte.
 - npm audit: 12 moderados dev-only via `minimatch <11.0.1` en ESLint (sin fix aún); no
   llegan al bundle.
 ## Próximos pasos
-- Commit de Fase 1 cuando se autorice; luego Fase 2 (HU-02.1: cliente
-  observaciones según OpenAPI real, adaptador con reglas v1.0, estados de datos).
-- Coordinar con Backend-API: campos FIRMS extendidos, forma de respuesta y
-  shape exacto de `/health` (el indicador solo usa el estado HTTP).
+- Según contratos/disponibilidad: calendario, predicción y filtros administrativos;
+  no simular funciones para las que API/datos no proveen soporte.
+- Revisar artefactos publicados por AI-Pipeline antes de completar fichas IA.

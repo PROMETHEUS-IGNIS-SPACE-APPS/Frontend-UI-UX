@@ -17,8 +17,8 @@ export const APP_MODULES = [
   },
   {
     id: 'comparison',
-    label: 'Matriz 5×5',
-    description: 'Gestión del riesgo territorial P = Amenaza × Consecuencia.',
+    label: 'Aula Pedagógica',
+    description: 'Lecciones interactivas y matriz ordinal para aprender a leer el riesgo territorial.',
   },
   {
     id: 'laboratory',

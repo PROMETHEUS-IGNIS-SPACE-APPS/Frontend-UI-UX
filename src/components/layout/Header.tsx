@@ -1,4 +1,4 @@
-import { Activity, BookOpen, Cpu, Download, Layers, Sparkles } from 'lucide-react';
+import { Activity, BookOpen, Cpu, Download, HeartHandshake, Layers } from 'lucide-react';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
@@ -15,14 +15,14 @@ interface HeaderProps {
 const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   explorer: Layers,
   analytics: Activity,
-  comparison: Sparkles,
+  comparison: HeartHandshake,
   laboratory: Cpu,
 };
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
   analytics: 'Analítica',
-  comparison: 'Matriz 5×5',
+  comparison: 'Aula',
   laboratory: 'Modelos IA',
 };
 

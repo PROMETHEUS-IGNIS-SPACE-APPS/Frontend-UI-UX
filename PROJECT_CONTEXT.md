@@ -36,6 +36,7 @@ El producto entregado en esta versión:
 - Registra la evolución temporal de las observaciones con una línea de tiempo funcional (reproducción, scrubber e histograma diario) que filtra los puntos del mapa.
 - Presenta analítica histórica descriptiva: conteos por sensor (nunca sumados), índice de recurrencia oficial v1.0, FRP promedio/máxima, evolución mensual, distribución día/noche y ficha técnica comparativa de sensores.
 - Sitúa la gestión del riesgo territorial con la Matriz 5×5 oficial (P = Amenaza × Consecuencia) sobre zonas documentadas.
+- Incluye un Aula Pedagógica con lecciones y preguntas de comprensión sobre los conceptos y cautelas científicas del producto; la matriz 5×5 interactiva está integrada en esa pestaña.
 - Expone las fichas de los modelos entrenados por el AI-Pipeline del proyecto (Laboratorio IA), sin ejecutar nada en el navegador.
 - Permite exportar a CSV los registros descargados y filtrados, y explica la procedencia del conjunto consultado.
 - Incluye glosario científico y guía de uso.
@@ -66,7 +67,11 @@ El producto entregado en esta versión:
    - Ficha técnica comparativa de sensores (plataformas, resoluciones, implicación territorial) con referencias Giglio et al. (2016) y Schroeder et al. (2014).
    - Exportación CSV del conjunto filtrado.
 
-3. **Matriz 5×5** (`RiskMatrix5x5.tsx`)
+3. **Aula Pedagógica** (`PedagogicalPanel.tsx`)
+   - Lecciones breves y preguntas de comprensión sobre observaciones frente a incendios, diferencias entre MODIS y VIIRS, confianza original y FRP.
+   - Integra la matriz interactiva descrita abajo. El contenido educativo no presenta detecciones como incendios confirmados ni inventa equivalencias entre sensores.
+
+   **Matriz 5×5** (`RiskMatrix5x5.tsx`, dentro del aula)
    - Matriz de gestión del riesgo territorial 5×5: eje vertical Consecuencia (C), eje horizontal Amenaza (A), producto `P = A × C` (1–25) mostrado por celda.
    - Interactiva: clic en celda y sliders para fijar A y C manualmente; selector de zonas documentadas.
    - Perfil de zona: justificación de la amenaza, justificación de la consecuencia, elementos expuestos (población, infraestructura crítica, áreas protegidas, accesibilidad) y recomendaciones preventivas de planificación.

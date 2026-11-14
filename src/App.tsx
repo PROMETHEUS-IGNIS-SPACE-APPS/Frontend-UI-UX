@@ -10,8 +10,8 @@ import { useUiStore } from '@/stores/uiStore';
 import type { Observation, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
-import RiskMatrixPanel from '@/features/comparison/RiskMatrixPanel';
 import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
+import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
 import { MAP_FOCUS_PRESETS, type MapFocusPreset } from '@/features/explorer/mapPresets';
@@ -112,7 +112,7 @@ export default function App() {
             observationsQuery.isSuccess
               ? <AnalyticsPanel observations={visible} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
-          ) : activeModule === 'comparison' ? <RiskMatrixPanel />
+          ) : activeModule === 'comparison' ? <PedagogicalPanel />
             : activeModule === 'laboratory' ? <LaboratoryPanel provenance={observationsQuery.data?.data_provenance ?? 'No disponible'} />
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
