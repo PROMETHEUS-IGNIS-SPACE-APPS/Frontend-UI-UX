@@ -59,14 +59,17 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
   });
 
-  it('renderea los módulos en desarrollo con su estado provisional', async () => {
+  it('muestra la Matriz 5×5 interactiva con el producto ordinal oficial', async () => {
     const user = userEvent.setup();
     renderApp();
 
     const desktopTablist = screen.getByRole('tablist', { name: 'Módulos' });
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Matriz 5×5' }));
 
-    expect(screen.getByText('Módulo en desarrollo')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Matriz de Gestión del Riesgo 5×5' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Amenaza 5, consecuencia 2, producto 10' }));
+    expect(screen.getByText('5 × 2 = 10')).toBeInTheDocument();
+    expect(screen.getByText('Moderado')).toBeInTheDocument();
   });
 
   it('deshabilita la exportación CSV sin registros visibles', () => {

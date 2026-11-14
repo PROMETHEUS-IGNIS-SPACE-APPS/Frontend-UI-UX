@@ -9,6 +9,9 @@ import { fetchObservations } from '@/services/api/observationsService';
 import { useUiStore } from '@/stores/uiStore';
 import type { Observation, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
+import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
+import RiskMatrixPanel from '@/features/comparison/RiskMatrixPanel';
+import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
@@ -117,7 +120,13 @@ export default function App() {
               </div>
               </div>
             </section>
-          ) : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
+          ) : activeModule === 'analytics' ? (
+            observationsQuery.isSuccess
+              ? <AnalyticsPanel observations={visible} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} />
+              : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
+          ) : activeModule === 'comparison' ? <RiskMatrixPanel />
+            : activeModule === 'laboratory' ? <LaboratoryPanel provenance={observationsQuery.data?.data_provenance ?? 'No disponible'} />
+              : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
       </main>
       <GlossaryModal isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
@@ -128,4 +137,9 @@ export default function App() {
 function csvValue(value: string | number | null) {
   if (value === null) return '';
   return `"${String(value).replaceAll('"', '""')}"`;
+}
+
+function QueryState({ isLoading, error, onRetry }: { isLoading: boolean; error?: string; onRetry: () => void }) {
+  if (isLoading) return <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-[#0b1220] p-5 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones para el análisis…</div>;
+  return <div role="alert" className="rounded-xl border border-red-900/70 bg-red-950/30 p-5 text-sm text-red-200"><p className="font-semibold">No se pudo cargar el conjunto consultado</p><p className="mt-1">{error ?? 'Error desconocido'}</p><button type="button" onClick={onRetry} className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 text-xs hover:bg-red-900/40">Reintentar</button></div>;
 }
