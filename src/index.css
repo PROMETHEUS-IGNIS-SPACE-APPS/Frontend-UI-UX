@@ -35,6 +35,9 @@
   --citizen: #4D88C4;
   --viirs: #D9B43A;
   --input-bg: #0E1A21;
+  --sensor-viirs: #F87171;
+  --sensor-modis: #FDE047;
+  --backdrop: rgba(14, 26, 33, 0.85);
 
   /* Alias heredados usados por los paneles existentes */
   --ignis-border: var(--border);
@@ -44,6 +47,42 @@
   --ignis-card: var(--card);
 
   color-scheme: dark;
+}
+
+/* Tema claro opcional (paleta clara de la carpeta Ejemplo). El oscuro sigue siendo el predeterminado. */
+:root.light {
+  --background: #F8FAFC;
+  --surface: #F2F5F8;
+  --surface-hover: #E4E9EF;
+  --card: #FFFFFF;
+  --card-muted: #F8FAFC;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #46565F;
+  --accent: #B46A55;
+  --accent-solid: #B46A55;
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(180, 106, 85, 0.14);
+  --success: #047857;
+  --success-soft: rgba(16, 185, 129, 0.08);
+  --warning: #A65E1E;
+  --warning-soft: rgba(180, 106, 85, 0.09);
+  --danger: #AD3030;
+  --danger-soft: rgba(173, 48, 48, 0.09);
+  --info: #1B5FA8;
+  --info-soft: rgba(27, 95, 168, 0.09);
+  --predictive: #A88613;
+  --predictive-soft: rgba(168, 134, 19, 0.12);
+  --citizen: #1B5FA8;
+  --viirs: #855618;
+  --input-bg: #FFFFFF;
+  --sensor-viirs: #B91C1C;
+  --sensor-modis: #A16207;
+  --backdrop: rgba(15, 23, 42, 0.5);
+  --ignis-cyan: #1B5FA8;
+
+  color-scheme: light;
 }
 
 @theme {
@@ -79,6 +118,8 @@
   --color-predictive: var(--predictive);
   --color-predictive-soft: var(--predictive-soft);
   --color-input-bg: var(--input-bg);
+  --color-sensor-viirs: var(--sensor-viirs);
+  --color-sensor-modis: var(--sensor-modis);
   --color-citizen: var(--citizen);
   --color-viirs: var(--viirs);
   --font-sans: 'Inclusive Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -171,6 +212,7 @@
 @layer base {
   html,
   body {
+    transition: background-color 300ms ease, color 300ms ease;
     font-family: var(--font-sans);
     background-color: var(--background);
     color: var(--text-primary);
@@ -204,8 +246,8 @@
 }
 
 .maplibregl-ctrl-group {
-  background-color: #0E1A21 !important;
-  border: 1px solid #202F38 !important;
+  background-color: var(--card) !important;
+  border: 1px solid var(--border-strong) !important;
   border-radius: 0.1875rem !important;
   box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.14) !important;
 }
@@ -219,16 +261,27 @@
   background-color: var(--surface-hover) !important;
 }
 
-.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+:root:not(.light) .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
   filter: invert(0.92) hue-rotate(180deg);
 }
 
 .maplibregl-ctrl-attrib {
-  background-color: #0E1A21 !important;
+  background-color: var(--card) !important;
   color: var(--text-secondary) !important;
-  border: 1px solid #202F38 !important;
+  border: 1px solid var(--border-strong) !important;
 }
 
 .maplibregl-ctrl-attrib a {
   color: var(--info) !important;
+}
+
+/* Impresión del Instructivo: solo se imprime el manual abierto. */
+@media print {
+  body.print-manual > *:not(#manual-print-root) {
+    display: none !important;
+  }
+
+  body.print-manual {
+    background: #ffffff !important;
+  }
 }

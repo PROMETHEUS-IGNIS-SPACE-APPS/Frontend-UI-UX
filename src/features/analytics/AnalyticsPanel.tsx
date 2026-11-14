@@ -51,8 +51,8 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
     </div>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <KpiCard label="Sensor VIIRS (~375 m)" tag="Detecciones" value={viirs.length.toLocaleString()} detail="Conteo de observaciones VIIRS" color="text-red-400" icon={<Satellite className="h-4 w-4" />} />
-      <KpiCard label="Sensor MODIS (~1 km)" tag="Detecciones" value={modis.length.toLocaleString()} detail="Conteo de observaciones MODIS" color="text-yellow-300" icon={<Satellite className="h-4 w-4" />} />
+      <KpiCard label="Sensor VIIRS (~375 m)" tag="Detecciones" value={viirs.length.toLocaleString()} detail="Conteo de observaciones VIIRS" color="text-sensor-viirs" icon={<Satellite className="h-4 w-4" />} />
+      <KpiCard label="Sensor MODIS (~1 km)" tag="Detecciones" value={modis.length.toLocaleString()} detail="Conteo de observaciones MODIS" color="text-sensor-modis" icon={<Satellite className="h-4 w-4" />} />
       <KpiCard label="Índice de Recurrencia" tag="Ordinal" value={hasObservations ? `${recurrenceScore} / 100` : 'No disponible'} detail={hasObservations ? recurrenceLevel : 'Sin observaciones para calcularlo'} color="text-info" icon={<Activity className="h-4 w-4" />} />
       <KpiCard label="FRP promedio / máxima" tag="MW" value={frpValues.length ? `${(frpValues.reduce((sum, value) => sum + value, 0) / frpValues.length).toFixed(1)} / ${maximumFrp} MW` : 'No disponible'} detail={`${frpValues.length} observaciones con FRP disponible`} color="text-danger" icon={<Flame className="h-4 w-4" />} />
     </div>
@@ -88,8 +88,8 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
         <div className="overflow-x-auto"><table className="w-full border-collapse text-left text-xs">
           <thead><tr className="border-b border-border font-noto text-[11px] text-text-secondary"><th className="py-2">Sensor</th><th className="py-2">Plataformas</th><th className="py-2">Resolución</th><th className="py-2">Implicación territorial</th></tr></thead>
           <tbody className="divide-y divide-border font-source text-[11px]">
-            <tr><td className="py-2 font-bold text-red-400">VIIRS</td><td className="py-2 text-text-primary">Suomi-NPP, NOAA-20/21</td><td className="py-2 text-text-primary">~375 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Detecta anomalías térmicas más pequeñas.</td></tr>
-            <tr><td className="py-2 font-bold text-yellow-300">MODIS</td><td className="py-2 text-text-primary">Terra, Aqua</td><td className="py-2 text-text-primary">~1000 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Serie histórica más larga, menor detalle espacial.</td></tr>
+            <tr><td className="py-2 font-bold text-sensor-viirs">VIIRS</td><td className="py-2 text-text-primary">Suomi-NPP, NOAA-20/21</td><td className="py-2 text-text-primary">~375 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Detecta anomalías térmicas más pequeñas.</td></tr>
+            <tr><td className="py-2 font-bold text-sensor-modis">MODIS</td><td className="py-2 text-text-primary">Terra, Aqua</td><td className="py-2 text-text-primary">~1000 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Serie histórica más larga, menor detalle espacial.</td></tr>
           </tbody>
         </table></div>
       </article>

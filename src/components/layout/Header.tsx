@@ -1,8 +1,11 @@
-import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Radar, Satellite, TrendingUp } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Moon, Radar, Satellite, Server, Sun, TrendingUp } from 'lucide-react';
+import { useUiStore } from '@/stores/uiStore';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
 import EmergencyAccess from './EmergencyAccess';
+import LocalCsvAccess from './LocalCsvAccess';
+import ManualAccess from './ManualAccess';
 import NoveltyReportAccess from './NoveltyReportAccess';
 import logoPng from '@/assets/PROMETHEUS_IGNIS.png';
 
@@ -22,6 +25,7 @@ const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   analytics: Activity,
   comparison: HeartHandshake,
   laboratory: Cpu,
+  sources: Server,
 };
 
 /** Etiquetas visibles cortas, como en la barra del ejemplo. */
@@ -33,6 +37,7 @@ const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
   analytics: 'Analítica',
   comparison: 'Aula Pedagógica',
   laboratory: 'Modelos IA',
+  sources: 'Fuentes/API',
 };
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
@@ -43,11 +48,14 @@ const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   analytics: 'Analítica',
   comparison: 'Aula',
   laboratory: 'Modelos IA',
+  sources: 'Fuentes',
 };
 
 const SMALL_BUTTON = 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400';
 
 export default function Header({ activeModule, onModuleChange, totalVisibleCount, onExportCsv, onOpenGlossary }: HeaderProps) {
+  const theme = useUiStore((state) => state.theme);
+  const toggleTheme = useUiStore((state) => state.toggleTheme);
   const canExport = totalVisibleCount > 0;
   const exportTitle = canExport
     ? `Exportar ${totalVisibleCount} registros filtrados a CSV`
@@ -74,9 +82,13 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
           </nav>
 
           <div className="order-2 flex shrink-0 items-center gap-1.5 xl:order-3">
+            <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-accent transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+              {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
+            </button>
             <button type="button" onClick={onOpenGlossary} aria-label="Abrir glosario científico" title="Guía y Glosario Científico" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
               <BookOpen className="h-4 w-4" aria-hidden />
             </button>
+            <ManualAccess />
           </div>
         </div>
 
@@ -85,6 +97,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
           <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             <div className="flex items-center gap-1 overflow-x-auto lg:hidden">{renderTabs('mobile')}</div>
             <ConnectionIndicator />
+            <LocalCsvAccess />
             <span className={`${SMALL_BUTTON} bg-card text-text-primary`}>
               <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
               <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>

@@ -1,8 +1,8 @@
 ﻿# MEMORY.md — PROMETHEUS IGNIS Frontend
 
 ## Estado actual
-- Rama `feature/day`; commits locales sin push posterior al remoto.
-- Interfaz con siete módulos: Mapa, Predictibilidad, Mapa de Calor Markov, Calendario, Aula Pedagógica, Analítica y Laboratorio IA.
+- Rama `feature/day`, publicada en origin; PR hacia `develop` pendiente.
+- Interfaz con ocho módulos: Mapa, Predictibilidad, Mapa de Calor Markov, Calendario, Aula Pedagógica, Analítica, Laboratorio IA y Fuentes/API.
 - Mapa conectado a IDEAM, NASA FIRMS, fusión e histórico muestreado v0.2 (máximo 9.000 registros, con aviso de muestreo).
 - Header muestra botones 123 SOS, Reportar Novedad y Descargar Reportes (.CSV); CSV exporta la selección visible. El aviso de novedades explica que no hay endpoint de recepción y no guarda nada.
 - SOS abre opciones voluntarias `tel:123` y `tel:119`; no inicia llamadas por sí solo.
@@ -12,7 +12,11 @@
 - Paleta actual (Ejemplo 2026-11-14): superficies sólidas `#0E1A21`, bordes `#202F38`, acento `#CE8C67`, predictivo `#DBBF60`; sin degradados ni transparencias.
 - Módulo nuevo `markov-heatmap` (Mapa de Calor Markov): muestra observaciones reales por subregión de Antioquia; horizonte, clima y escala de probabilidad quedan desactivados/pendientes hasta que exista modelo publicado.
 - Calendario estacional: filtro de 6 subregiones y gráficas Ene–Dic (frecuencia y FRP promedio). Subregión = municipio de referencia del Backend-API (`utils/subregions.ts`, misma tabla que `Backend-API/app/utils/geo.py`); Oriente queda como no clasificado.
-- No se replican botones Gemini, tema claro, Instructivo PDF, CSV manager ni FastAPI del ejemplo: no hay endpoints.
+- Tema claro opcional (botón sol/luna, guardado en localStorage, clase `.light` en `<html>`); oscuro predeterminado. Colores vía tokens, incluidos `sensor-viirs`/`sensor-modis`.
+- CSV locales (IDEAM `;`/UTC-5 o NASA FIRMS UTC) se leen en el navegador (`services/csv/localCsvParser.ts`, `stores/localCsvStore.ts`), se suman al mapa y módulos con procedencia “CSV local”, no se envían al backend y no traen municipio/departamento. Limpiar pide confirmación en pantalla (sin contraseña).
+- Instructivo (.PDF): manual en ventana imprimible; “Guardar como PDF” usa el diálogo de impresión del navegador (sin jspdf).
+- Mapa: botones “Reportar en Terreno” (mismo aviso sin endpoint) y “Guía” (glosario).
+- No se replican Gemini ni Demostración/Lab Real del ejemplo.
 - Módulos usan `components/common/ModuleLayout.tsx` (ModulePage, ModuleHeader, ProvenanceNote) con la estructura del ejemplo. Predictibilidad y Laboratorio IA replican el esqueleto visual del ejemplo con “—”/“Pendiente”, sin cifras, hasta que el AI-Pipeline publique artefactos.
 - Se conserva procedencia y `confidence_raw`; no se usa `confidence_score` provisional. FRP null continúa como no disponible.
 

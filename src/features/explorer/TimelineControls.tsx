@@ -57,7 +57,7 @@ export default function TimelineControls({ dates, countsByDate, activeDate, isPl
               return <div key={date} style={{ height: `${Math.max(10, Math.round((count / maxCount) * 100))}%` }} className={`flex-1 rounded-t-xs transition-colors ${isPassed ? 'bg-accent-solid' : 'bg-border-strong'}`} title={`${date}: ${count} observaciones`} />;
             })}
           </div>
-          <input type="range" aria-label="Fecha de la línea de tiempo" min={0} max={Math.max(0, dates.length - 1)} value={activeIndex < 0 ? Math.max(0, dates.length - 1) : activeIndex} onChange={(event) => onSelectIndex(Number(event.target.value))} disabled={!dates.length} className="h-1.5 w-full cursor-pointer rounded-lg bg-border-strong accent-[#CE8C67]" />
+          <input type="range" aria-label="Fecha de la línea de tiempo" min={0} max={Math.max(0, dates.length - 1)} value={activeIndex < 0 ? Math.max(0, dates.length - 1) : activeIndex} onChange={(event) => onSelectIndex(Number(event.target.value))} disabled={!dates.length} className="h-1.5 w-full cursor-pointer rounded-lg bg-border-strong accent-accent" />
         </div>
 
         <div className="hidden max-w-[235px] items-center gap-1.5 text-[10px] leading-tight text-text-secondary lg:flex">

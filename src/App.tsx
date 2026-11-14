@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header';
 import ObservationMap from '@/features/explorer/ObservationMap';
 import { fetchIngestedObservations } from '@/services/api/ingestionService';
 import { useUiStore } from '@/stores/uiStore';
+import { selectLocalObservations, useLocalCsvStore } from '@/stores/localCsvStore';
 import type { Observation, ObservationSourceMode, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
@@ -15,6 +16,7 @@ import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
 import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
 import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
 import MarkovHeatmapPanel from '@/features/markov/MarkovHeatmapPanel';
+import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
 import TimelineControls from '@/features/explorer/TimelineControls';
@@ -38,6 +40,10 @@ function shiftDate(date: string, days: number) {
 export default function App() {
   const activeModule = useUiStore((state) => state.activeModule);
   const setActiveModule = useUiStore((state) => state.setActiveModule);
+  const theme = useUiStore((state) => state.theme);
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light');
+  }, [theme]);
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [sensor, setSensor] = useState<Sensor | 'ALL'>('ALL');
   const [sourceMode, setSourceMode] = useState<ObservationSourceMode>('fusion');
@@ -72,7 +78,13 @@ export default function App() {
     }),
     staleTime: 15 * 60_000,
   });
-  const allObservations = observationsQuery.data?.data ?? EMPTY_OBSERVATIONS;
+  const localDatasets = useLocalCsvStore((state) => state.datasets);
+  const localObservations = useMemo(() => selectLocalObservations(localDatasets), [localDatasets]);
+  const backendObservations = observationsQuery.data?.data ?? EMPTY_OBSERVATIONS;
+  const allObservations = useMemo(() => localObservations.length ? [...backendObservations, ...localObservations] : backendObservations, [backendObservations, localObservations]);
+  const hasData = observationsQuery.isSuccess || localObservations.length > 0;
+  const totalMatching = (observationsQuery.data?.total_matching ?? 0) + localObservations.length;
+  const provenance = [observationsQuery.data?.data_provenance, localObservations.length ? `CSV local (${localObservations.length.toLocaleString()} observaciones)` : null].filter(Boolean).join(' + ') || (observationsQuery.isPending ? 'Cargando fuente…' : 'No disponible');
   const matchingObservations = useMemo(() => {
     const minFrp = minimumFrp.trim() ? Number(minimumFrp) : null;
     const search = municipalitySearch.trim().toLocaleLowerCase('es');
@@ -151,9 +163,9 @@ export default function App() {
                 onConfidenceRawChange={setConfidenceRaw}
                 observations={allObservations}
                 visibleCount={visible.length}
-                recordCount={observationsQuery.data?.count ?? 0}
-                totalMatching={observationsQuery.data?.total_matching ?? 0}
-                provenance={observationsQuery.data?.data_provenance ?? 'Cargando fuente…'}
+                recordCount={(observationsQuery.data?.count ?? 0) + localObservations.length}
+                totalMatching={totalMatching}
+                provenance={provenance}
                 warning={observationsQuery.data?.warning}
                 degradedMode={observationsQuery.data?.degradedMode}
                 sampling={observationsQuery.data?.sampling}
@@ -163,14 +175,14 @@ export default function App() {
 
               <div className="relative flex min-h-[580px] min-w-0 flex-1 flex-col overflow-hidden bg-background lg:h-full lg:min-h-0">
                 <button type="button" onClick={() => setIsSidebarOpen((value) => !value)} aria-expanded={isSidebarOpen} aria-label={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} title={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} className="absolute left-0 top-1/2 z-30 hidden h-11 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border bg-card text-[10px] text-text-secondary shadow-sm transition-colors hover:bg-card hover:text-text-primary lg:flex"><span aria-hidden>{isSidebarOpen ? '◀' : '▶'}</span></button>
-                {observationsQuery.isPending && <div className="m-3 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones…</div>}
-                {observationsQuery.isError && <div role="alert" className="m-3 flex items-start gap-3 rounded-xl border border-red-900/70 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-red-200/80">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-red-900/40" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
+                {observationsQuery.isPending && <div className="m-3 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones…</div>}
+                {observationsQuery.isError && <div role="alert" className="m-3 flex items-start gap-3 rounded-xl border border-danger/40 bg-danger-soft p-4 text-sm text-danger"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-danger">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-danger-soft" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                 <div className="relative min-h-[360px] flex-1 overflow-hidden bg-background lg:min-h-0">
-                  {observationsQuery.isSuccess && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
-                  {observationsQuery.isSuccess && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-slate-500" /><p className="mt-2 font-medium text-slate-200">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-slate-400">La consulta respondió correctamente con una colección vacía.</p></div></div>}
-                  {observationsQuery.isSuccess && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} />}
+                  {hasData && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
+                  {hasData && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-text-secondary" /><p className="mt-2 font-medium text-text-primary">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-text-secondary">La consulta respondió correctamente con una colección vacía.</p></div></div>}
+                  {hasData && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} onOpenGuide={() => setIsGlossaryOpen(true)} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />}
                   {selected && <aside aria-label="Observación seleccionada" className="absolute right-4 top-16 z-30 max-h-[calc(100%-5rem)] w-80 space-y-3 overflow-y-auto rounded-2xl border border-accent/60 bg-card p-4 text-xs shadow-2xl sm:w-96">
-                    <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-yellow-400/50 bg-yellow-400/10 text-yellow-300'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
+                    <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-sensor-viirs' : 'border-yellow-400/50 bg-yellow-400/10 text-sensor-modis'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
                     <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
                     <p className="flex items-start gap-1.5 text-[10px] leading-4 text-text-secondary"><MapPin className="mt-0.5 h-3 w-3 shrink-0 text-accent" />Una observación satelital no equivale necesariamente a un incendio independiente.</p>
                     {selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="inline-block text-[11px] font-semibold text-info underline underline-offset-2">Consultar fuente original</a>}
@@ -180,20 +192,21 @@ export default function App() {
               </div>
             </section>
           ) : activeModule === 'analytics' ? (
-            observationsQuery.isSuccess
-              ? <AnalyticsPanel observations={visible} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} />
+            hasData
+              ? <AnalyticsPanel observations={visible} totalMatching={totalMatching} provenance={provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'calendar' ? (
-            observationsQuery.isSuccess
-              ? <ActivityCalendarPanel observations={allObservations} totalMatching={observationsQuery.data.total_matching} provenance={observationsQuery.data.data_provenance} onSelectDate={(date) => { setActiveDate(date); setSensor('ALL'); setSelected(null); setIsPlaying(false); setActiveModule('explorer'); }} />
+            hasData
+              ? <ActivityCalendarPanel observations={allObservations} totalMatching={totalMatching} provenance={provenance} onSelectDate={(date) => { setActiveDate(date); setSensor('ALL'); setSelected(null); setIsPlaying(false); setActiveModule('explorer'); }} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'markov-heatmap' ? (
-            observationsQuery.isSuccess
-              ? <MarkovHeatmapPanel observations={allObservations} provenance={observationsQuery.data.data_provenance} />
+            hasData
+              ? <MarkovHeatmapPanel observations={allObservations} provenance={provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'predictability' ? <PredictabilityPanel />
             : activeModule === 'comparison' ? <PedagogicalPanel />
-            : activeModule === 'laboratory' ? <LaboratoryPanel provenance={observationsQuery.data?.data_provenance ?? 'No disponible'} />
+            : activeModule === 'laboratory' ? <LaboratoryPanel provenance={provenance} />
+            : activeModule === 'sources' ? <SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} />
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
       </main>
@@ -209,6 +222,6 @@ function csvValue(value: unknown) {
 }
 
 function QueryState({ isLoading, error, onRetry }: { isLoading: boolean; error?: string; onRetry: () => void }) {
-  if (isLoading) return <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-5 text-sm text-slate-300"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-300" />Consultando observaciones para el análisis…</div>;
-  return <div role="alert" className="rounded-xl border border-red-900/70 bg-red-950/30 p-5 text-sm text-red-200"><p className="font-semibold">No se pudo cargar el conjunto consultado</p><p className="mt-1">{error ?? 'Error desconocido'}</p><button type="button" onClick={onRetry} className="mt-3 rounded-lg border border-red-800 px-3 py-1.5 text-xs hover:bg-red-900/40">Reintentar</button></div>;
+  if (isLoading) return <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-5 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones para el análisis…</div>;
+  return <div role="alert" className="rounded-xl border border-danger/40 bg-danger-soft p-5 text-sm text-danger"><p className="font-semibold">No se pudo cargar el conjunto consultado</p><p className="mt-1">{error ?? 'Error desconocido'}</p><button type="button" onClick={onRetry} className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 text-xs hover:bg-danger-soft">Reintentar</button></div>;
 }

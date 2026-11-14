@@ -147,7 +147,7 @@ No asumas que el backend está levantado ni que los endpoints futuros están imp
 - Usa `import.meta.env` para configuración Vite y declara las variables en `vite-env.d.ts` si corresponde.
 - Prefiere accesibilidad semántica: etiquetas, botones reales, foco visible, navegación por teclado, textos alternativos y contraste suficiente.
 - Evita estilos inline salvo para valores dinámicos que no puedan expresarse razonablemente con clases o tokens.
-- Mantén la identidad visual PROMETHEUS IGNIS: tema oscuro, base azul-negra, acentos naranja/ámbar y cian; evita saturar todos los elementos con color.
+- Mantén la identidad visual PROMETHEUS IGNIS: tema oscuro predeterminado (superficies `#0E1A21`, acento naranja `#CE8C67`); existe un tema claro opcional con la paleta de la carpeta Ejemplo. Usa los tokens de `src/index.css` (`bg-card`, `text-text-primary`, `text-warning`, etc.) en lugar de colores fijos para que ambos temas funcionen; evita saturar todos los elementos con color.
 - Los textos visibles deben ser concisos y consistentes. Fechas, unidades y etiquetas deben ser comprensibles para el usuario.
 - No añadas comentarios que repitan el código. Explica decisiones no obvias y limitaciones de dominio.
 - Referencias principales: `PROJECT_CONTEXT.md` para producto y dominio; `docs/api-contracts.md` del backend para contratos; componentes existentes para patrones visuales.

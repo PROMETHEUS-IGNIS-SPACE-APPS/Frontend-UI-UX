@@ -39,6 +39,11 @@ export const APP_MODULES = [
     label: 'Laboratorio IA',
     description: 'Fichas de los modelos publicados por el AI-Pipeline.',
   },
+  {
+    id: 'sources',
+    label: 'Fuentes/API',
+    description: 'Estado del Backend-API, endpoints consultados y límites de cada fuente de datos.',
+  },
 ] as const;
 
 export type AppModule = (typeof APP_MODULES)[number];

@@ -3,10 +3,12 @@ import { AlertTriangle, Compass, MapPin, Radar, Thermometer, Wind, X } from 'luc
 import ObservationMap from '@/features/explorer/ObservationMap';
 import { MAP_STYLE_PRESETS, type MapFocusPreset } from '@/features/explorer/mapPresets';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
+import { useUiStore } from '@/stores/uiStore';
 import type { Observation } from '@/types/api/observations';
 import { ANTIOQUIA_VIEWPORT, SUBREGIONS, computeSubregionMatrix, resolveSubregion, type SubregionId } from '@/utils/subregions';
 
 const DARK_STYLE = MAP_STYLE_PRESETS.find((style) => style.id === 'dark') ?? MAP_STYLE_PRESETS[0];
+const LIGHT_STYLE = MAP_STYLE_PRESETS.find((style) => style.id === 'positron') ?? MAP_STYLE_PRESETS[0];
 
 /** Escala del ejemplo; se usará cuando el AI-Pipeline publique probabilidades. */
 const PROBABILITY_SCALE = [
@@ -25,6 +27,7 @@ interface MarkovHeatmapPanelProps {
 export default function MarkovHeatmapPanel({ observations, provenance }: MarkovHeatmapPanelProps) {
   const [subregion, setSubregion] = useState<'all' | SubregionId>('all');
   const [selected, setSelected] = useState<Observation | null>(null);
+  const theme = useUiStore((state) => state.theme);
   const matrix = useMemo(() => computeSubregionMatrix(observations), [observations]);
 
   const antioquiaObservations = useMemo(() => observations.filter((item) => {
@@ -83,7 +86,7 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
     <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
       <div className="relative flex min-h-[460px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:col-span-8 lg:min-h-[580px]">
         <div className="min-h-[460px] w-full flex-1 lg:min-h-[580px]">
-          <ObservationMap observations={antioquiaObservations} selected={selected} onSelect={setSelected} focusTarget={focus} mapStyle={DARK_STYLE} showViirs showModis showHeatmap={false} />
+          <ObservationMap observations={antioquiaObservations} selected={selected} onSelect={setSelected} focusTarget={focus} mapStyle={theme === 'light' ? LIGHT_STYLE : DARK_STYLE} showViirs showModis showHeatmap={false} />
         </div>
 
         <div className="pointer-events-none absolute left-3 top-3 z-10">

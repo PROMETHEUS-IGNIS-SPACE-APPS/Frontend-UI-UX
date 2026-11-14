@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Compass, Layers, Map as MapIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp, Compass, HelpCircle, Layers, Map as MapIcon } from 'lucide-react';
+import NoveltyReportAccess from '@/components/layout/NoveltyReportAccess';
 import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
@@ -15,20 +16,30 @@ interface MapOverlaysProps {
   onToggleModis: () => void;
   onToggleViirs: () => void;
   onToggleHeatmap: () => void;
+  /** Abre la guía/glosario; si falta, no se muestra el botón “Guía”. */
+  onOpenGuide?: () => void;
+  sourceLabel?: string;
 }
 
 const GLASS = 'border border-border-strong bg-card shadow-2xl';
 
-export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap }: MapOverlaysProps) {
+export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap, onOpenGuide, sourceLabel }: MapOverlaysProps) {
   const [layersOpen, setLayersOpen] = useState(true);
   const [baseOpen, setBaseOpen] = useState(false);
   const activeStyle = MAP_STYLE_PRESETS.find((style) => style.id === styleId) ?? MAP_STYLE_PRESETS[0];
 
   return <>
     <div className="pointer-events-none absolute left-3 right-14 top-3 z-20 flex flex-col gap-2">
-      <div className={`pointer-events-auto flex flex-wrap items-center gap-1 self-start rounded-xl p-1.5 ${GLASS}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className={`pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl p-1.5 ${GLASS}`}>
         <span className="flex items-center gap-1 px-1.5 font-noto text-[11px] font-bold text-accent"><Compass className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Zona:</span></span>
         {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors sm:text-xs ${focusId === preset.id ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:bg-surface-hover/60 hover:text-text-primary'}`}>{preset.label}</button>)}
+      </div>
+      <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
+        {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {(observationCounts.VIIRS + observationCounts.MODIS).toLocaleString()} pts</span>}
+        <NoveltyReportAccess variant="map" />
+        {onOpenGuide && <button type="button" onClick={onOpenGuide} className="flex items-center gap-1 rounded-lg bg-card px-2 py-1.5 text-xs font-semibold text-info shadow-sm hover:underline" aria-label="Abrir guía y glosario"><HelpCircle className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Guía</span></button>}
+      </div>
       </div>
 
       <div className={`pointer-events-auto max-w-[260px] self-start overflow-hidden rounded-2xl ${GLASS}`}>
@@ -78,7 +89,7 @@ function LayerToggle({ label, detail, color, count, checked, onChange }: { label
     </span>
     <span className="flex items-center gap-2">
       <span className="min-w-5 rounded border border-border-strong bg-input-bg px-1 text-center font-source text-[10px] text-text-secondary">{count}</span>
-      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-[#CE8C67]" />
+      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-accent" />
     </span>
   </label>;
 }

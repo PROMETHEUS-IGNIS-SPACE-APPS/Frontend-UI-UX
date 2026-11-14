@@ -83,14 +83,14 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <div className="p-2 rounded-xl bg-cyan-500/20 text-info border border-cyan-500/30">
               <BookOpen className="w-5 h-5" aria-hidden />
             </div>
             <div>
               <h2 id="glossary-modal-title" className="text-base font-bold text-white font-mono">
                 Glosario Científico & Marco Epistémico
               </h2>
-              <p id="glossary-modal-subtitle" className="text-xs text-slate-400">
+              <p id="glossary-modal-subtitle" className="text-xs text-text-secondary">
                 PROMETHEUS IGNIS — Semillero de Astronomía del ITM (NASA Space Apps Medellín 2026)
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
             type="button"
             onClick={onClose}
             aria-label="Cerrar glosario"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
           >
             <X className="w-5 h-5" aria-hidden />
           </button>
@@ -111,10 +111,10 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
             {TERMS.map((entry) => (
               <div
                 key={entry.term}
-                className="bg-slate-900/70 border border-border/80 rounded-xl p-3.5 space-y-1.5"
+                className="bg-surface border border-border/80 rounded-xl p-3.5 space-y-1.5"
               >
-                <h3 className="font-mono font-bold text-amber-300 text-sm">{entry.term}</h3>
-                <p className="text-slate-300 leading-relaxed text-[11px]">{entry.definition}</p>
+                <h3 className="font-mono font-bold text-warning text-sm">{entry.term}</h3>
+                <p className="text-text-primary leading-relaxed text-[11px]">{entry.definition}</p>
               </div>
             ))}
           </div>
@@ -122,14 +122,14 @@ export default function GlossaryModal({ isOpen, onClose }: GlossaryModalProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-border bg-card flex items-center justify-between text-xs">
-          <span className="text-[11px] text-slate-400 font-mono">
+          <span className="text-[11px] text-text-secondary font-mono">
             Fuentes: Giglio et al. (2016), Schroeder et al. (2014), NASA FIRMS, UNDRR Sendai
             Framework (2015).
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-mono text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+            className="px-4 py-2 bg-surface-hover hover:bg-surface-hover text-white rounded-xl font-mono text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
           >
             Entendido
           </button>
