@@ -11,9 +11,10 @@ interface ObservationMapProps {
   focusTarget: MapFocusPreset;
   showViirs: boolean;
   showModis: boolean;
+  showHeatmap: boolean;
 }
 
-export default function ObservationMap({ observations, selected, onSelect, focusTarget, showViirs, showModis }: ObservationMapProps) {
+export default function ObservationMap({ observations, selected, onSelect, focusTarget, showViirs, showModis, showHeatmap }: ObservationMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const currentObservations = useRef(observations);
@@ -22,8 +23,8 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   onSelectRef.current = onSelect;
   const focusTargetRef = useRef(focusTarget);
   focusTargetRef.current = focusTarget;
-  const layerVisibilityRef = useRef({ showViirs, showModis });
-  layerVisibilityRef.current = { showViirs, showModis };
+  const layerVisibilityRef = useRef({ showViirs, showModis, showHeatmap });
+  layerVisibilityRef.current = { showViirs, showModis, showHeatmap };
 
   useEffect(() => {
     if (!container.current) return;
@@ -37,6 +38,17 @@ export default function ObservationMap({ observations, selected, onSelect, focus
     map.addControl(new NavigationControl(), 'top-right');
     map.on('load', () => {
       map.addSource('observations', { type: 'geojson', data: featureCollection(currentObservations.current) });
+      map.addLayer({
+        id: 'observation-heatmap', type: 'heatmap', source: 'observations',
+        filter: ['!=', ['get', 'frp_mw'], null],
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'frp_mw'], 0, 0.1, 100, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.6, 9, 1.4],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 4, 14, 9, 28],
+          'heatmap-opacity': 0.65,
+          'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(0,0,0,0)', 0.2, '#164e63', 0.45, '#0e7490', 0.7, '#f59e0b', 1, '#ef4444'],
+        },
+      });
       map.addLayer({
         id: 'observation-points-viirs', type: 'circle', source: 'observations',
         filter: ['==', ['get', 'sensor'], 'VIIRS'],
@@ -66,6 +78,7 @@ export default function ObservationMap({ observations, selected, onSelect, focus
       }
       map.setLayoutProperty('observation-points-viirs', 'visibility', layerVisibilityRef.current.showViirs ? 'visible' : 'none');
       map.setLayoutProperty('observation-points-modis', 'visibility', layerVisibilityRef.current.showModis ? 'visible' : 'none');
+      map.setLayoutProperty('observation-heatmap', 'visibility', layerVisibilityRef.current.showHeatmap ? 'visible' : 'none');
     });
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -86,6 +99,10 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   }, [showViirs, showModis]);
 
   useEffect(() => {
+    if (mapRef.current?.getLayer('observation-heatmap')) mapRef.current.setLayoutProperty('observation-heatmap', 'visibility', showHeatmap ? 'visible' : 'none');
+  }, [showHeatmap]);
+
+  useEffect(() => {
     if (selected) mapRef.current?.flyTo({ center: [selected.longitude, selected.latitude], zoom: 9 });
   }, [selected]);
 
@@ -98,7 +115,7 @@ function featureCollection(observations: Observation[]) {
     features: observations.map((item) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [item.longitude, item.latitude] },
-      properties: { id: item.observation_id, sensor: item.sensor },
+      properties: { id: item.observation_id, sensor: item.sensor, frp_mw: item.frp_mw },
     })),
   };
 }

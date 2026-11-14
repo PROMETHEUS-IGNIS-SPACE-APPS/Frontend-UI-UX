@@ -12,7 +12,8 @@ describe('MapOverlays', () => {
     const onFocusChange = vi.fn();
     const onToggleViirs = vi.fn();
     const onToggleModis = vi.fn();
-    render(<MapOverlays focusId="antioquia" onFocusChange={onFocusChange} observationCounts={{ VIIRS: 3, MODIS: 2 }} showViirs onToggleViirs={onToggleViirs} showModis onToggleModis={onToggleModis} />);
+    const onToggleHeatmap = vi.fn();
+    render(<MapOverlays focusId="antioquia" onFocusChange={onFocusChange} observationCounts={{ VIIRS: 3, MODIS: 2 }} frpCount={4} showViirs onToggleViirs={onToggleViirs} showModis onToggleModis={onToggleModis} showHeatmap={false} onToggleHeatmap={onToggleHeatmap} />);
 
     await user.click(screen.getByRole('button', { name: 'Colombia' }));
     expect(onFocusChange).toHaveBeenCalledWith(MAP_FOCUS_PRESETS[1]);
@@ -20,5 +21,8 @@ describe('MapOverlays', () => {
     expect(onToggleViirs).toHaveBeenCalledOnce();
     await user.click(screen.getByRole('checkbox', { name: 'Puntos amarillos' }));
     expect(onToggleModis).toHaveBeenCalledOnce();
+    expect(screen.getByText('4')).toBeInTheDocument();
+    await user.click(screen.getByRole('checkbox', { name: 'Densidad térmica' }));
+    expect(onToggleHeatmap).toHaveBeenCalledOnce();
   });
 });

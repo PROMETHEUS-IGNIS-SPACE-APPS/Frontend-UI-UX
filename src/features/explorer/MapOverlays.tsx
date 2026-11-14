@@ -6,13 +6,16 @@ interface MapOverlaysProps {
   focusId: string;
   onFocusChange: (preset: MapFocusPreset) => void;
   observationCounts: { MODIS: number; VIIRS: number };
+  frpCount: number;
   showModis: boolean;
   showViirs: boolean;
+  showHeatmap: boolean;
   onToggleModis: () => void;
   onToggleViirs: () => void;
+  onToggleHeatmap: () => void;
 }
 
-export default function MapOverlays({ focusId, onFocusChange, observationCounts, showModis, showViirs, onToggleModis, onToggleViirs }: MapOverlaysProps) {
+export default function MapOverlays({ focusId, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap }: MapOverlaysProps) {
   const [layersOpen, setLayersOpen] = useState(true);
   return <>
     <div className="absolute left-3 top-3 z-20 flex max-w-[calc(100%-5rem)] items-center gap-1 overflow-x-auto rounded-xl border border-slate-700 bg-[#0b1422]/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur sm:left-4 sm:top-4">
@@ -25,6 +28,8 @@ export default function MapOverlays({ focusId, onFocusChange, observationCounts,
       {layersOpen && <div className="space-y-1 border-t border-slate-800 px-2 py-2">
         <LayerToggle label="Puntos rojos" detail="Focos VIIRS" color="bg-red-500" count={observationCounts.VIIRS} checked={showViirs} onChange={onToggleViirs} />
         <LayerToggle label="Puntos amarillos" detail="Focos MODIS" color="bg-yellow-400" count={observationCounts.MODIS} checked={showModis} onChange={onToggleModis} />
+        <LayerToggle label="Densidad térmica" detail="Peso FRP disponible (MW)" color="bg-orange-400" count={frpCount} checked={showHeatmap} onChange={onToggleHeatmap} />
+        {showHeatmap && <p className="px-2 pb-1 text-[8px] leading-4 text-slate-500">La intensidad visual usa FRP informada; FRP nula queda excluida y no se interpreta como cero.</p>}
       </div>}
     </section>
   </>;

@@ -4,8 +4,9 @@ aporte.
 ## Estado actual
 - Mapa Territorial adaptado a la composición de `Ejemplo` (2026-11-14): filtros
   laterales compactos con modo fácil/pro, mapa MapLibre, presets de cámara,
-  capas MODIS/VIIRS y timeline funcional por `acquired_at`; detalle, procedencia,
-  truncamiento y export CSV. Filtros municipio/departamento disabled por contrato.
+  capas MODIS/VIIRS, densidad térmica WebGL ponderada por FRP disponible y timeline
+  funcional por `acquired_at`; detalle, procedencia, truncamiento y export CSV.
+  FRP nula se excluye del heatmap, sin imputarla como cero. Filtros territoriales disabled.
   Filtros territoriales sin soporte API siguen deshabilitados. Aula Pedagógica:
   calendario analítico con agregación diaria UTC, sensores separados y FRP nullable;
   evita agrupar el mismo mes de años distintos. Suite: 25 pruebas; lint/typecheck/build
