@@ -27,7 +27,17 @@ export interface ObservationCollection {
   data_provenance: string;
   warning?: string | null;
   degradedMode?: boolean;
-  sourceMode?: 'fusion' | 'ideam' | 'firms';
+  sourceMode?: ObservationSourceMode;
+  sampling?: ObservationSamplingInfo;
 }
 
-export type ObservationSourceMode = 'fusion' | 'ideam' | 'firms';
+export type ObservationSourceMode = 'fusion' | 'ideam' | 'firms' | 'historical';
+
+export interface ObservationSamplingInfo {
+  from?: string;
+  to?: string;
+  rawCount?: number;
+  deduplicatedCount?: number;
+  filesLoaded?: string[];
+  attribution?: string;
+}
