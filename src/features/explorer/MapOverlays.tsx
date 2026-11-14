@@ -1,0 +1,40 @@
+import { useState } from 'react';
+import { ChevronDown, ChevronUp, Layers, LocateFixed } from 'lucide-react';
+import { MAP_FOCUS_PRESETS, type MapFocusPreset } from './mapPresets';
+
+interface MapOverlaysProps {
+  focusId: string;
+  onFocusChange: (preset: MapFocusPreset) => void;
+  observationCounts: { MODIS: number; VIIRS: number };
+  showModis: boolean;
+  showViirs: boolean;
+  onToggleModis: () => void;
+  onToggleViirs: () => void;
+}
+
+export default function MapOverlays({ focusId, onFocusChange, observationCounts, showModis, showViirs, onToggleModis, onToggleViirs }: MapOverlaysProps) {
+  const [layersOpen, setLayersOpen] = useState(true);
+  return <>
+    <div className="absolute left-3 top-3 z-20 flex max-w-[calc(100%-5rem)] items-center gap-1 overflow-x-auto rounded-xl border border-slate-700 bg-[#0b1422]/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur sm:left-4 sm:top-4">
+      <span className="flex shrink-0 items-center gap-1 px-2 font-mono text-[9px] text-amber-300"><LocateFixed className="h-3 w-3" />Zona:</span>
+      {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[9px] font-semibold transition sm:text-[10px] ${focusId === preset.id ? 'bg-amber-500 text-slate-950' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>{preset.label}</button>)}
+    </div>
+
+    <section className="absolute left-3 top-[3.65rem] z-20 w-[216px] overflow-hidden rounded-xl border border-slate-700 bg-[#0b1422]/95 shadow-xl shadow-black/30 backdrop-blur sm:left-4 sm:top-[4.25rem] sm:w-[230px]">
+      <button type="button" aria-expanded={layersOpen} onClick={() => setLayersOpen((value) => !value)} className="flex w-full items-center justify-between px-3 py-2.5 text-left font-mono text-[9px] font-semibold text-slate-200"><span className="flex items-center gap-2"><Layers className="h-3.5 w-3.5 text-amber-400" />Filtro por color / sensor</span>{layersOpen ? <ChevronUp className="h-3.5 w-3.5 text-slate-400" /> : <ChevronDown className="h-3.5 w-3.5 text-slate-400" />}</button>
+      {layersOpen && <div className="space-y-1 border-t border-slate-800 px-2 py-2">
+        <LayerToggle label="Puntos rojos" detail="Focos VIIRS" color="bg-red-500" count={observationCounts.VIIRS} checked={showViirs} onChange={onToggleViirs} />
+        <LayerToggle label="Puntos amarillos" detail="Focos MODIS" color="bg-yellow-400" count={observationCounts.MODIS} checked={showModis} onChange={onToggleModis} />
+      </div>}
+    </section>
+  </>;
+}
+
+function LayerToggle({ label, detail, color, count, checked, onChange }: { label: string; detail: string; color: string; count: number; checked: boolean; onChange: () => void }) {
+  return <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-800/70">
+    <span className={`h-3 w-3 shrink-0 rounded-full ring-1 ring-white/50 ${color}`} aria-hidden />
+    <span className="min-w-0 flex-1"><span className="block text-[10px] font-semibold text-slate-200">{label}</span><span className="block text-[8px] text-slate-500">{detail}</span></span>
+    <span className="min-w-5 rounded border border-slate-700 bg-slate-950 px-1 text-center font-mono text-[8px] text-slate-400">{count}</span>
+    <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-amber-500" />
+  </label>;
+}

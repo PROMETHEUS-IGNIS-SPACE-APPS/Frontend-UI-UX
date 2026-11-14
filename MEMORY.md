@@ -3,9 +3,10 @@ Memoria del proyecto entre sesiones. Máximo ~50 líneas: resume o elimina lo qu
 aporte.
 ## Estado actual
 - Mapa Territorial adaptado a la composición de `Ejemplo` (2026-11-14): filtros
-  laterales, mapa central MapLibre, timeline funcional por fechas `acquired_at`,
-  detalle, procedencia/truncamiento y export CSV. Consulta `/observations` con
-  `limit=1000`; API validada en `types/api/observations.ts`.
+  laterales compactos con modo fácil/pro, mapa MapLibre, presets de cámara,
+  capas MODIS/VIIRS y timeline funcional por `acquired_at`; detalle, procedencia,
+  truncamiento y export CSV. Filtros municipio/departamento disabled por contrato.
+  Suite ahora: 22 pruebas; typecheck/lint/build pasan.
 - Analítica deriva conteos MODIS/VIIRS, FRP y recurrencia v1.0 de la colección API;
   matriz ordinal interactiva P=A×C sin perfiles geográficos inventados. Laboratorio
   señala ausencia de artefactos IA publicados. Pruebas: 20 verdes; typecheck/lint/build.
