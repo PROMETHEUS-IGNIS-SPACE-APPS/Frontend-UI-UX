@@ -3,6 +3,7 @@ import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
 import EmergencyAccess from './EmergencyAccess';
+import NoveltyReportAccess from './NoveltyReportAccess';
 import logoPng from '@/assets/PROMETHEUS_IGNIS.png';
 
 interface HeaderProps {
@@ -61,7 +62,6 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button type="button" onClick={onOpenGlossary} aria-label="Abrir glosario científico" title="Glosario científico" className="rounded-lg border border-slate-800 bg-[#0d1422] p-2 text-slate-300 transition hover:border-slate-600 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"><BookOpen className="h-4 w-4" aria-hidden /></button>
-            <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-[#111a29] px-2 py-2 font-mono text-[9px] font-semibold text-slate-200 transition hover:border-amber-600/60 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 sm:px-2.5 sm:text-[10px]"><Download className="h-3.5 w-3.5 text-amber-400" aria-hidden /><span className="hidden sm:inline">CSV ({totalVisibleCount})</span><span className="sm:hidden">CSV</span></button>
           </div>
         </div>
 
@@ -72,7 +72,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             <span className="hidden h-4 w-px bg-slate-700 sm:block" />
             <span className="whitespace-nowrap rounded-md border border-slate-700 bg-[#101827] px-2 py-1 font-mono text-[10px] text-slate-300"><span className="text-cyan-300">▤</span> Observaciones satelitales <span className="text-slate-500">({totalVisibleCount})</span></span>
           </div>
-          <div className="ml-auto flex shrink-0 items-center gap-2"><EmergencyAccess /><span className="hidden font-mono text-[10px] text-slate-500 lg:inline">VISTA TERRITORIAL</span></div>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2"><EmergencyAccess /><NoveltyReportAccess /><button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className="flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-600/60 bg-[#111a29] px-2 py-2 font-mono text-[9px] font-semibold text-slate-200 transition hover:bg-amber-950/30 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 sm:px-2.5 sm:text-[10px]"><Download className="h-3.5 w-3.5 text-amber-400" aria-hidden /><span className="hidden sm:inline">Descargar Reportes (.CSV)</span><span className="sm:hidden">CSV</span><span className="rounded-full bg-amber-950/70 px-1.5 py-0.5 text-[9px] text-amber-300">{totalVisibleCount}</span></button></div>
         </div>
       </div>
     </header>

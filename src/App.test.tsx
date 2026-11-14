@@ -61,6 +61,16 @@ describe('App shell de pestañas', () => {
     expect(activeTab).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('presenta acciones de emergencia, novedad y exportación en la barra superior', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    expect(screen.getByRole('button', { name: 'Abrir líneas de emergencia de Colombia' })).toBeInTheDocument();
+    expect(screen.getByText('Descargar Reportes (.CSV)')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Reportar una novedad territorial' }));
+    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+  });
+
   it('cambia de módulo al activar otra pestaña de escritorio', async () => {
     const user = userEvent.setup();
     renderApp();

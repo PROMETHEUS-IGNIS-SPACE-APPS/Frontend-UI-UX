@@ -98,7 +98,7 @@ La navegación actual organiza seis pestañas: Mapa Territorial, Predictibilidad
 
 #### 2.2 Componentes compartidos
 
-- **Header** (`Header.tsx`): logo con núcleo de fuego y punto cian (armonización MODIS+VIIRS), título con degradado ámbar, badge cian «MODIS · VIIRS», subtítulo institucional; navegación por pestañas (barra horizontal en escritorio, barra compacta en móvil); **indicador pasivo de conexión con el backend** (sin configuración de URL); botón de glosario; botón de exportación CSV con contador de registros visibles; acceso SOS voluntario con enlaces telefónicos nacionales 123/119, sin iniciar llamadas automáticamente. Sin conmutador de modo demostración.
+- **Header** (`Header.tsx`): logo con núcleo de fuego y punto cian (armonización MODIS+VIIRS), título con degradado ámbar, badge cian «MODIS · VIIRS», subtítulo institucional; navegación por pestañas (barra horizontal en escritorio, barra compacta en móvil); **indicador pasivo de conexión con el backend** (sin configuración de URL); botón de glosario; exportación CSV del conjunto visible con contador; acceso SOS voluntario con enlaces 123/119 y acción «Reportar Novedad». Esta última informa que el backend actual no recibe reportes ciudadanos; no simula ni almacena reportes. Sin conmutador de modo demostración.
 - **Modal Glosario** (`GlossaryModal.tsx`): 7 términos canónicos (foco de calor, MODIS vs VIIRS, FRP, confianza FIRMS, recurrencia histórica, marco UNDRR, matriz 5×5) con fuentes.
 - **Estados de UI** en toda la aplicación: carga, error de conexión, vacío, truncamiento y procedencia, siempre distinguibles entre sí.
 
