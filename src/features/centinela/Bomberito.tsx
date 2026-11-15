@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Flame, MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
+import { MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
 import { fetchCentinelaModel } from '@/services/models/centinelaModelService';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import type { CentinelaEstimate, CentinelaForecast } from '@/types/api/centinela';
@@ -12,6 +12,10 @@ interface BomberitoProps {
   /** Lleva al Mapa centrado en [lon, lat]. */
   onShowCell?: (center: [number, number]) => void;
 }
+
+const BOMBERITO_IMAGE = `${import.meta.env.BASE_URL}assets/centinela/bomberito.webp`;
+const SEEN_KEY = 'prometheus-ignis-bomberito-visto';
+const readSeen = () => { try { return globalThis.localStorage?.getItem(SEEN_KEY) === '1'; } catch { return false; } };
 
 const pct = (value: number | null | undefined) => value === null || value === undefined ? 'Datos insuficientes' : `${(value * 100).toFixed(1)} %`;
 const productLabel = (product: string) => product === 'VIIRS_NOAA20' ? 'VIIRS NOAA-20' : product;
@@ -37,6 +41,12 @@ function Estimate({ label, estimate }: { label: string; estimate: CentinelaEstim
  */
 export default function Bomberito({ observations, onShowCell }: BomberitoProps) {
   const [open, setOpen] = useState(false);
+  /** Tras la primera apertura la invitación se calma (solo un rebote suave). */
+  const [seen, setSeen] = useState(readSeen);
+  const toggle = () => {
+    setOpen((value) => !value);
+    if (!seen) { setSeen(true); try { globalThis.localStorage?.setItem(SEEN_KEY, '1'); } catch { /* sin almacenamiento */ } }
+  };
   const [cellId, setCellId] = useState('');
   const { outcome } = useBackendHealth();
   const model = useQuery({ queryKey: ['centinela-model'], queryFn: ({ signal }) => fetchCentinelaModel(signal), staleTime: Infinity, enabled: open });
@@ -56,15 +66,22 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
   const metrics = model.data?.evaluation.metrics;
 
   return <>
-    <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Abrir Bomberito Centinela" title="Bomberito Centinela" className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#CE8C67] bg-[#B9200B] text-white shadow-2xl transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:bottom-28 md:right-6">
-      <Bot className="h-7 w-7" aria-hidden />
-      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#facc15] text-[#7B3314] shadow"><Flame className="h-3 w-3" aria-hidden /></span>
-    </button>
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex items-center gap-1 md:bottom-28 md:right-6">
+      {!open && <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! Tócame</span>}
+      {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen ? 'bomberito-point--calm' : ''}`}>👉</span>}
+      <button type="button" onClick={toggle} aria-expanded={open} aria-label="Abrir Bomberito Centinela" title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
+        {!open && <span aria-hidden className={`bomberito-ring absolute inset-0 rounded-full border-4 border-[#facc15] ${seen ? 'bomberito-ring--calm' : ''}`} />}
+        <span className="absolute inset-0 overflow-hidden rounded-full border-[3px] border-[#facc15] bg-[#7B1A0C] shadow-[0_6px_16px_rgba(0,0,0,0.45)] transition-transform group-hover:scale-105 group-active:scale-95">
+          {/* Asoma la cabeza desde el borde inferior del círculo. */}
+          <img src={BOMBERITO_IMAGE} alt="" width={96} height={96} className={`bomberito-head absolute left-1/2 top-[6%] h-auto w-[150%] max-w-none [image-rendering:pixelated] ${open ? '' : 'bomberito-peek'}`} />
+        </span>
+      </button>
+    </div>
 
-    {open && <section role="dialog" aria-label="Bomberito Centinela" className="fixed inset-x-2 bottom-[calc(8.5rem+env(safe-area-inset-bottom,0px))] z-[45] flex max-h-[70dvh] flex-col overflow-hidden rounded-2xl border border-border-strong bg-card text-xs text-text-primary shadow-2xl md:inset-x-auto md:bottom-[11.5rem] md:right-6 md:w-[24rem]">
+    {open && <section role="dialog" aria-label="Bomberito Centinela" className="fixed inset-x-2 bottom-[calc(9rem+env(safe-area-inset-bottom,0px))] z-[45] flex max-h-[70dvh] flex-col overflow-hidden rounded-2xl border border-border-strong bg-card text-xs text-text-primary shadow-2xl md:inset-x-auto md:bottom-[12rem] md:right-6 md:w-[24rem]">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-[#B9200B] px-4 py-3 text-white">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><Bot className="h-5 w-5" aria-hidden /></span>
+          <img src={BOMBERITO_IMAGE} alt="" width={40} height={40} className="h-10 w-10 object-contain [image-rendering:pixelated]" />
           <div><h2 className="font-noto text-sm font-extrabold tracking-wide">BOMBERITO CENTINELA</h2><p className="text-[10px] text-white/80">Asistente del modelo CENTINELA · experimental</p></div>
         </div>
         <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar Bomberito" className="rounded-lg p-1.5 hover:bg-white/15"><X className="h-4 w-4" aria-hidden /></button>
