@@ -3,9 +3,8 @@
  * "PROMETHEUS IGNIS — Instructivo Oficial de Uso" (noviembre 2026, 14 páginas),
  * adaptado a las funciones que esta interfaz tiene realmente. Omitimos lo que no
  * existe aquí: Gemini, Open-Meteo / "+ Clima", contraseña de limpieza, DAGRAN,
- * Matriz de Riesgo 5 × 5, Diccionario Sin Enredos, modal FastAPI y las
- * infografías y el podcast de "Interpretación de los datos". Tampoco usamos la
- * cifra "más del 95 %", que no tiene fuente.
+ * Matriz de Riesgo 5 × 5, Diccionario Sin Enredos y el modal FastAPI. Tampoco
+ * usamos la cifra "más del 95 %", que no tiene fuente.
  */
 
 export type ManualBlock =
@@ -70,7 +69,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         ['3. Analítica', 'Indicadores y estadísticas del conjunto consultado.', '4.3'],
         ['4. Mapa de Calor', 'Observaciones por subregión de Antioquia; capa de probabilidad P(S1 ∪ S2) pendiente.', '4.4'],
         ['5. Calendario', 'Calendario estacional y dinámica térmica subregional.', '4.5'],
-        ['6. Aula', 'KAIRÓS, Aula Pedagógica: tres actividades complementarias (Actividad 1: 19 infografías en tres guías, cada una con su podcast; Actividad 2: Aprendizaje Basado en Problemas – ABP; Actividad 3: juego de simulación Detector de Riesgos Cotidianos).', '4.6'],
+        ['6. Aula', 'KAIRÓS, Aula Pedagógica: tres actividades complementarias (Actividad 1: 26 infografías en cuatro guías, cada una con su podcast; Actividad 2: Aprendizaje Basado en Problemas – ABP; Actividad 3: juego de simulación Detector de Riesgos Cotidianos).', '4.6'],
         ['7. Información del Proyecto', 'Laboratorio IA (modelos) y estado de las fuentes y del Backend-API.', '4.7'],
       ] },
     ],
@@ -229,7 +228,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'p', text: 'Al abrir la pestaña aparece una portada con el título KAIRÓS, Aula Pedagógica sobre un fondo ilustrado con humo en tonos naranja y café. Desplácese hacia abajo; encontrará en orden:' },
       { kind: 'steps', items: [
         'El texto introductorio Te invitamos a leer.',
-        'Actividad 1. Infografías y podcasts: saber qué hacer antes, durante y después. Tres guías con carruseles, cada una con su podcast, las reglas de lectura de los datos de PROMETHEUS IGNIS y el texto La educación como primera forma de prevención.',
+        'Actividad 1. Infografías y podcasts: saber qué hacer antes, durante y después. Cuatro guías con carruseles, cada una con su podcast, las reglas de lectura de los datos de PROMETHEUS IGNIS y el texto La educación como primera forma de prevención.',
         'Actividad 2. Aprendizaje Basado en Problemas (ABP): situaciones de la vida real presentadas en diapositivas, con desafíos para analizar, tomar decisiones y comparar soluciones.',
         'Actividad 3. Juego de simulación: Detector de Riesgos Cotidianos, pensado especialmente para niños y familias, en tres escenarios.',
         'El cierre: kronos y kairós, el momento oportuno que construye la prevención.',
@@ -237,13 +236,13 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'h', text: 'Te invitamos a leer' },
       { kind: 'p', text: 'Un texto breve que recuerda que casi todos conocemos a alguien que ha vivido un incendio de cerca: una vela olvidada en la sala, un cortocircuito silencioso detrás de un mueble, una quema de rastrojo que parecía inofensiva hasta que cambió el viento o una tarde seca en la montaña. Detrás de cada emergencia rara vez hay un evento inevitable; casi siempre hubo una señal temprana que no supimos leer a tiempo.' },
       { kind: 'h', text: 'Actividad 1. Infografías: saber qué hacer antes, durante y después (con podcasts)' },
-      { kind: 'p', text: 'Reúne 19 infografías que explican de forma clara y visual qué hacer y qué no hacer ante situaciones de riesgo de la vida cotidiana.' },
+      { kind: 'p', text: 'Reúne 26 infografías en cuatro guías que explican de forma clara y visual qué hacer y qué no hacer ante situaciones de riesgo de la vida cotidiana.' },
       { kind: 'p', text: 'Podcasts (aprendizaje visual o auditivo): cada guía tiene su propio podcast con la misma información de sus infografías. Así el contenido se puede consultar leyendo o escuchando, lo que lo hace más accesible para quienes tienen dificultades de lectura o de visión, o para quienes prefieren escuchar mientras hacen otras actividades. El reproductor tiene botón de reproducir / pausar, barra de avance y tiempo; al iniciar un podcast se detiene el que estuviera sonando.' },
       { kind: 'list', items: [
         'Guía 1 — Prevención en el hogar (7 infografías + podcast): cómo evitar incendios en la cocina, con las conexiones eléctricas o con las baterías, y cómo preparar un plan familiar de emergencia. La primera, Seguridad eléctrica y baterías de ion-litio, recomienda conectar directo a la pared los electrodomésticos de alto consumo, cargar baterías sobre superficies rígidas y ventiladas, y nunca usar multitomas en cascada ni cables pelados (Fuentes: NFPA; USFA).',
         'Guía 2 — Prevención por ecosistema (6 infografías + podcast): cómo proteger bosques, páramos y zonas rurales, qué alternativas hay a las quemas y cómo influyen el clima y el terreno. La primera, Incendios de cobertura vegetal y espacio defendible, recuerda que la mayoría de los incendios de la cobertura vegetal en Colombia se relacionan con actividades humanas y recomienda un espacio defendible alrededor de las viviendas rurales y reportar columnas de humo al 123 (Fuentes: IDEAM; UNGRD; DAGRD Medellín; Ministerio de Ambiente).',
         'Guía 3 — Prevención médica y primeros auxilios (6 infografías + podcast): cómo protegerse del humo, atender el golpe de calor y cuidar a las personas más vulnerables y a los animales. La primera, Protección respiratoria ante humo de incendios forestales, explica que las partículas finas (PM2.5) llegan a los pulmones y recomienda cerrar puertas y ventanas y usar mascarillas N95 o KN95 bien ajustadas; los tapabocas de tela no filtran el humo (Fuentes: OPS/OMS; CDC; SIATA).',
-        'Interpretación de los datos de PROMETHEUS IGNIS: siete reglas de lectura propias de la plataforma (qué significan los colores del mapa, por qué un punto de calor no es un incendio confirmado, por qué MODIS y VIIRS se leen por separado y por qué la FRP ausente es “No disponible”).',
+        'Guía 4 — Interpretación de los datos de PROMETHEUS IGNIS (7 infografías + podcast): qué significan los puntos de calor, los sensores, la FRP, el horario orbital, el motor Markov y su validación, y la participación ciudadana. Una nota de lectura advierte que algunas piezas mencionan funciones que la plataforma aún no tiene (factor de clima, matriz 5 × 5). A su lado están las siete Reglas de lectura de esta plataforma: por qué un punto de calor no es un incendio confirmado, por qué MODIS y VIIRS se leen por separado y por qué la FRP ausente es “No disponible”.',
       ] },
       { kind: 'h', text: 'Cómo se manejan las guías con infografías' },
       { kind: 'steps', items: [

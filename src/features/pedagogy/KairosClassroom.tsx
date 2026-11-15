@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
 import {
   KAIROS_CLOSING,
+  KAIROS_DATA_INFOGRAPHICS,
+  KAIROS_DATA_NOTICE,
   KAIROS_DATA_SECTION,
   KAIROS_EDUCATION_BLOCK,
   KAIROS_FOOTER_IMAGE,
@@ -23,13 +25,14 @@ const wrap = (index: number, length: number) => (index + length) % length;
 
 interface InfographicCardProps {
   section: KairosSection;
+  notice?: string;
   onExpand: (index: number) => void;
   audioActive: boolean;
   onToggleAudio: () => void;
   onAudioEnded: () => void;
 }
 
-function InfographicCard({ section, onExpand, audioActive, onToggleAudio, onAudioEnded }: InfographicCardProps) {
+function InfographicCard({ section, notice, onExpand, audioActive, onToggleAudio, onAudioEnded }: InfographicCardProps) {
   const [index, setIndex] = useState(0);
   const slide = section.slides[index];
   return <article className="flex h-full flex-col rounded-2xl bg-[#EEDFC5] p-4 sm:p-6">
@@ -51,6 +54,7 @@ function InfographicCard({ section, onExpand, audioActive, onToggleAudio, onAudi
       </div>
     </div>
     <p className="mt-1 flex-1 font-noto text-sm leading-relaxed text-[#4A2E1B] sm:text-justify">{section.description}</p>
+    {notice && <p role="note" className="mt-3 rounded-xl border border-[#D9692B]/40 bg-[#FDECCD] px-3 py-2 font-noto text-xs leading-relaxed text-[#6E3B21]"><strong className="text-[#7B3314]">Nota de lectura: </strong>{notice}</p>}
     {section.audioSrc && <PodcastPlayer src={section.audioSrc} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
   </article>;
 }
@@ -110,17 +114,29 @@ export default function KairosClassroom() {
       </div>
 
       <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-10">
-        <article className="rounded-2xl bg-[#EEDFC5] p-5 sm:p-6 lg:col-span-5">
-          <h2 className="mb-4 flex items-center gap-2 font-sans text-lg font-bold leading-snug text-[#5C260E] sm:text-xl"><Satellite className="h-5 w-5 shrink-0 text-[#D9692B]" aria-hidden />{KAIROS_DATA_SECTION.title}</h2>
-          <ul className="space-y-2.5 font-noto text-sm leading-relaxed">
-            {KAIROS_DATA_SECTION.rules.map((rule, index) => <li key={rule} className="flex gap-2.5"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#D9692B] font-source text-[11px] font-bold text-[#FDECCD]">{index + 1}</span><span>{rule}</span></li>)}
-          </ul>
-        </article>
-        <div className="flex flex-col justify-center px-1 py-2 sm:px-4 lg:col-span-7 lg:px-6">
-          <h2 className="mb-5 font-sans text-2xl font-bold leading-tight text-[#7B3314] sm:text-3xl">{KAIROS_EDUCATION_BLOCK.title}</h2>
-          <div className="max-w-2xl space-y-4 font-noto text-sm leading-relaxed sm:text-justify sm:text-base">
-            {KAIROS_EDUCATION_BLOCK.paragraphs.map((paragraph) => <p key={paragraph.slice(0, 24)}>{paragraph}</p>)}
+        <div className="lg:col-span-6">
+          <InfographicCard
+            section={KAIROS_DATA_INFOGRAPHICS}
+            notice={KAIROS_DATA_NOTICE}
+            onExpand={(index) => setLightbox({ section: KAIROS_DATA_INFOGRAPHICS, index })}
+            audioActive={activeAudioId === KAIROS_DATA_INFOGRAPHICS.id}
+            onToggleAudio={() => setActiveAudioId((current) => (current === KAIROS_DATA_INFOGRAPHICS.id ? null : KAIROS_DATA_INFOGRAPHICS.id))}
+            onAudioEnded={releaseAudio}
+          />
+        </div>
+        <div className="flex flex-col justify-center gap-8 px-1 py-2 sm:px-4 lg:col-span-6 lg:px-6">
+          <div>
+            <h2 className="mb-5 font-sans text-2xl font-bold leading-tight text-[#7B3314] sm:text-3xl">{KAIROS_EDUCATION_BLOCK.title}</h2>
+            <div className="max-w-2xl space-y-4 font-noto text-sm leading-relaxed sm:text-justify sm:text-base">
+              {KAIROS_EDUCATION_BLOCK.paragraphs.map((paragraph) => <p key={paragraph.slice(0, 24)}>{paragraph}</p>)}
+            </div>
           </div>
+          <article className="rounded-2xl bg-[#EEDFC5] p-5 sm:p-6">
+            <h2 className="mb-4 flex items-center gap-2 font-sans text-lg font-bold leading-snug text-[#5C260E]"><Satellite className="h-5 w-5 shrink-0 text-[#D9692B]" aria-hidden />{KAIROS_DATA_SECTION.title}</h2>
+            <ul className="space-y-2.5 font-noto text-sm leading-relaxed">
+              {KAIROS_DATA_SECTION.rules.map((rule, index) => <li key={rule} className="flex gap-2.5"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#D9692B] font-source text-[11px] font-bold text-[#FDECCD]">{index + 1}</span><span>{rule}</span></li>)}
+            </ul>
+          </article>
         </div>
       </div>
 

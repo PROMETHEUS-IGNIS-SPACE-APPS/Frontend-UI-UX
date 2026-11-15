@@ -2,11 +2,11 @@
  * Contenido de KAIRÓS, Aula Pedagógica (portado de la carpeta `ejemplo`).
  * Las infografías viven en `public/assets/kairos` convertidas a WebP.
  *
- * No se portan las 7 infografías de "Interpretación de los datos" del ejemplo:
- * describen funciones que esta plataforma aún no tiene (motor Markov en vivo,
- * reportes ciudadanos en el mapa, validación del modelo) o afirman que una
- * detección nocturna "confirma" combustión, lo que contradice la regla de que
- * una observación satelital no confirma un incendio.
+ * Guía 4 "Interpretación de los datos" (7 infografías + podcast) restaurada por
+ * decisión del usuario (2026-11-15), igual que en el ejemplo. Algunas piezas
+ * mencionan funciones que esta plataforma no tiene (factor clima, matriz 5 × 5)
+ * o afirman que una detección nocturna "confirma" combustión; por eso la tarjeta
+ * lleva KAIROS_DATA_NOTICE y conserva al lado las reglas de lectura propias.
  */
 
 export interface KairosSlide {
@@ -83,16 +83,34 @@ export const KAIROS_SECTIONS: KairosSection[] = [
   },
 ];
 
+export const KAIROS_DATA_INFOGRAPHICS: KairosSection = {
+  id: 'datos',
+  title: '4. Interpretación de los datos de PROMETHEUS IGNIS',
+  description: 'Leer un visor satelital con rigor significa distinguir qué mide cada sensor y qué limitaciones tiene. VIIRS (~375 m) y MODIS (~1 km) detectan anomalías térmicas según sus pasos orbitales diurnos y nocturnos y la presencia de nubes; la Potencia Radiativa del Fuego (FRP, en MW) diferencia eventos moderados (S1) de focos intensos (S2 ≥ 30 MW); el motor Markov 3×3 estima probabilidades que se auditan con Brier Skill Score y ROC-AUC; y el reporte ciudadano complementa la vigilancia sin reemplazar jamás la llamada inmediata al 123.',
+  audioSrc: podcast('datos'),
+  slides: [
+    { id: 'datos-1', title: 'Lectura de puntos de calor satelitales', imageSrc: img('datos-puntos-calor') },
+    { id: 'datos-2', title: 'Motor predictivo Markov', imageSrc: img('datos-motor-markov') },
+    { id: 'datos-3', title: 'Potencia radiativa del fuego', imageSrc: img('datos-potencia-radiativa') },
+    { id: 'datos-4', title: 'Horario orbital', imageSrc: img('datos-horario-orbital') },
+    { id: 'datos-5', title: 'Ranking territorial y vecindad', imageSrc: img('datos-ranking-territorial') },
+    { id: 'datos-6', title: 'Validación científica del modelo', imageSrc: img('datos-validacion-modelo') },
+    { id: 'datos-7', title: 'Participación ciudadana', imageSrc: img('datos-participacion-ciudadana') },
+  ],
+};
+
+export const KAIROS_DATA_NOTICE = 'Algunas piezas de esta guía mencionan funciones que la plataforma todavía no tiene (factor de clima, matriz de riesgo 5 × 5). Una detección nocturna indica calor persistente, pero ningún punto satelital confirma por sí solo un incendio: use las reglas de lectura de esta página.';
+
 /** Reglas de lectura de esta plataforma (texto propio, coherente con PROJECT_CONTEXT). */
 export const KAIROS_DATA_SECTION = {
-  title: 'Interpretación de los datos de PROMETHEUS IGNIS',
+  title: 'Reglas de lectura de esta plataforma',
   rules: [
     'Puntos rojos: observaciones VIIRS (~375 m). Puntos amarillos: MODIS (~1 km). Naranja: FRP informada ≥ 30 MW.',
     'Una observación satelital es una anomalía térmica: por sí sola no confirma un incendio ni un evento independiente.',
     'Los conteos de MODIS y VIIRS se leen por separado; más detecciones no significan necesariamente más incendios.',
     'La FRP (MW) mide la energía radiativa en el momento del paso. Si falta, se muestra “No disponible”, nunca 0.',
     'Las nubes, el humo y el horario orbital pueden ocultar actividad: la ausencia de puntos no prueba ausencia de fuego.',
-    'Las probabilidades Markov aparecerán solo cuando el AI-Pipeline publique un modelo evaluado.',
+    'Las probabilidades Markov son una estimación exploratoria de actividad térmica: léalas siempre junto con su validación retrospectiva.',
     'Ante una emergencia real, llama al 123. El mapa es contexto, no un sistema de alerta.',
   ],
 };

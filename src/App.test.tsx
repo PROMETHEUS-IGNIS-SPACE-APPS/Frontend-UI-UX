@@ -180,7 +180,8 @@ describe('App shell de pestañas', () => {
 
     expect(screen.getByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '1. Prevención en el hogar' })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /^Reproducir podcast de/ })).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /^Reproducir podcast de/ })).toHaveLength(4);
+    expect(screen.getByRole('heading', { name: '4. Interpretación de los datos de PROMETHEUS IGNIS' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Aprendizaje Basado en Problemas (ABP)' })).toBeInTheDocument();
     expect(screen.getByText('1 / 36')).toBeInTheDocument();
     expect(screen.queryByText('Actividades interactivas')).not.toBeInTheDocument();
