@@ -84,14 +84,14 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
       <button type="button" aria-pressed={advanced} onClick={() => setAdvanced(true)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${advanced ? 'bg-accent-solid text-accent-fg shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}><SlidersHorizontal className="h-3.5 w-3.5" />Filtros Pro</button>
     </div>
 
-    <section className="space-y-1.5">
+    <section className="space-y-1.5 rounded-xl border border-border bg-surface p-3">
       <h2 className="font-noto text-xs font-bold text-text-primary">Categorías Visuales (PROMETHEUS):</h2>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         {CATEGORY_ITEMS.map((item) => <label key={item.key} className="flex cursor-pointer items-center gap-2 py-1">
           <input type="checkbox" checked={props.categories[item.key]} onChange={() => props.onToggleCategory(item.key)} aria-label={`Mostrar ${item.label}`} className="accent-accent" />
           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-border-strong ${item.color}`} aria-hidden />
-          <span className="font-medium text-text-primary">{item.label}</span>
-          <span className="ml-auto font-source text-[10px] text-text-secondary">{props.categoryCounts[item.key].toLocaleString()}</span>
+          <span className="whitespace-nowrap font-medium text-text-primary">{item.label}</span>
+          <span className="ml-auto pl-1 font-source text-[10px] text-text-secondary">{props.categoryCounts[item.key].toLocaleString()}</span>
         </label>)}
       </div>
       <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS.</p>
@@ -134,28 +134,28 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
       {props.degradedMode && <p className="mt-2 text-[11px] leading-4 text-text-primary">La fuente remota no respondió; se muestran datos de caché auténticos.</p>}
     </section>
 
-    <section className="space-y-2 border-t border-border pt-3">
+    <section className="space-y-2 rounded-xl border border-border bg-surface p-3">
       <h2 className="font-noto text-xs font-bold text-text-primary">Sensor</h2>
       <div className="grid grid-cols-3 gap-1 rounded-lg bg-input-bg p-1" aria-label="Filtrar por sensor">
-        {(['ALL', 'VIIRS', 'MODIS'] as const).map((item) => <button key={item} type="button" onClick={() => props.onSensorChange(item)} aria-pressed={props.sensor === item} className={`rounded-md px-2 py-2 text-[11px] font-semibold transition ${props.sensor === item ? 'bg-surface-hover text-white ring-1 ring-border-strong' : 'text-text-secondary hover:text-text-primary'}`}>{item === 'ALL' ? 'Todos' : item}</button>)}
+        {(['ALL', 'VIIRS', 'MODIS'] as const).map((item) => <button key={item} type="button" onClick={() => props.onSensorChange(item)} aria-pressed={props.sensor === item} className={`rounded-md px-2 py-2 text-[11px] font-semibold transition ${props.sensor === item ? 'bg-accent-solid text-accent-fg shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>{item === 'ALL' ? 'Todos' : item}</button>)}
       </div>
     </section>
 
-    <section className="space-y-2 border-t border-border pt-3">
+    <section className="space-y-2 rounded-xl border border-border bg-surface p-3">
       <h2 className="font-noto text-xs font-bold text-text-primary">Ubicación</h2>
       <label className="flex items-center gap-2 rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-secondary"><Search className="h-3.5 w-3.5" /><input value={props.municipalitySearch} onChange={(event) => props.onMunicipalitySearchChange(event.target.value)} aria-label="Buscar por municipio" placeholder="Buscar municipio..." className="min-w-0 flex-1 bg-transparent text-[11px] text-text-primary outline-none placeholder:text-text-secondary" /></label>
       <label className="block space-y-1 text-[11px] text-text-secondary">Departamento<select aria-label="Departamento" value={props.department} onChange={(event) => props.onDepartmentChange(event.target.value)} className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary"><option value="ALL">Todos los departamentos</option>{departments.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
       <label className="block space-y-1 text-[11px] text-text-secondary">Municipio<select aria-label="Municipio" value={props.municipality} onChange={(event) => props.onMunicipalityChange(event.target.value)} className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary"><option value="ALL">Todos los municipios</option>{municipalities.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
     </section>
 
-    {advanced && <section className="space-y-3 border-t border-border pt-3">
+    {advanced && <section className="space-y-3 rounded-xl border border-border bg-surface p-3">
       <h2 className="font-noto text-xs font-bold text-text-primary">Filtros adicionales</h2>
       <label className="block space-y-1 text-[11px] text-text-secondary">FRP mínima (MW)<input type="number" min="0" step="0.1" value={props.minimumFrp} onChange={(event) => props.onMinimumFrpChange(event.target.value)} placeholder="Sin mínimo" className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary placeholder:text-text-secondary" /><span className="block text-[11px] text-text-secondary">Las observaciones sin FRP no coinciden con un mínimo.</span></label>
       <label className="block space-y-1 text-[11px] text-text-secondary">Confianza original<select aria-label="Confianza original" value={props.confidenceRaw} onChange={(event) => props.onConfidenceRawChange(event.target.value)} className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary"><option value="ALL">Todas las categorías</option>{confidenceValues.map((value) => <option key={value} value={value}>{value}</option>)}</select><span className="block text-[11px] text-text-secondary">Filtro exacto del valor de origen; no armoniza escalas.</span></label>
       <fieldset><legend className="mb-1 text-[11px] text-text-secondary">Paso orbital</legend><div className="grid grid-cols-3 gap-1">{([{ key: 'ALL', label: 'Todos' }, { key: 'D', label: 'Día' }, { key: 'N', label: 'Noche' }] as const).map(({ key, label }) => <button key={key} type="button" aria-pressed={props.daynight === key} onClick={() => props.onDaynightChange(key)} className={`rounded-md px-2 py-1.5 text-[11px] font-semibold ${props.daynight === key ? 'bg-info-soft text-info' : 'bg-input-bg text-text-secondary hover:text-text-primary'}`}>{label}</button>)}</div></fieldset>
     </section>}
 
-    <div className="mt-auto border-t border-border pt-3 text-[11px] leading-4 text-text-secondary"><p className="font-semibold text-text-secondary">Lectura de los datos</p><p className="mt-1">Una observación no equivale necesariamente a un incendio independiente. Los conteos se mantienen separados por sensor.</p></div>
+    <div className="mt-auto rounded-xl border border-border bg-surface p-3 text-[11px] leading-4 text-text-secondary"><p className="font-semibold text-text-secondary">Lectura de los datos</p><p className="mt-1">Una observación no equivale necesariamente a un incendio independiente. Los conteos se mantienen separados por sensor.</p></div>
     </div>
   </aside>;
 }
