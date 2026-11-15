@@ -21,6 +21,7 @@ import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
 import CartographicGuideModal from '@/features/explorer/CartographicGuideModal';
+import Bomberito from '@/features/centinela/Bomberito';
 import TimelineControls from '@/features/explorer/TimelineControls';
 import { DEFAULT_MAP_LAYERS, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, observationCategory, type MapFocusPreset, type MapLayerState, type MapStylePreset } from '@/features/explorer/mapPresets';
 import type { SourcePreset } from '@/features/explorer/ExplorerSidebar';
@@ -264,6 +265,7 @@ export default function App() {
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
       </main>
+      <Bomberito observations={allObservations} onShowCell={(center) => { setFocusTarget({ id: `centinela-${center.join(',')}`, label: 'Celda CENTINELA', center, zoom: 9.5 }); setSelected(null); setActiveModule('explorer'); }} />
       <CartographicGuideModal isOpen={isCartoGuideOpen} onClose={() => setIsCartoGuideOpen(false)} onOpenGlossary={() => setIsGlossaryOpen(true)} />
       <GlossaryModal isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
     </div>

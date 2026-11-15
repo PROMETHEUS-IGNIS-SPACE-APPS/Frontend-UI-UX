@@ -339,6 +339,13 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     ],
   },
   {
+    id: 'bomberito', level: 2, title: '5.6 Bomberito Centinela (asistente del modelo)', blocks: [
+      { kind: 'p', text: 'Botón flotante con un robot bombero, disponible en todas las pestañas. Presenta el modelo CENTINELA v0.1.0 del AI-Pipeline: cadena de Markov mensual por celdas de 0,25° sobre Antioquia, entrenada con 1.469.158 observaciones reales de NASA FIRMS (MODIS 2001–2025 y VIIRS NOAA-20 2018–2025).' },
+      { kind: 'list', items: ['Estado: fecha del último entrenamiento, conexión con el Backend-API y datos de entrenamiento.', 'Detecciones recientes del conjunto cargado.', 'Celdas con frecuencia histórica elevada (≥ 50 % con al menos 12 meses conocidos).', 'Consulta de una celda: estimación del próximo mes, nueva actividad P(1|0), persistencia P(1|1) con intervalo creíble del 95 %, frecuencia histórica y cobertura. Botón Ver en mapa.', 'Evaluación: Brier del modelo frente a la frecuencia histórica y la frecuencia por mes del año.'] },
+      { kind: 'warn', text: 'Importante / Rigor científico: es una probabilidad experimental de detección térmica, no de incendio, y no es una alerta oficial ni una orden de evacuación. El modelo mejora a la frecuencia simple pero no a la frecuencia estacional; para noviembre de 2026 indica «datos insuficientes» por falta de cobertura reciente.' },
+    ],
+  },
+  {
     id: 'notas', level: 1, title: 'Notas finales', blocks: [
       { kind: 'list', items: [
         'Un foco de calor satelital es una anomalía térmica, no un incendio confirmado.',
