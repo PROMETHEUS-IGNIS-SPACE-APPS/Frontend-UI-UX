@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
-import { fetchCentinelaModel } from '@/services/models/centinelaModelService';
+import { cellCenter as centerOf, cellName, pctOrUnknown, productLabel, useCentinelaModel } from './centinelaFormat';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import { useUiStore } from '@/stores/uiStore';
-import type { CentinelaEstimate, CentinelaForecast } from '@/types/api/centinela';
+import type { CentinelaEstimate } from '@/types/api/centinela';
 import type { Observation } from '@/types/api/observations';
-import { nearestReferenceName } from '@/utils/subregions';
 
 interface BomberitoProps {
   observations: Observation[];
@@ -18,14 +16,7 @@ const BOMBERITO_IMAGE = `${import.meta.env.BASE_URL}assets/centinela/bomberito.w
 const SEEN_KEY = 'prometheus-ignis-bomberito-visto';
 const readSeen = () => { try { return globalThis.localStorage?.getItem(SEEN_KEY) === '1'; } catch { return false; } };
 
-const pct = (value: number | null | undefined) => value === null || value === undefined ? 'Datos insuficientes' : `${(value * 100).toFixed(1)} %`;
-const productLabel = (product: string) => product === 'VIIRS_NOAA20' ? 'VIIRS NOAA-20' : product;
-const centerOf = (forecast: CentinelaForecast): [number, number] => [(forecast.bounds[0] + forecast.bounds[2]) / 2, (forecast.bounds[1] + forecast.bounds[3]) / 2];
-function cellName(forecast: CentinelaForecast) {
-  const [lon, lat] = centerOf(forecast);
-  const near = nearestReferenceName(lat, lon);
-  return `${near ? `Cerca de ${near}` : 'Celda'} (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
-}
+const pct = pctOrUnknown;
 
 function Estimate({ label, estimate }: { label: string; estimate: CentinelaEstimate }) {
   return <div className="rounded-lg border border-border bg-surface p-2">
@@ -52,7 +43,7 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
   // En el Mapa se eleva para no tapar la línea de tiempo; en los demás módulos queda en la esquina.
   const onMap = useUiStore((state) => state.activeModule) === 'explorer';
   const { outcome } = useBackendHealth();
-  const model = useQuery({ queryKey: ['centinela-model'], queryFn: ({ signal }) => fetchCentinelaModel(signal), staleTime: Infinity, enabled: open });
+  const model = useCentinelaModel(open);
 
   useEffect(() => {
     if (!open) return undefined;

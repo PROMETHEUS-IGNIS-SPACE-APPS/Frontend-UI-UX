@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, BarChart3, FileDown, FlaskConical, Info, MapPin, ShieldCheck, TrendingUp } from 'lucide-react';
 import PredictabilityReport from './PredictabilityReport';
+import AlarmitaCentinelaPanel from '@/features/centinela/AlarmitaCentinelaPanel';
 import { AiInterpretButton, AiInterpretationPanel } from '@/components/common/AiInterpretation';
 import { useAiInterpretation } from '@/hooks/useAiInterpretation';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
@@ -71,6 +72,9 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
     <AiInterpretationPanel ai={ai} />
     {reportOpen && <PredictabilityReport result={result} provenance={provenance} onClose={() => setReportOpen(false)} aiReading={ai.data ?? null} />}
 
+    <AlarmitaCentinelaPanel onShowCell={onShowCell} />
+
+    <h2 className="pt-2 font-noto text-base font-bold text-text-primary">Estimación exploratoria con los datos cargados</h2>
     <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning-soft p-4 text-text-primary">
       <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
       <div className="space-y-1 text-xs leading-relaxed">

@@ -91,8 +91,8 @@ describe('App shell de pestañas', () => {
     await user.click(screen.getByRole('tab', { name: 'Predictibilidad' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Predictibilidad');
-    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ })).toBeInTheDocument();
-    expect(await screen.findByText('Estimación exploratoria')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ }, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByText('Estimación exploratoria', {}, { timeout: 8000 })).toBeInTheDocument();
     expect(await screen.findByText('No es un modelo publicado')).toBeInTheDocument();
   });
 

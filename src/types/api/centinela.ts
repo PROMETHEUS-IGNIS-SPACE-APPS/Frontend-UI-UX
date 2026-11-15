@@ -43,6 +43,7 @@ export interface CentinelaModel {
   model_version: string;
   model_id: string;
   trained_at: string;
+  source_commit?: string;
   observations: number;
   sources_count: number;
   sources_products: string[];

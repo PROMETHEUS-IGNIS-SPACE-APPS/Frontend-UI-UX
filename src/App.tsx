@@ -79,8 +79,9 @@ export default function App() {
   const citizenReports = useCitizenReportsStore((state) => state.reports);
   const toggleReportStatus = useCitizenReportsStore((state) => state.toggleStatus);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [citizenStatus, setCitizenStatus] = useState<'ALL' | 'verificado' | 'pendiente'>('ALL');
   const selectedReport = citizenReports.find((report) => report.id === selectedReportId) ?? null;
-  const mapReports = useMemo(() => citizenReports.map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports]);
+  const mapReports = useMemo(() => citizenReports.filter((report) => citizenStatus === 'ALL' || (report.status ?? 'pendiente') === citizenStatus).map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports, citizenStatus]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const dataMode = useUiStore((state) => state.dataMode);
@@ -214,7 +215,9 @@ export default function App() {
                 categoryCounts={categoryCounts}
                 onToggleCategory={toggleMapLayer}
                 onApplySourcePreset={applySourcePreset}
-                onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
+                citizenStatus={citizenStatus}
+                onCitizenStatusChange={setCitizenStatus}
+                onReset={() => { setCitizenStatus('ALL'); setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
               />}
 
               <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background lg:min-h-0">

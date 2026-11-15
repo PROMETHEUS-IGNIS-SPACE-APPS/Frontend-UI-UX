@@ -37,6 +37,9 @@ interface ExplorerSidebarProps {
   sampling?: ObservationSamplingInfo;
   isTruncated: boolean;
   onReset: () => void;
+  /** Estado de los reportes ciudadanos visibles en el mapa (marca local Verificado/Pendiente). */
+  citizenStatus?: 'ALL' | 'verificado' | 'pendiente';
+  onCitizenStatusChange?: (value: 'ALL' | 'verificado' | 'pendiente') => void;
   categories: Pick<MapLayerState, 'viirs' | 'modis' | 'highIntensity' | 'citizen'>;
   categoryCounts: Record<'viirs' | 'modis' | 'highIntensity' | 'citizen', number>;
   onToggleCategory: (key: 'viirs' | 'modis' | 'highIntensity' | 'citizen') => void;
@@ -154,6 +157,7 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
       <label className="block space-y-1 text-[11px] text-text-secondary">FRP mínima (MW)<input type="number" min="0" step="0.1" value={props.minimumFrp} onChange={(event) => props.onMinimumFrpChange(event.target.value)} placeholder="Sin mínimo" className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary placeholder:text-text-secondary" /><span className="block text-[11px] text-text-secondary">Las observaciones sin FRP no coinciden con un mínimo.</span></label>
       <label className="block space-y-1 text-[11px] text-text-secondary">Confianza original<select aria-label="Confianza original" value={props.confidenceRaw} onChange={(event) => props.onConfidenceRawChange(event.target.value)} className="w-full rounded-xl border border-border-strong bg-input-bg px-3 py-2 text-text-primary"><option value="ALL">Todas las categorías</option>{confidenceValues.map((value) => <option key={value} value={value}>{value}</option>)}</select><span className="block text-[11px] text-text-secondary">Filtro exacto del valor de origen; no armoniza escalas.</span></label>
       <fieldset><legend className="mb-1 text-[11px] text-text-secondary">Paso orbital</legend><div className="grid grid-cols-3 gap-1">{([{ key: 'ALL', label: 'Todos' }, { key: 'D', label: 'Día' }, { key: 'N', label: 'Noche' }] as const).map(({ key, label }) => <button key={key} type="button" aria-pressed={props.daynight === key} onClick={() => props.onDaynightChange(key)} className={`rounded-md px-2 py-1.5 text-[11px] font-semibold ${props.daynight === key ? 'bg-info-soft text-info' : 'bg-input-bg text-text-secondary hover:text-text-primary'}`}>{label}</button>)}</div></fieldset>
+      {props.onCitizenStatusChange && <fieldset><legend className="mb-1 text-[11px] text-text-secondary">Estado reportes ciudadanos</legend><div className="grid grid-cols-3 gap-1">{([{ key: 'ALL', label: 'Todos' }, { key: 'verificado', label: 'Verif.' }, { key: 'pendiente', label: 'Pend.' }] as const).map((option) => <button key={option.key} type="button" aria-pressed={(props.citizenStatus ?? 'ALL') === option.key} onClick={() => props.onCitizenStatusChange?.(option.key)} className={`rounded-md px-2 py-1.5 text-[11px] font-semibold transition ${(props.citizenStatus ?? 'ALL') === option.key ? 'bg-accent-solid text-accent-fg' : 'border border-border text-text-secondary hover:text-text-primary'}`}>{option.label}</button>)}</div></fieldset>}
     </section>}
 
     <div className="mt-auto rounded-xl border border-border bg-surface p-3 text-[11px] leading-4 text-text-secondary"><p className="font-semibold text-text-secondary">Lectura de los datos</p><p className="mt-1">Una observación no equivale necesariamente a un incendio independiente. Los conteos se mantienen separados por sensor.</p></div>
