@@ -1,4 +1,4 @@
-import { Activity, BookOpen, CalendarDays, Download, HeartHandshake, Info, Layers, Moon, Radar, Satellite, Sun, TrendingUp } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Download, HeartHandshake, Info, Layers, Moon, Radar, Sun, TrendingUp } from 'lucide-react';
 import { useUiStore } from '@/stores/uiStore';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
@@ -56,7 +56,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
   const toggleTheme = useUiStore((state) => state.toggleTheme);
   const canExport = totalVisibleCount > 0;
   const exportTitle = canExport
-    ? `Exportar ${totalVisibleCount} registros filtrados a CSV`
+    ? `Descargar las ${totalVisibleCount} observaciones satelitales visibles en un archivo .CSV`
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
 
   return (
@@ -96,20 +96,17 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             <div className="hidden items-center gap-1 overflow-x-auto md:flex lg:hidden">{renderTabs('mobile')}</div>
             <ConnectionIndicator />
             <LocalCsvAccess />
-            <span className={`${SMALL_BUTTON.replace('inline-flex ', '')} hidden bg-card text-text-primary sm:inline-flex`}>
-              <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
-              <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>
-            </span>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5 sm:flex-wrap">
-            <EmergencyAccess />
-            <NoveltyReportAccess />
             <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
               <Download className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
-              <span className="hidden sm:inline">Descargar Reportes (.CSV)</span>
-              <span className="sm:hidden">CSV</span>
-              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount}</span>
+              <span className="hidden sm:inline">Descargar observaciones (.CSV)</span>
+              <span className="sm:hidden">Descargar</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount.toLocaleString()}</span>
             </button>
+          </div>
+          <div role="group" aria-label="Emergencias" className="order-first flex shrink-0 items-center gap-1.5 sm:order-none sm:flex-wrap sm:border-l sm:border-border sm:pl-2">
+            <span className="hidden font-source text-[10px] font-bold uppercase tracking-wider text-text-secondary xl:inline">Emergencias</span>
+            <EmergencyAccess />
+            <NoveltyReportAccess />
           </div>
         </div>
       </div>

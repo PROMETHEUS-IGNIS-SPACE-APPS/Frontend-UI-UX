@@ -66,7 +66,7 @@ describe('App shell de pestañas', () => {
     renderApp();
 
     expect(screen.getByRole('button', { name: 'Abrir líneas de emergencia de Colombia' })).toBeInTheDocument();
-    expect(screen.getByText('Descargar Reportes (.CSV)')).toBeInTheDocument();
+    expect(screen.getByText('Descargar observaciones (.CSV)')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Reportar una novedad territorial' }));
     expect(screen.getByRole('dialog', { name: 'Reportar Novedad de Incendio Forestal' })).toBeInTheDocument();
   });

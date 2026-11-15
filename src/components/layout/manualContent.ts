@@ -36,7 +36,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         ['Conocer el estado de los modelos de probabilidad', 'Pestañas Predictibilidad y Mapa de Calor (apartados 4.2 y 4.4)'],
         ['Revisar estadísticas, meses y épocas del año', 'Pestañas Analítica y Calendario (apartados 4.3 y 4.5)'],
         ['Entender una palabra técnica', 'Glosario Científico (apartado 5.1)'],
-        ['Descargar información', 'Descargar Reportes (.CSV) (3.3) y Exportar consulta CSV (4.3)'],
+        ['Descargar información', 'Descargar observaciones (.CSV) (3.3) y Exportar consulta CSV (4.3)'],
         ['Conocer los modelos, las fuentes y las conexiones', 'Pestaña Información del Proyecto (apartado 4.7)'],
       ] },
       { kind: 'p', text: 'A lo largo del documento encontrará dos tipos de recuadros:' },
@@ -76,7 +76,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'barra', level: 1, title: '3. Barra superior: funciones globales y herramientas rápidas', blocks: [
-      { kind: 'p', text: 'La barra superior está disponible en todas las pestañas. Se compone de la identidad, los controles superiores derechos y una fila inferior de controles de datos y emergencias.' },
+      { kind: 'p', text: 'La barra superior está disponible en todas las pestañas. Se compone de la identidad, los controles superiores derechos y una fila inferior con dos grupos: a la izquierda los datos (estado del Backend, archivos .CSV y descarga de observaciones) y a la derecha las emergencias (123 SOS y Reportar Novedad).' },
     ],
   },
   {
@@ -113,8 +113,8 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'h', text: 'Botón 123 SOS' },
       { kind: 'list', items: ['Abre las líneas de emergencia con marcación directa (apartado 5.2).'] },
       { kind: 'h', text: 'Botón Reportar Novedad' },
-      { kind: 'list', items: ['Abre el formulario de 5 secciones para preparar un reporte y compartirlo (apartado 5.3).'] },
-      { kind: 'h', text: 'Descargar Reportes (.CSV)' },
+      { kind: 'list', items: ['Abre el formulario de 5 secciones para preparar un reporte de lo que usted ve en el territorio y compartirlo (apartado 5.3). No descarga ni guarda nada.'] },
+      { kind: 'h', text: 'Descargar observaciones (.CSV)' },
       { kind: 'list', items: ['El contador indica cuántas observaciones están visibles con los filtros actuales.', 'Descarga esas observaciones en un archivo .CSV, con su procedencia, confianza original y FRP (vacía cuando no está disponible).'] },
     ],
   },
