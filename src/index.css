@@ -395,3 +395,22 @@
 @media (prefers-reduced-motion: reduce) {
   .kairos-sun { animation: none; transition: none; }
 }
+
+/* Bomberito Centinela: asoma la cabeza dentro del círculo y una mano señala el botón. */
+@keyframes bomberito-peek { 0%, 8% { transform: translate(-50%, 38%); } 22%, 72% { transform: translate(-50%, 0); } 78% { transform: translate(-50%, -4%) rotate(-4deg); } 84% { transform: translate(-50%, 0) rotate(3deg); } 92%, 100% { transform: translate(-50%, 38%); } }
+@keyframes bomberito-point { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+@keyframes bomberito-ring { 0% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes bomberito-bubble { 0%, 15% { opacity: 0; transform: translateX(8px) scale(0.9); } 22%, 75% { opacity: 1; transform: translateX(0) scale(1); } 85%, 100% { opacity: 0; transform: translateX(8px) scale(0.9); } }
+.bomberito-head { transform: translate(-50%, 0); }
+.bomberito-peek { animation: bomberito-peek 4.5s ease-in-out infinite; }
+.bomberito-point { animation: bomberito-point 0.9s ease-in-out infinite; }
+.bomberito-point--calm { display: none; }
+.bomberito-ring { animation: bomberito-ring 1.8s ease-out infinite; }
+.bomberito-ring--calm { animation-duration: 4s; }
+.bomberito-bubble { animation: bomberito-bubble 4.5s ease-in-out infinite; }
+.bomberito-bubble--calm { animation-duration: 12s; }
+@media (prefers-reduced-motion: reduce) {
+  .bomberito-peek, .bomberito-point, .bomberito-ring { animation: none; }
+  .bomberito-peek { transform: translate(-50%, 0); }
+  .bomberito-bubble { animation: none; opacity: 1; }
+}

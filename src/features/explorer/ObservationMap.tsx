@@ -143,8 +143,9 @@ function addDataLayers(map: MapLibreMap, observations: Observation[], cells: Map
   }
   if (!map.getSource('markov-cells')) {
     map.addSource('markov-cells', { type: 'geojson', data: cellCollection(cells) });
-    map.addLayer({ id: 'markov-cells', type: 'fill', source: 'markov-cells', paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.55 } });
-    map.addLayer({ id: 'markov-cells-line', type: 'line', source: 'markov-cells', paint: { 'line-color': ['get', 'color'], 'line-width': 1, 'line-opacity': 0.95 } });
+    // Celdas Markov en morado (como el ejemplo): no se confunden con VIIRS/MODIS; la intensidad crece con P(S1 ∪ S2).
+    map.addLayer({ id: 'markov-cells', type: 'fill', source: 'markov-cells', paint: { 'fill-color': '#8b5cf6', 'fill-opacity': ['interpolate', ['linear'], ['get', 'p'], 0, 0.1, 0.15, 0.18, 0.3, 0.3, 0.5, 0.45, 0.7, 0.6] } });
+    map.addLayer({ id: 'markov-cells-line', type: 'line', source: 'markov-cells', paint: { 'line-color': '#6d28d9', 'line-width': 0.8, 'line-opacity': 0.7 } });
     map.addSource('markov-centroids', { type: 'geojson', data: centroidCollection(cells) });
     // Mancha difuminada por celda con el color de SU probabilidad (sin sumar densidades,
     // para que muchas celdas al 20 % no aparezcan rojas como si fueran >70 %).

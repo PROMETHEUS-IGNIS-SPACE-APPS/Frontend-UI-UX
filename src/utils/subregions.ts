@@ -87,6 +87,17 @@ export function locationLabel(item: { municipality?: string | null; latitude?: n
   return isNearReference(item) ? item.municipality : 'Sin municipio cercano';
 }
 
+/** Municipio de referencia más cercano a un punto (≤ 50 km), o null. */
+export function nearestReferenceName(latitude: number, longitude: number): string | null {
+  let best: { name: string; km: number } | null = null;
+  for (const [key, [lat, lon]] of Object.entries(REFERENCE_COORDS)) {
+    const km = haversineKm(latitude, longitude, lat, lon);
+    if (!best || km < best.km) best = { name: key, km };
+  }
+  if (!best || best.km > MAX_REFERENCE_DISTANCE_KM) return null;
+  return best.name.replace(/(^|\s)\p{L}/gu, (match) => match.toUpperCase());
+}
+
 export function resolveSubregion(observation: Pick<Observation, 'municipality' | 'department'> & { latitude?: number; longitude?: number }): SubregionId | null {
   if (observation.department && observation.department !== 'Antioquia') return null;
   if (!isNearReference(observation)) return null;

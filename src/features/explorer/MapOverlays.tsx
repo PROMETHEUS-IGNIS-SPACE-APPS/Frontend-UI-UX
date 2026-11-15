@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Activity, ChevronDown, ChevronUp, Compass, Flame, Globe, HelpCircle, Layers, Map as MapIcon, Moon, Mountain, Sparkles, Sun } from 'lucide-react';
-import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, PROBABILITY_SCALE, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
+import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, MARKOV_PURPLE_SCALE, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
   focusId: string;
@@ -85,7 +85,7 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
             </div>
             {markovNote
               ? <p className="rounded-md border border-warning/40 bg-warning-soft px-2 py-1 text-[10px] leading-tight text-warning">{markovNote}</p>
-              : <p className="text-[10px] leading-tight text-text-secondary">Estimación exploratoria con los datos cargados (no es un modelo publicado). Toca una zona de color para ver la celda.</p>}
+              : <p className="text-[10px] leading-tight text-text-secondary">Estimación exploratoria con los datos cargados (no es un modelo publicado). Celdas moradas: más intenso = mayor probabilidad. Toca una celda para ver sus valores.</p>}
           </>}
         </div>
       </div>}
@@ -102,7 +102,7 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
       </div>
       {layers.markov && !markovNote && <div className="flex items-center gap-2 border-t border-border pt-1.5">
         <span className="font-bold text-predictive">P(S1 ∪ S2)</span>
-        {PROBABILITY_SCALE.map((step) => <span key={step.label} className="flex items-center gap-1"><span className="inline-block h-2.5 w-4 rounded-xs" style={{ backgroundColor: step.color }} /><span className="text-text-secondary">{step.label}</span></span>)}
+        {MARKOV_PURPLE_SCALE.map((step) => <span key={step.label} className="flex items-center gap-1"><span className="inline-block h-2.5 w-4 rounded-xs border border-[#6d28d9]" style={{ backgroundColor: `rgba(139, 92, 246, ${step.opacity})` }} /><span className="text-text-secondary">{step.label}</span></span>)}
       </div>}
     </div>
   </>;

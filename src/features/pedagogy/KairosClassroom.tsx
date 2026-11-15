@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
 import {
   KAIROS_CLOSING,
   KAIROS_DATA_INFOGRAPHICS,
@@ -13,7 +13,9 @@ import {
   KAIROS_SUN_MESSAGE,
   KAIROS_WIDE_SLIDES,
   type KairosSection,
+  type KairosSlide,
 } from './kairosContent';
+import FullscreenSlideshow from './FullscreenSlideshow';
 import ExploreHint from './ExploreHint';
 import PodcastPlayer from './PodcastPlayer';
 import RiskDetectorGame from './RiskDetectorGame';
@@ -54,7 +56,7 @@ function InfographicCard({ section, onExpand, audioActive, onToggleAudio, onAudi
       </div>
     </div>
     <p className="mt-1 flex-1 font-noto text-sm leading-relaxed text-[#4A2E1B] sm:text-justify">{section.description}</p>
-    {section.audioSrc && <PodcastPlayer src={section.audioSrc} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
+    {section.audioSrc && <PodcastPlayer src={section.audioSrc} knownDuration={section.audioDurationSec} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
   </article>;
 }
 
@@ -88,6 +90,8 @@ export default function KairosClassroom() {
   const [footerFailed, setFooterFailed] = useState(false);
   const [wideIndex, setWideIndex] = useState(0);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const [fullscreen, setFullscreen] = useState<{ slides: KairosSlide[]; index: number; title: string } | null>(null);
+  const closeFullscreen = useCallback(() => setFullscreen(null), []);
   const releaseAudio = useCallback(() => setActiveAudioId(null), []);
   const wide = KAIROS_WIDE_SLIDES[wideIndex] ?? null;
   const hasWide = KAIROS_WIDE_SLIDES.length > 0;
@@ -166,6 +170,7 @@ export default function KairosClassroom() {
         <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <h2 className="font-sans text-xl font-bold text-[#5C260E] sm:text-2xl">Aprendizaje Basado en Problemas (ABP)</h2>
           <div className="flex items-center gap-2.5 self-end sm:self-auto">
+            <button type="button" onClick={() => setFullscreen({ slides: KAIROS_WIDE_SLIDES, index: wideIndex, title: 'Aprendizaje Basado en Problemas (ABP)' })} disabled={!hasWide} className="inline-flex items-center gap-1.5 rounded-full bg-[#5C260E] px-3.5 py-2 font-sans text-xs font-bold text-[#FDECCD] transition-colors hover:bg-[#7B3314] disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7B3314]"><Expand className="h-4 w-4" aria-hidden />Pantalla completa</button>
             <button type="button" onClick={() => setWideIndex((value) => wrap(value - 1, KAIROS_WIDE_SLIDES.length))} disabled={!hasWide} aria-label="Infografía panorámica anterior" className={`${ROUND_BUTTON} disabled:cursor-not-allowed disabled:opacity-45`}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
             <span className="min-w-[3rem] text-center font-source text-xs font-semibold text-[#8E431E]">{hasWide ? `${wideIndex + 1} / ${KAIROS_WIDE_SLIDES.length}` : '0 / 0'}</span>
             <button type="button" onClick={() => setWideIndex((value) => wrap(value + 1, KAIROS_WIDE_SLIDES.length))} disabled={!hasWide} aria-label="Infografía panorámica siguiente" className={`${ROUND_BUTTON} disabled:cursor-not-allowed disabled:opacity-45`}><ChevronRight className="h-4 w-4" aria-hidden /></button>
@@ -204,6 +209,7 @@ export default function KairosClassroom() {
             <p className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#B8531E]">{lightbox.section.title}</p>
             <h3 className="truncate font-sans text-sm font-bold text-[#5C260E] sm:text-base">{current.title}</h3>
           </div>
+          <button type="button" onClick={() => { setFullscreen({ slides: lightbox.section.slides, index: lightbox.index, title: lightbox.section.title }); setLightbox(null); }} className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#5C260E] px-3 py-1.5 font-sans text-xs font-bold text-[#FDECCD] hover:bg-[#7B3314]"><Expand className="h-3.5 w-3.5" aria-hidden />Pantalla completa</button>
           <button type="button" onClick={() => setLightbox(null)} aria-label="Cerrar vista ampliada" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEDFC5] text-[#5C260E] hover:bg-[#E4D1B1]"><X className="h-4 w-4" aria-hidden /></button>
         </div>
         <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto rounded-xl bg-[#EEDFC5] p-2">
@@ -216,5 +222,7 @@ export default function KairosClassroom() {
         </div>
       </div>
     </div>}
+
+    {fullscreen && <FullscreenSlideshow slides={fullscreen.slides} startIndex={fullscreen.index} title={fullscreen.title} onClose={closeFullscreen} />}
   </section>;
 }

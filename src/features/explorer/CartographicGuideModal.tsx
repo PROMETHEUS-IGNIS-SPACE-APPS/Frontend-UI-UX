@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { BookOpen, Compass, X } from 'lucide-react';
-import { CITIZEN_COLOR, HIGH_INTENSITY_FRP_MW, PROBABILITY_SCALE } from './mapPresets';
+import { CITIZEN_COLOR, HIGH_INTENSITY_FRP_MW, MARKOV_PURPLE_SCALE } from './mapPresets';
 
 interface CartographicGuideModalProps {
   isOpen: boolean;
@@ -52,7 +52,7 @@ export default function CartographicGuideModal({ isOpen, onClose, onOpenGlossary
           <h3 className="font-noto text-xs font-bold">Capas</h3>
           <ul className="space-y-2">
             <Row symbol={<span className="h-3.5 w-12 rounded-full" style={{ background: 'linear-gradient(90deg, rgba(250,204,21,0.5), rgba(239,68,68,0.9))' }} aria-hidden />} title="Mapa Calor Observado">Densidad de observaciones ponderada por FRP informada. Las observaciones sin FRP no participan.</Row>
-            <Row symbol={<span className="flex gap-0.5" aria-hidden>{PROBABILITY_SCALE.map((step) => <span key={step.label} className="h-3.5 w-2 rounded-xs" style={{ backgroundColor: step.color }} />)}</span>} title="Capa Predictiva Markov">Zonas de color por celda según P(S1 ∪ S2): {PROBABILITY_SCALE.map((step) => step.label).join(' · ')}. Estimación exploratoria con los datos cargados; no es un modelo publicado ni predice ignición.</Row>
+            <Row symbol={<span className="flex gap-0.5" aria-hidden>{MARKOV_PURPLE_SCALE.map((step) => <span key={step.label} className="h-3.5 w-2 rounded-xs border border-[#6d28d9]" style={{ backgroundColor: `rgba(139, 92, 246, ${step.opacity})` }} />)}</span>} title="Capa Predictiva Markov">Cuadros morados por celda: más intenso = mayor P(S1 ∪ S2) ({MARKOV_PURPLE_SCALE.map((step) => step.label).join(' · ')}). En la pestaña Mapa de Calor la misma probabilidad se muestra en amarillo-rojo. Estimación exploratoria con los datos cargados; no es un modelo publicado ni predice ignición.</Row>
             <Row symbol={<span className="h-0 w-12 border-t-2 border-dashed border-[#0284c7]" aria-hidden />} title="Límite de Colombia">Línea azul punteada de referencia.</Row>
             <Row symbol={<span className="h-3.5 w-12 rounded-sm border-2 border-[#d97706] bg-[#0284c7]/10" aria-hidden />} title="Subregiones de Antioquia">Contornos naranja esquemáticos de referencia visual; no son límites oficiales.</Row>
           </ul>

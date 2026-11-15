@@ -1,32 +1,35 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Flame, LoaderCircle, MapPin, X } from 'lucide-react';
 import GlossaryModal from '@/components/common/GlossaryModal';
 import ModulePlaceholder from '@/components/common/ModulePlaceholder';
 import Header from '@/components/layout/Header';
-import ObservationMap from '@/features/explorer/ObservationMap';
 import { fetchIngestedObservations } from '@/services/api/ingestionService';
 import { demoCollection } from '@/data/syntheticDemo';
 import { useUiStore } from '@/stores/uiStore';
 import { selectLocalObservations, useLocalCsvStore } from '@/stores/localCsvStore';
 import type { Observation, ObservationSourceMode, Sensor } from '@/types/api/observations';
 import { APP_MODULES } from '@/types/domain/module';
-import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
-import ActivityCalendarPanel from '@/features/calendar/ActivityCalendarPanel';
-import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
-import KairosClassroom from '@/features/pedagogy/KairosClassroom';
-import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
-import MarkovHeatmapPanel from '@/features/markov/MarkovHeatmapPanel';
-import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
 import CartographicGuideModal from '@/features/explorer/CartographicGuideModal';
+import Bomberito from '@/features/centinela/Bomberito';
 import TimelineControls from '@/features/explorer/TimelineControls';
 import { DEFAULT_MAP_LAYERS, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, observationCategory, type MapFocusPreset, type MapLayerState, type MapStylePreset } from '@/features/explorer/mapPresets';
 import type { SourcePreset } from '@/features/explorer/ExplorerSidebar';
 import { STATE_CODES, runMarkovEngine } from '@/utils/markovEngine';
 import { MAX_REFERENCE_DISTANCE_KM, locationLabel, referenceDistanceKm } from '@/utils/subregions';
 import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
+
+// Módulos y mapa se cargan bajo demanda para aligerar el arranque (bundle inicial < 500 kB).
+const ObservationMap = lazy(() => import('@/features/explorer/ObservationMap'));
+const AnalyticsPanel = lazy(() => import('@/features/analytics/AnalyticsPanel'));
+const ActivityCalendarPanel = lazy(() => import('@/features/calendar/ActivityCalendarPanel'));
+const LaboratoryPanel = lazy(() => import('@/features/laboratory/LaboratoryPanel'));
+const KairosClassroom = lazy(() => import('@/features/pedagogy/KairosClassroom'));
+const PredictabilityPanel = lazy(() => import('@/features/predictability/PredictabilityPanel'));
+const MarkovHeatmapPanel = lazy(() => import('@/features/markov/MarkovHeatmapPanel'));
+const SourcesPanel = lazy(() => import('@/features/sources/SourcesPanel'));
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
@@ -76,8 +79,9 @@ export default function App() {
   const citizenReports = useCitizenReportsStore((state) => state.reports);
   const toggleReportStatus = useCitizenReportsStore((state) => state.toggleStatus);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [citizenStatus, setCitizenStatus] = useState<'ALL' | 'verificado' | 'pendiente'>('ALL');
   const selectedReport = citizenReports.find((report) => report.id === selectedReportId) ?? null;
-  const mapReports = useMemo(() => citizenReports.map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports]);
+  const mapReports = useMemo(() => citizenReports.filter((report) => citizenStatus === 'ALL' || (report.status ?? 'pendiente') === citizenStatus).map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports, citizenStatus]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const dataMode = useUiStore((state) => state.dataMode);
@@ -172,6 +176,7 @@ export default function App() {
       {dataMode === 'demo' && <div role="status" className="flex items-center gap-2 border-b border-warning/40 bg-warning-soft px-4 py-1.5 font-noto text-[11px] font-semibold text-warning"><AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />Modo Demostración activo: los focos mostrados son sintéticos (2024–2025) para pruebas y capacitación; no son observaciones reales. Cambia a «Lab Real» para ver datos del Backend-API.</div>}
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <div key={active.id} id={`panel-${active.id}`} role="tabpanel" aria-labelledby={`tab-${active.id}-desktop`} tabIndex={0} className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <Suspense fallback={<div role="status" className="m-6 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" aria-hidden />Cargando módulo…</div>}>
           {activeModule === 'explorer' ? (
             <section className="flex flex-1 flex-col lg:min-h-0 lg:flex-row lg:overflow-hidden">
               {isSidebarOpen && <ExplorerSidebar
@@ -210,13 +215,15 @@ export default function App() {
                 categoryCounts={categoryCounts}
                 onToggleCategory={toggleMapLayer}
                 onApplySourcePreset={applySourcePreset}
-                onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
+                citizenStatus={citizenStatus}
+                onCitizenStatusChange={setCitizenStatus}
+                onReset={() => { setCitizenStatus('ALL'); setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
               />}
 
               <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background lg:min-h-0">
                 <button type="button" onClick={() => setIsSidebarOpen((value) => !value)} aria-expanded={isSidebarOpen} aria-label={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} title={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} className="absolute left-0 top-1/2 z-30 hidden h-11 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border bg-card text-[10px] text-text-secondary shadow-sm transition-colors hover:bg-card hover:text-text-primary lg:flex"><span aria-hidden>{isSidebarOpen ? '◀' : '▶'}</span></button>
                 <div className="relative h-[max(440px,64dvh)] shrink-0 overflow-hidden bg-background lg:h-auto lg:min-h-0 lg:flex-1 lg:shrink">
-                  <ObservationMap observations={visible} selected={selected} onSelect={(item) => { setSelectedCellId(null); setSelectedReportId(null); setSelected(item); }} focusTarget={focusTarget} mapStyle={mapStyle} layers={mapLayers} cells={markovCells} onSelectCell={(id) => { setSelected(null); setSelectedReportId(null); setSelectedCellId(id); }} reports={mapReports} onSelectReport={(id) => { setSelected(null); setSelectedCellId(null); setSelectedReportId(id); }} />
+                  <ObservationMap observations={visible} selected={selected} onSelect={(item) => { setSelectedCellId(null); setSelectedReportId(null); setSelected(item); }} focusTarget={focusTarget} mapStyle={mapStyle} layers={mapLayers} cells={markovCells} cellStyle="squares" onSelectCell={(id) => { setSelected(null); setSelectedReportId(null); setSelectedCellId(id); }} reports={mapReports} onSelectReport={(id) => { setSelected(null); setSelectedCellId(null); setSelectedReportId(id); }} />
                   {observationsQuery.isPending && <div className="absolute left-1/2 top-28 z-30 flex w-[min(28rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-xl shadow-2xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones…</div>}
                   {observationsQuery.isError && <div role="alert" className="absolute left-1/2 top-28 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-start gap-3 rounded-xl border border-danger/40 bg-card shadow-2xl p-4 text-sm text-danger"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-danger">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-danger-soft" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                   {hasData && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-text-secondary" /><p className="mt-2 font-medium text-text-primary">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-text-secondary">La consulta respondió correctamente con una colección vacía.</p></div></div>}
@@ -262,8 +269,10 @@ export default function App() {
           ) : activeModule === 'comparison' ? <KairosClassroom />
             : activeModule === 'project-info' ? <div className="flex flex-col"><LaboratoryPanel provenance={provenance} /><SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} /></div>
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
+          </Suspense>
         </div>
       </main>
+      <Bomberito observations={allObservations} onShowCell={(center) => { setFocusTarget({ id: `centinela-${center.join(',')}`, label: 'Celda CENTINELA', center, zoom: 9.5 }); setSelected(null); setActiveModule('explorer'); }} />
       <CartographicGuideModal isOpen={isCartoGuideOpen} onClose={() => setIsCartoGuideOpen(false)} onOpenGlossary={() => setIsGlossaryOpen(true)} />
       <GlossaryModal isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
     </div>

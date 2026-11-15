@@ -91,9 +91,9 @@ describe('App shell de pestañas', () => {
     await user.click(screen.getByRole('tab', { name: 'Predictibilidad' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Predictibilidad');
-    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ })).toBeInTheDocument();
-    expect(screen.getByText('Estimación exploratoria')).toBeInTheDocument();
-    expect(screen.getByText('No es un modelo publicado')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ }, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByText('Estimación exploratoria', {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(await screen.findByText('No es un modelo publicado')).toBeInTheDocument();
   });
 
   it('abre el Mapa de Calor Markov sin probabilidades inventadas', async () => {
@@ -179,7 +179,7 @@ describe('App shell de pestañas', () => {
     const desktopTablist = screen.getByRole('tablist', { name: 'Módulos' });
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Aula Pedagógica' }));
 
-    expect(screen.getByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' }, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.getByText('¡Explora el Aula!')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '1. Prevención en el hogar' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^Reproducir podcast de/ })).toHaveLength(4);
