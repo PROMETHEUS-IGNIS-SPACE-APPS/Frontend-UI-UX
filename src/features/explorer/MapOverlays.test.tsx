@@ -28,7 +28,17 @@ describe('MapOverlays', () => {
     expect(screen.getByText('4')).toBeInTheDocument();
     await user.click(screen.getByRole('checkbox', { name: 'Mapa Calor Observado' }));
     expect(onToggleLayer).toHaveBeenCalledWith('heatmap');
-    expect(screen.getByRole('checkbox', { name: 'Capa Predictiva Markov' })).toBeDisabled();
+    await user.click(screen.getByRole('checkbox', { name: 'Capa Predictiva Markov' }));
+    expect(onToggleLayer).toHaveBeenCalledWith('markov');
+  });
+
+  it('shows the Markov horizon selector and probability legend when the layer is on', async () => {
+    const user = userEvent.setup();
+    const onMarkovHorizonChange = vi.fn();
+    render(<MapOverlays focusId="antioquia" styleId="liberty" onStyleChange={vi.fn()} onFocusChange={vi.fn()} layers={{ ...DEFAULT_MAP_LAYERS, markov: true }} onToggleLayer={vi.fn()} pointCount={5} frpCount={4} markovHorizon={0} onMarkovHorizonChange={onMarkovHorizonChange} />);
+    await user.click(screen.getByRole('button', { name: '48h' }));
+    expect(onMarkovHorizonChange).toHaveBeenCalledWith(1);
+    expect(screen.getByText(/Estimación exploratoria/)).toBeInTheDocument();
   });
 
   it('gives high-intensity priority over the sensor colour', () => {

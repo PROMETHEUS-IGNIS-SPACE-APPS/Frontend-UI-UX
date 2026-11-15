@@ -18,13 +18,13 @@ const observations: Observation[] = [
 describe('MarkovHeatmapPanel', () => {
   afterEach(() => cleanup());
 
-  it('shows observed subregion data without inventing probabilities', async () => {
+  it('shows observed subregion data and no probabilities with insufficient history', async () => {
     const user = userEvent.setup();
     render(<MarkovHeatmapPanel observations={observations} provenance="test_fixture" />);
 
-    expect(screen.getByText('Sin modelo publicado')).toBeInTheDocument();
-    expect(screen.getByText('Capa predictiva pendiente')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '24h' })).toBeDisabled();
+    expect(screen.getByText('Estimación exploratoria')).toBeInTheDocument();
+    expect(screen.getByText('Historial insuficiente para el mapa de calor')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+24h' })).toBeDisabled();
     expect(screen.getByLabelText('Mapa de prueba')).toHaveTextContent('2 puntos');
 
     await user.click(screen.getByRole('button', { name: 'Urabá' }));

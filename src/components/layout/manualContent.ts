@@ -150,7 +150,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'list', items: [
         'Barra superior: zonas Antioquia, Colombia, Valle de Aburrá, Bajo Cauca y Urabá; indicador de datos activos y botón Guía.',
         'Mapa base: Liberty, Satélite, Topográfico, Oscuro y Claro; casillas Límite de Colombia y Subregiones de Antioquia (contornos esquemáticos, no oficiales).',
-        'Capas Cartográficas (panel inferior izquierdo, plegable): Marcadores Térmicos y Mapa Calor Observado (ponderado por FRP). La Capa Predictiva Markov está visible pero desactivada hasta que exista un modelo publicado.',
+        'Capas Cartográficas (panel inferior izquierdo, plegable): Marcadores Térmicos, Mapa Calor Observado (ponderado por FRP) y Capa Predictiva Markov con selector 24h / 48h / 72h; muestra zonas de color según la probabilidad estimada de cada celda y un aviso si el historial es insuficiente.',
         'Controles de zoom y brújula, y leyenda inferior (VIIRS, MODIS, Alta ≥ 30 MW).',
       ] },
       { kind: 'p', text: 'Al hacer clic sobre un foco se abre su ficha: identificador, sensor, satélite, hora de adquisición (UTC), FRP en MW (o “No disponible”), confianza original, día/noche, concordancia, coordenadas, origen y enlace a la fuente original.' },
@@ -194,11 +194,10 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: 'mapa-calor', level: 2, title: '4.4 Pestaña Mapa de Calor', blocks: [
       { kind: 'p', text: 'Mapa independiente de las subregiones de Antioquia. No modifica las capas del Mapa principal.' },
       { kind: 'list', items: [
-        'Horizonte (24h, 48h, 72h) y + Clima: visibles pero desactivados hasta que exista un modelo publicado.',
+        'Horizonte +24h, +48h o +72h. El botón + Clima está desactivado: no hay un factor climático validado.',
         'Barra de subregión: Todas (Antioquia), Bajo Cauca, Urabá, Nordeste, Magdalena Medio, Valle de Aburrá y Norte & Occidente.',
-        'Mapa con las observaciones satelitales de la subregión elegida; al tocar un punto se abre su ficha.',
-        'Escala P(S1 ∪ S2) de 5 rangos (<15 % a >70 %), marcada como “Pendiente”.',
-        'Columna lateral: observaciones y FRP promedio por subregión, y Municipios con más observaciones (al seleccionar uno, el mapa se centra en él).',
+        'Mapa de calor con una zona de color por celda según su P(S1 ∪ S2), en una escala de 5 rangos (<15 % a >70 %). Al tocar una zona se abre la ficha de la celda: P del horizonte, 24/48/72 h, estado, vecinos activos y detecciones.',
+        'Columna lateral: probabilidad máxima y promedio, celdas, observaciones y FRP por subregión, y Celdas Prioritarias (al seleccionar una, el mapa se centra en ella).',
       ] },
       { kind: 'warn', text: 'Importante: la subregión se aproxima a partir del municipio de referencia asignado por el Backend-API. Oriente y otras zonas quedan fuera de estas seis agrupaciones.' },
     ],

@@ -103,7 +103,7 @@ describe('App shell de pestañas', () => {
     await user.click(screen.getByRole('tab', { name: 'Mapa de Calor Markov' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Mapa de Calor Markov');
-    expect(await screen.findByText('Capa predictiva pendiente')).toBeInTheDocument();
+    expect(await screen.findByText('Estimación exploratoria')).toBeInTheDocument();
   });
 
   it('cambia entre tema oscuro y claro desde el encabezado', async () => {
