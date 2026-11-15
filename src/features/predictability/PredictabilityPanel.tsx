@@ -69,7 +69,7 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
       </>}
     />
     <AiInterpretationPanel ai={ai} />
-    {reportOpen && <PredictabilityReport result={result} provenance={provenance} onClose={() => setReportOpen(false)} />}
+    {reportOpen && <PredictabilityReport result={result} provenance={provenance} onClose={() => setReportOpen(false)} aiReading={ai.data ?? null} />}
 
     <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning-soft p-4 text-text-primary">
       <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />

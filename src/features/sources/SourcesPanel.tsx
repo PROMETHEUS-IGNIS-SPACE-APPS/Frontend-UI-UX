@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Activity, CheckCircle2, Copy, Database, FileSpreadsheet, RefreshCw, Server, ShieldAlert, XCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Activity, CheckCircle2, Copy, Database, FileSpreadsheet, RefreshCw, Server, ShieldAlert, Sparkles, XCircle } from 'lucide-react';
 import { checkEndpoint, diagnosticEndpoints, type EndpointResult } from '@/services/api/diagnosticsService';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
+import { fetchAiAvailability } from '@/services/api/aiService';
 import { useLocalCsvStore } from '@/stores/localCsvStore';
 import type { ObservationSourceMode } from '@/types/api/observations';
 
@@ -45,6 +47,7 @@ const SOURCE_LABELS: Record<ObservationSourceMode, string> = {
 
 export default function SourcesPanel({ sourceMode, provenance, loadedCount, totalMatching, warning, degradedMode }: SourcesPanelProps) {
   const { outcome, checkNow } = useBackendHealth();
+  const aiStatus = useQuery({ queryKey: ['ai-availability'], queryFn: fetchAiAvailability, staleTime: 60_000, retry: false });
   const datasets = useLocalCsvStore((state) => state.datasets);
   const status = STATUS[outcome];
   const StatusIcon = status.icon;
@@ -76,7 +79,7 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
       </>}
     />
 
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <article className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
         <h2 className="flex items-center gap-2 font-noto text-sm font-bold"><Server className="h-4 w-4 text-accent" />Backend-API</h2>
         <p className={`flex items-center gap-2 font-source text-2xl font-extrabold ${status.color}`}><StatusIcon className={`h-5 w-5 ${outcome === 'checking' ? 'animate-spin' : ''}`} aria-hidden />{status.label}</p>
@@ -95,6 +98,13 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
         </dl>
         {degradedMode && <p className="rounded-lg border border-warning/40 bg-warning-soft p-2 text-[11px] text-text-primary">La fuente remota no respondió; el backend entregó caché auténtica.</p>}
         {warning && <p className="rounded-lg border border-warning/40 bg-warning-soft p-2 text-[11px] text-text-primary">{warning}</p>}
+      </article>
+
+      <article className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 font-noto text-sm font-bold"><Sparkles className="h-4 w-4 text-info" aria-hidden />IA explicativa (Gemini, en el servidor)</h2>
+        <p className={`font-source text-2xl font-extrabold ${aiStatus.data ? 'text-success' : 'text-warning'}`}>{aiStatus.isPending ? 'Comprobando…' : aiStatus.isError ? 'Sin respuesta' : aiStatus.data ? 'Gemini activo' : 'Falta la clave'}</p>
+        <p className="text-[11px] leading-relaxed text-text-secondary">{aiStatus.data ? 'Los botones “Interpretar con IA” de Predictibilidad y Calendario están disponibles.' : 'Configure GEMINI_API_KEY en el archivo .env del Backend-API y reinícielo. La clave nunca viaja a esta página.'}</p>
+        <p className="font-source text-[11px] text-text-secondary">POST /api/ai/explain · GET /api/health (hasGeminiKey)</p>
       </article>
 
       <article className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">

@@ -1,4 +1,4 @@
-import { ApiError, postJson } from './httpClient';
+import { ApiError, postJson, requestJson } from './httpClient';
 
 /** Interpretación con IA del Backend-API (`POST /api/ai/explain`, Gemini en el servidor). */
 
@@ -54,4 +54,10 @@ export async function explainWithAi(mode: AiMode, payload: Record<string, unknow
     structured,
     disclaimer: isString(record.disclaimer) ? record.disclaimer : 'Lectura generada por IA a partir de las cifras de la plataforma.',
   };
+}
+
+/** `hasGeminiKey` de `GET /api/health`: si el Backend-API tiene configurada la clave de Gemini. */
+export async function fetchAiAvailability(): Promise<boolean> {
+  const { body } = await requestJson('/health', { apiPrefix: '/api' });
+  return Boolean(body && typeof body === 'object' && (body as Record<string, unknown>).hasGeminiKey === true);
 }

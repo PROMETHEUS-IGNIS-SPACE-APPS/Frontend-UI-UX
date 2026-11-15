@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import type { AiExplainResult } from '@/services/api/aiService';
 import { Printer, X } from 'lucide-react';
 import { ANTIOQUIA_SUBREGIONS_GEOJSON } from '@/data/schematicBoundaries';
 import { PROBABILITY_SCALE, probabilityColor } from '@/features/explorer/mapPresets';
@@ -9,6 +10,8 @@ interface PredictabilityReportProps {
   result: MarkovResult;
   provenance: string;
   onClose: () => void;
+  /** Lectura de "Interpretar con IA" si el usuario ya la pidió. */
+  aiReading?: AiExplainResult | null;
 }
 
 const pct = (value: number, digits = 1) => `${(value * 100).toFixed(digits)}%`;
@@ -31,7 +34,7 @@ function CellsMap({ result }: { result: MarkovResult }) {
 }
 
 /** Informe imprimible (Guardar como PDF) de la estimación exploratoria Markov. */
-export default function PredictabilityReport({ result, provenance, onClose }: PredictabilityReportProps) {
+export default function PredictabilityReport({ result, provenance, onClose, aiReading }: PredictabilityReportProps) {
   useEffect(() => {
     document.body.classList.add('print-manual');
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
@@ -92,6 +95,16 @@ export default function PredictabilityReport({ result, provenance, onClose }: Pr
             <tbody>{result.cells.slice(0, 10).map((cell) => <tr key={cell.id}><td className="border border-[#E3CDB0] bg-[#F2E3CF] px-2 py-1">{cell.municipality ?? 'Sin municipio cercano'} ({cell.centerLat.toFixed(2)}, {cell.centerLon.toFixed(2)})</td><td className="border border-[#E3CDB0] px-2 py-1">{STATE_CODES[cell.state]}</td><td className="border border-[#E3CDB0] px-2 py-1">{cell.activeNeighbors}/8</td><td className="border border-[#E3CDB0] px-2 py-1 font-bold">{pct(cell.p24)}</td><td className="border border-[#E3CDB0] px-2 py-1">{pct(cell.p48)}</td><td className="border border-[#E3CDB0] px-2 py-1">{pct(cell.p72)}</td><td className="border border-[#E3CDB0] px-2 py-1">{cell.detections}</td></tr>)}</tbody>
           </table>
         </section>
+
+        {aiReading && <section className="space-y-2 break-inside-avoid">
+          <h3 className={`border-b-2 border-[#C9531F] pb-1 font-noto text-base font-bold ${BROWN}`}>5. Lectura asistida por IA (Gemini · {aiReading.model})</h3>
+          <p>{aiReading.structured.resumenEjecutivo}</p>
+          <ul className="list-disc space-y-0.5 pl-5">{aiReading.structured.hallazgosClave.map((item) => <li key={item}>{item}</li>)}</ul>
+          <p><strong>Estimación Markov:</strong> {aiReading.structured.interpretacionMarkov}</p>
+          <p><strong>Limitaciones:</strong> {aiReading.structured.limitacionesYCautela.join(' ')}</p>
+          <p><strong>Recomendaciones:</strong> {aiReading.structured.recomendacionesOperativas.join(' ')}</p>
+          <p className="text-[11px] text-[#7A6555]">{aiReading.disclaimer}</p>
+        </section>}
 
         <p className="break-inside-avoid border-l-4 border-[#B3261E] bg-[#FBE6DD] px-3 py-2 text-[12px]"><strong>Importante / Rigor científico:</strong> P(S1 ∪ S2) es una probabilidad de actividad térmica satelital estimada con los datos cargados; no confirma ni predice incendios, ni superficie quemada. Las nubes y el horario orbital pueden ocultar actividad. El modelo oficial lo publicará el AI-Pipeline con su evaluación. Ante una emergencia, llame al 123.</p>
         <footer className="border-t border-[#E3CDB0] pt-2 text-[11px] text-[#7A6555]">PROMETHEUS IGNIS · Semillero de Astronomía ITM · NASA Space Apps Challenge 2026</footer>
