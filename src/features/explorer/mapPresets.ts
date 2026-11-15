@@ -67,8 +67,6 @@ export interface MapLayerState {
   highIntensity: boolean;
   points: boolean;
   heatmap: boolean;
-  colombiaBoundary: boolean;
-  antioquiaSubregions: boolean;
   /** Celdas de la estimación exploratoria Markov 3×3. */
   markov: boolean;
   /** Reportes ciudadanos guardados en este dispositivo. */
@@ -81,8 +79,6 @@ export const DEFAULT_MAP_LAYERS: MapLayerState = {
   highIntensity: true,
   points: true,
   heatmap: false,
-  colombiaBoundary: true,
-  antioquiaSubregions: true,
   markov: false,
   citizen: true,
 };

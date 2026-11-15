@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AiExplainResult } from '@/services/api/aiService';
 import { Printer, X } from 'lucide-react';
-import { ANTIOQUIA_SUBREGIONS_GEOJSON } from '@/data/schematicBoundaries';
 import { PROBABILITY_SCALE, probabilityColor } from '@/features/explorer/mapPresets';
 import { STATE_CODES, type MarkovResult } from '@/utils/markovEngine';
+import { fetchWeatherContext } from '@/services/api/weatherService';
+import type { WeatherContext } from '@/types/api/weather';
 
 interface PredictabilityReportProps {
   result: MarkovResult;
@@ -24,23 +25,29 @@ function CellsMap({ result }: { result: MarkovResult }) {
   const x = (lon: number) => ((lon - lonMin) / (lonMax - lonMin)) * width;
   const y = (lat: number) => ((latMax - lat) / (latMax - latMin)) * height;
   const cellPx = (result.gridDeg / (lonMax - lonMin)) * width;
-  const polygons = ANTIOQUIA_SUBREGIONS_GEOJSON.features.flatMap((feature) => feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates[0] as number[][]] : []);
   const cells = result.cells.filter((cell) => cell.centerLon > lonMin && cell.centerLon < lonMax && cell.centerLat > latMin && cell.centerLat < latMax);
   return <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full max-w-[520px] rounded-md border border-[#E3CDB0] bg-[#FBF5EC]" role="img" aria-label="Mapa de celdas Markov sobre Antioquia">
-    {polygons.map((ring, index) => <polygon key={index} points={ring.map(([lon, lat]) => `${x(lon)},${y(lat)}`).join(' ')} fill="#0284c7" fillOpacity={0.05} stroke="#d97706" strokeWidth={1.2} />)}
     {cells.map((cell) => <rect key={cell.id} x={x(cell.centerLon) - cellPx / 2} y={y(cell.centerLat) - cellPx / 2} width={cellPx} height={cellPx} fill={probabilityColor(cell.p24)} fillOpacity={0.85} stroke="#ffffff" strokeWidth={0.4} />)}
-    <text x={8} y={height - 8} fontSize={10} fill="#7A6555">Contornos esquemáticos, no oficiales · celdas de {result.gridDeg.toFixed(2)}°</text>
+    <text x={8} y={height - 8} fontSize={10} fill="#7A6555">Sin límites administrativos · celdas de {result.gridDeg.toFixed(2)}°</text>
   </svg>;
 }
 
 /** Informe imprimible (Guardar como PDF) de la estimación exploratoria Markov. */
 export default function PredictabilityReport({ result, provenance, onClose, aiReading }: PredictabilityReportProps) {
+  const [weather, setWeather] = useState<WeatherContext | null>(null);
   useEffect(() => {
     document.body.classList.add('print-manual');
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => { document.body.classList.remove('print-manual'); window.removeEventListener('keydown', onKey); };
   }, [onClose]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchWeatherContext(6.4, -75.6, 'Antioquia', controller.signal)
+      .then(setWeather)
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   const v = result.validation;
   const generated = new Date().toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' });
@@ -67,6 +74,11 @@ export default function PredictabilityReport({ result, provenance, onClose, aiRe
           <div><dt className="inline font-bold">Transiciones: </dt><dd className="inline">{result.transitions.toLocaleString()} · celdas de {result.gridDeg.toFixed(2)}°</dd></div>
           <div><dt className="inline font-bold">Procedencia: </dt><dd className="inline">{provenance}</dd></div>
         </dl>
+        {weather?.available && <section className="break-inside-avoid rounded-md border border-[#E3CDB0] bg-[#FBF5EC] px-3 py-2 text-[12px]">
+          <strong>Contexto meteorológico ({weather.locationName}): </strong>
+          {weather.current.temperatureC ?? '—'} °C · humedad {weather.current.relativeHumidityPct ?? '—'}% · precipitación {weather.current.precipitationMm ?? '—'} mm · viento {weather.current.windSpeedKmh ?? '—'} km/h.
+          <span className="block text-[10px] text-[#7A6555]">{weather.note} No modifica las métricas Markov del informe.</span>
+        </section>}
 
         <section className="space-y-2 break-inside-avoid">
           <h3 className={`border-b-2 border-[#C9531F] pb-1 font-noto text-base font-bold ${BROWN}`}>1. Pronóstico regional</h3>

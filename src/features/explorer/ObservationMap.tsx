@@ -5,7 +5,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 // the library into node_modules/.vite/deps. Pinning the worker URL keeps tiles rendering.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { Observation } from '@/types/api/observations';
-import { ANTIOQUIA_SUBREGIONS_GEOJSON, COLOMBIA_BOUNDARIES_GEOJSON } from '@/data/schematicBoundaries';
 import { DEFAULT_MAP_LAYERS, observationCategory, probabilityColor, type MapFocusPreset, type MapLayerState, type MapCitizenReport, type MapProbabilityCell, type MapStylePreset, CITIZEN_COLOR } from './mapPresets';
 
 interface ObservationMapProps {
@@ -119,10 +118,10 @@ export default function ObservationMap({ observations, selected, onSelect, focus
     }
   }, [mapStyle]);
 
-  const { points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen } = layerState;
+  const { points, heatmap, markov, citizen } = layerState;
   useEffect(() => {
-    if (mapRef.current) applyVisibility(mapRef.current, { ...DEFAULT_MAP_LAYERS, points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen }, cellStyle);
-  }, [points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen, cellStyle]);
+    if (mapRef.current) applyVisibility(mapRef.current, { ...DEFAULT_MAP_LAYERS, points, heatmap, markov, citizen }, cellStyle);
+  }, [points, heatmap, markov, citizen, cellStyle]);
 
   useEffect(() => {
     if (selected) mapRef.current?.flyTo({ center: [selected.longitude, selected.latitude], zoom: 9 });
@@ -132,15 +131,6 @@ export default function ObservationMap({ observations, selected, onSelect, focus
 }
 
 function addDataLayers(map: MapLibreMap, observations: Observation[], cells: MapProbabilityCell[], reports: MapCitizenReport[]) {
-  if (!map.getSource('colombia-boundaries')) {
-    map.addSource('colombia-boundaries', { type: 'geojson', data: COLOMBIA_BOUNDARIES_GEOJSON });
-    map.addLayer({ id: 'colombia-boundary-line', type: 'line', source: 'colombia-boundaries', paint: { 'line-color': '#0284c7', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': 0.9 } });
-  }
-  if (!map.getSource('antioquia-subregions')) {
-    map.addSource('antioquia-subregions', { type: 'geojson', data: ANTIOQUIA_SUBREGIONS_GEOJSON });
-    map.addLayer({ id: 'antioquia-subregions-fill', type: 'fill', source: 'antioquia-subregions', paint: { 'fill-color': '#0284c7', 'fill-opacity': 0.05 } });
-    map.addLayer({ id: 'antioquia-subregions-line', type: 'line', source: 'antioquia-subregions', paint: { 'line-color': '#d97706', 'line-width': 2, 'line-opacity': 0.85 } });
-  }
   if (!map.getSource('markov-cells')) {
     map.addSource('markov-cells', { type: 'geojson', data: cellCollection(cells) });
     // Celdas Markov en morado (como el ejemplo): no se confunden con VIIRS/MODIS; la intensidad crece con P(S1 ∪ S2).
@@ -209,9 +199,6 @@ function applyVisibility(map: MapLibreMap, state: MapLayerState, cellStyle: 'squ
   const set = (id: string, visible: boolean) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none'); };
   POINT_LAYERS.forEach((id) => set(id, state.points));
   set('observation-heatmap', state.heatmap);
-  set('colombia-boundary-line', state.colombiaBoundary);
-  set('antioquia-subregions-fill', state.antioquiaSubregions);
-  set('antioquia-subregions-line', state.antioquiaSubregions);
   set('markov-cells', state.markov && cellStyle === 'squares');
   set('markov-cells-line', state.markov && cellStyle === 'squares');
   set('markov-heat', state.markov && cellStyle === 'heat');

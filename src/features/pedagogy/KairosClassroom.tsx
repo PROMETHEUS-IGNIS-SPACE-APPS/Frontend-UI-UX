@@ -19,6 +19,7 @@ import FullscreenSlideshow from './FullscreenSlideshow';
 import ExploreHint from './ExploreHint';
 import PodcastPlayer from './PodcastPlayer';
 import RiskDetectorGame from './RiskDetectorGame';
+import RiskMatrix5x5 from './RiskMatrix5x5';
 
 interface LightboxState { section: KairosSection; index: number }
 
@@ -188,6 +189,7 @@ export default function KairosClassroom() {
         {wide && <p className="mt-3 text-center font-sans text-sm font-bold text-[#5C260E]">{wide.title}</p>}
       </section>
 
+      <RiskMatrix5x5 />
       <RiskDetectorGame />
     </div>
 

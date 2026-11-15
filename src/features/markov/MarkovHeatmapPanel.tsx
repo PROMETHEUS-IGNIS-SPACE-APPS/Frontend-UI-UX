@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Compass, Info, MapPin, Thermometer, Wind, X } from 'lucide-react';
 import ObservationMap from '@/features/explorer/ObservationMap';
 import { MAP_STYLE_PRESETS, PROBABILITY_SCALE, probabilityColor, type MapFocusPreset } from '@/features/explorer/mapPresets';
 import { useUiStore } from '@/stores/uiStore';
 import type { Observation } from '@/types/api/observations';
 import { STATE_CODES, runMarkovEngine, type MarkovCell } from '@/utils/markovEngine';
+import { fetchWeatherContext } from '@/services/api/weatherService';
+import type { WeatherContext } from '@/types/api/weather';
 import { ANTIOQUIA_VIEWPORT, SUBREGIONS, computeSubregionMatrix, locationLabel, resolveSubregion, type SubregionConfig, type SubregionId } from '@/utils/subregions';
 
 const DARK_STYLE = MAP_STYLE_PRESETS.find((style) => style.id === 'dark') ?? MAP_STYLE_PRESETS[0];
@@ -23,7 +25,8 @@ interface CellWithSubregion { cell: MarkovCell; sub: SubregionConfig | null }
 /**
  * Mapa de Calor Markov (distribución de la carpeta `ejemplo`) con la estimación
  * EXPLORATORIA de `utils/markovEngine.ts` calculada con las observaciones reales
- * cargadas. Sin factor climático (no hay uno validado) y sin datos sintéticos.
+ * cargadas. El contexto meteorológico solo aplica una modulación experimental
+ * explícita y no constituye un modelo físico ni publicado.
  */
 export default function MarkovHeatmapPanel({ observations, provenance }: MarkovHeatmapPanelProps) {
   const [subregion, setSubregion] = useState<'all' | SubregionId>('all');
@@ -31,11 +34,31 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
   const [selected, setSelected] = useState<Observation | null>(null);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
   const [cellFocus, setCellFocus] = useState<MapFocusPreset | null>(null);
+  const [includeWeather, setIncludeWeather] = useState(true);
+  const [weather, setWeather] = useState<WeatherContext | null>(null);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
   const theme = useUiStore((state) => state.theme);
   const matrix = useMemo(() => computeSubregionMatrix(observations), [observations]);
   const result = useMemo(() => runMarkovEngine(observations), [observations]);
   const ready = result.status !== 'insufficient';
   const key = HORIZON_KEYS[horizon];
+  useEffect(() => {
+    const controller = new AbortController();
+    setWeatherError(null);
+    fetchWeatherContext(6.4, -75.6, 'Antioquia', controller.signal)
+      .then(setWeather)
+      .catch((error: unknown) => { if (!controller.signal.aborted) setWeatherError(error instanceof Error ? error.message : 'No fue posible consultar el clima.'); });
+    return () => controller.abort();
+  }, []);
+  const weatherFactor = useMemo(() => {
+    if (!weather?.available) return 1;
+    const temperature = weather.current.temperatureC ?? 24;
+    const humidity = weather.current.relativeHumidityPct ?? 65;
+    const rain = weather.current.precipitationMm ?? 0;
+    const wind = weather.current.windSpeedKmh ?? 8;
+    return Math.min(1.4, Math.max(0.7, 1 + (temperature - 24) * 0.01 + (65 - humidity) * 0.004 + wind * 0.006 - rain * 0.08));
+  }, [weather]);
+  const adjustProbability = (value: number) => includeWeather ? Math.min(1, Math.max(0, value * weatherFactor)) : value;
 
   const antioquiaObservations = useMemo(() => observations.filter((item) => {
     const id = resolveSubregion(item);
@@ -66,8 +89,8 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
 
   const chooseSubregion = (id: 'all' | SubregionId) => { setSubregion(id); setCellFocus(null); setSelected(null); setSelectedCellId(null); };
   const focusCell = (cell: MarkovCell) => { setCellFocus({ id: `cell-${cell.id}`, label: cell.municipality ?? 'Celda', center: [cell.centerLon, cell.centerLat], zoom: 10 }); setSelected(null); setSelectedCellId(cell.id); };
-  const mapCells = visibleCells.map(({ cell }) => ({ id: cell.id, center: [cell.centerLon, cell.centerLat] as [number, number], sizeDeg: result.gridDeg, p: cell[key] }));
-  const regional = result.horizons[horizon];
+  const mapCells = visibleCells.map(({ cell }) => ({ id: cell.id, center: [cell.centerLon, cell.centerLat] as [number, number], sizeDeg: result.gridDeg, p: adjustProbability(cell[key]) }));
+  const regional = result.horizons[horizon] ? { ...result.horizons[horizon], activity: adjustProbability(result.horizons[horizon].activity) } : undefined;
 
   return <div className="mx-auto w-full max-w-7xl space-y-5 overflow-x-hidden p-4 text-text-primary sm:p-6 lg:p-8">
     <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 lg:flex-row lg:items-center">
@@ -80,10 +103,15 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
         <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1" role="group" aria-label="Horizonte de predicción">
           {(['+24h', '+48h', '+72h'] as const).map((label, index) => <button key={label} type="button" disabled={!ready} aria-pressed={horizon === index} onClick={() => setHorizon(index as 0 | 1 | 2)} className={`whitespace-nowrap rounded-lg px-3 py-1 font-source text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${ready && horizon === index ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:text-text-primary'}`}>{label}</button>)}
         </div>
-        <button type="button" disabled title="No hay un factor climático validado; no se acopla clima a la estimación" className="inline-flex cursor-not-allowed items-center gap-1.5 whitespace-nowrap rounded-xl border border-border bg-card px-3 py-1.5 font-noto text-xs font-bold text-text-secondary opacity-60"><Wind className="h-3.5 w-3.5 shrink-0" aria-hidden />+ Clima</button>
+        <button type="button" aria-pressed={includeWeather} onClick={() => setIncludeWeather((value) => !value)} title="Modulación contextual experimental, no modelo oficial" className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-1.5 font-noto text-xs font-bold ${includeWeather ? 'border-info/50 bg-info-soft text-info' : 'border-border bg-card text-text-secondary'}`}><Wind className="h-3.5 w-3.5 shrink-0" aria-hidden />{includeWeather ? '+ Clima' : 'Satelital'}</button>
       </div>
     </div>
 
+    {weather && <div className={`flex items-start gap-3 p-4 ${CARD}`}>
+      <Thermometer className="mt-0.5 h-5 w-5 shrink-0 text-info" aria-hidden />
+      <div className="text-xs"><p className="font-semibold text-info">Contexto ambiental: {weather.locationName}</p><p className="mt-1 text-text-secondary">Temperatura {weather.current.temperatureC ?? '—'} °C · Humedad {weather.current.relativeHumidityPct ?? '—'}% · Lluvia {weather.current.precipitationMm ?? '—'} mm · Viento {weather.current.windSpeedKmh ?? '—'} km/h.</p><p className="mt-1 text-[10px] text-text-secondary">{weather.note} Factor experimental aplicado: {weatherFactor.toFixed(2)}×.</p></div>
+    </div>}
+    {weatherError && <p role="status" className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs text-warning">Clima no disponible: {weatherError} El mapa continúa con probabilidades satelitales.</p>}
     {!ready && <div className={`flex items-start gap-3 p-5 ${CARD}`}>
       <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-warning" aria-hidden />
       <div className="space-y-1"><h2 className="font-noto text-sm font-bold text-warning">Historial insuficiente para el mapa de calor</h2><p className="text-xs leading-relaxed text-text-primary">{result.message} Mientras tanto se muestran las observaciones por subregión.</p></div>
@@ -104,7 +132,7 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
     <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
       <div className={`relative flex min-h-[420px] flex-col overflow-hidden lg:col-span-8 lg:min-h-[580px] ${CARD}`}>
         <div className="relative h-[max(420px,60dvh)] w-full flex-1 lg:h-auto lg:min-h-[580px]">
-          <div className="absolute inset-0"><ObservationMap observations={antioquiaObservations} selected={selected} onSelect={(item) => { setSelectedCellId(null); setSelected(item); }} focusTarget={focus} mapStyle={theme === 'light' ? LIGHT_STYLE : DARK_STYLE} layers={{ heatmap: false, points: !ready, colombiaBoundary: false, antioquiaSubregions: true, markov: ready }} cells={mapCells} cellStyle="heat" onSelectCell={(id) => { setSelected(null); setSelectedCellId(id); }} /></div>
+          <div className="absolute inset-0"><ObservationMap observations={antioquiaObservations} selected={selected} onSelect={(item) => { setSelectedCellId(null); setSelected(item); }} focusTarget={focus} mapStyle={theme === 'light' ? LIGHT_STYLE : DARK_STYLE} layers={{ heatmap: false, points: !ready, markov: ready }} cells={mapCells} cellStyle="heat" onSelectCell={(id) => { setSelected(null); setSelectedCellId(id); }} /></div>
         </div>
 
         <div className="pointer-events-none absolute left-3 top-3 z-10">
@@ -125,9 +153,9 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
             <button type="button" onClick={() => setSelectedCellId(null)} aria-label="Cerrar detalle de celda" className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary"><X className="h-3.5 w-3.5" /></button>
           </div>
           <dl className="grid grid-cols-2 gap-2 font-source text-[11px] tabular-nums">
-            <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">P(+{regional?.hours ?? 24}h)</dt><dd className="text-base font-black text-predictive">{pct(selectedCell.cell[key])}</dd></div>
+            <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">P(+{regional?.hours ?? 24}h)</dt><dd className="text-base font-black text-predictive">{pct(adjustProbability(selectedCell.cell[key]))}</dd></div>
             <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">Estado / vecinos</dt><dd className="text-sm font-bold text-accent">{STATE_CODES[selectedCell.cell.state]} · {selectedCell.cell.activeNeighbors}/8</dd></div>
-            <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">24h / 48h / 72h</dt><dd className="font-bold text-text-primary">{(selectedCell.cell.p24 * 100).toFixed(0)}% / {(selectedCell.cell.p48 * 100).toFixed(0)}% / {(selectedCell.cell.p72 * 100).toFixed(0)}%</dd></div>
+            <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">24h / 48h / 72h</dt><dd className="font-bold text-text-primary">{(adjustProbability(selectedCell.cell.p24) * 100).toFixed(0)}% / {(adjustProbability(selectedCell.cell.p48) * 100).toFixed(0)}% / {(adjustProbability(selectedCell.cell.p72) * 100).toFixed(0)}%</dd></div>
             <div className="rounded-lg border border-border bg-surface p-2"><dt className="block text-[10px] text-text-secondary">Detecciones</dt><dd className="font-bold text-info">{selectedCell.cell.detections} reg.</dd></div>
           </dl>
         </div>}
@@ -182,7 +210,7 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
 
     <div className="flex items-start gap-2 pt-1 text-[11px] text-text-secondary">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" aria-hidden />
-      <p className="leading-relaxed">Este mapa de calor muestra la probabilidad estadística P(S1 ∪ S2) de registrar anomalías térmicas satelitales por celda Markov ({result.gridDeg.toFixed(2)}°), estimada en el navegador con los datos cargados y sin modulación climática. Revise su validación retrospectiva en Predictibilidad. La subregión se aproxima por el municipio de referencia del Backend-API. No representa ignición física ni superficie quemada.</p>
+      <p className="leading-relaxed">Este mapa de calor muestra la probabilidad estadística P(S1 ∪ S2) de registrar anomalías térmicas satelitales por celda Markov ({result.gridDeg.toFixed(2)}°), estimada en el navegador. El ajuste climático es contextual y experimental, no un modelo publicado. Revise la validación retrospectiva en Predictibilidad. No representa ignición física ni superficie quemada.</p>
     </div>
   </div>;
 }

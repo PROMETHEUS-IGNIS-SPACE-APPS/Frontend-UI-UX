@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, CheckCircle2, Copy, Database, FileSpreadsheet, RefreshCw, Server, ShieldAlert, Sparkles, XCircle } from 'lucide-react';
+import { Activity, CheckCircle2, CloudRain, Copy, Cpu, Database, ExternalLink, FileSpreadsheet, Globe, Map, RefreshCw, Satellite, Server, ShieldAlert, Sparkles, XCircle } from 'lucide-react';
 import { checkEndpoint, diagnosticEndpoints, type EndpointResult } from '@/services/api/diagnosticsService';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
@@ -14,6 +14,7 @@ const ENDPOINTS = [
   { method: 'GET', path: '/api/ideam/observations?from&to&region', use: 'Fuente “IDEAM · SMByC”.' },
   { method: 'GET', path: '/api/firms/observations?region', use: 'Fuente “NASA FIRMS · NRT 7 días”.' },
   { method: 'GET', path: '/api/fusion/historical-all?region', use: 'Fuente “Histórico muestreado · 2024–hoy”.' },
+  { method: 'GET', path: '/api/weather?lat&lon&name', use: 'Contexto meteorológico Open-Meteo para Markov e informes.' },
 ];
 
 const SOURCES = [
@@ -44,6 +45,45 @@ const SOURCE_LABELS: Record<ObservationSourceMode, string> = {
   firms: 'NASA FIRMS · NRT 7 días',
   historical: 'Histórico muestreado',
 };
+
+const OFFICIAL_REFERENCES = [
+  {
+    title: 'IDEAM — Puntos de Calor Colombia (CSV Diarios)',
+    url: 'https://puntosdecalor.ideam.gov.co/archivos-csv/',
+    description: 'Repositorio histórico oficial 2024–2026 en UTC-5 integrado en el proxy resiliente del servidor.',
+    icon: Database,
+  },
+  {
+    title: 'IDEAM — Consulta Extent Antioquia (9–10 Nov 2026)',
+    url: 'https://puntosdecalor.ideam.gov.co/?from_date=2026-11-09&to_date=2026-11-10&region=antioquia&extent=(9.243092645104804_-78.73352050781251_5.04717073691972_-72.27355957031251)',
+    description: 'Bounding box calibrado directamente en el adaptador antioquia_ideam.',
+    icon: Map,
+  },
+  {
+    title: 'NASA Earthdata FIRMS — Herramienta y Feeds Sudamérica 7d',
+    url: 'https://www.earthdata.nasa.gov/data/tools/firms',
+    description: 'Ingesta continua sin clave de MODIS C6.1 + VIIRS NOAA-20 + VIIRS NOAA-21.',
+    icon: Satellite,
+  },
+  {
+    title: 'NASA FIRMS Area API (MAP_KEY)',
+    url: 'https://firms.modaps.eosdis.nasa.gov/api/map_key/',
+    description: 'Soporte directo en servidor mediante la variable secreta NASA_FIRMS_MAP_KEY.',
+    icon: Cpu,
+  },
+  {
+    title: 'NASA Space Apps Challenge — Open Science Reference',
+    url: 'https://github.com/nasa/spaceapps/',
+    description: 'Estándar de reproducibilidad abierta, procedencia trazable y rigor científico.',
+    icon: Globe,
+  },
+  {
+    title: 'Open-Meteo Weather Forecast API (Fuente C)',
+    url: 'https://api.open-meteo.com/v1/forecast',
+    description: 'Temperatura, humedad relativa, viento 10 m y lluvia de 3 días consultados en vivo.',
+    icon: CloudRain,
+  },
+] as const;
 
 export default function SourcesPanel({ sourceMode, provenance, loadedCount, totalMatching, warning, degradedMode }: SourcesPanelProps) {
   const { outcome, checkNow } = useBackendHealth();
@@ -138,6 +178,19 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
         <p className="font-source text-[11px] font-semibold text-warning">Límite: {source.limit}</p>
       </article>)}
     </div>
+
+    <section className="space-y-2.5 pt-2">
+      <h2 className="font-noto text-xs font-bold uppercase tracking-wider text-accent">Catálogo Oficial de Fuentes y Enlaces Conectados</h2>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {OFFICIAL_REFERENCES.map(({ title, url, description, icon: Icon }) => <a key={title} href={url} target="_blank" rel="noreferrer" className="flex items-start gap-2.5 rounded-xl border border-border bg-surface p-3 transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+          <Icon className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center justify-between gap-2"><span className="truncate font-noto text-xs font-bold text-text-primary">{title}</span><ExternalLink className="h-3 w-3 shrink-0 text-info" aria-hidden /></span>
+            <span className="mt-0.5 block text-[11px] leading-snug text-text-secondary">{description}</span>
+          </span>
+        </a>)}
+      </div>
+    </section>
 
     <div className="flex items-start gap-3 rounded-2xl border border-info/40 bg-info-soft p-4 text-xs">
       <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-info" />
