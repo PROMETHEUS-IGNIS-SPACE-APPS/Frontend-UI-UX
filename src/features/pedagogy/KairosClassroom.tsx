@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
-import PedagogicalPanel from './PedagogicalPanel';
 import {
   KAIROS_CLOSING,
   KAIROS_DATA_SECTION,
@@ -45,7 +44,7 @@ function InfographicCard({ section, onExpand }: { section: KairosSection; onExpa
   </article>;
 }
 
-/** KAIRÓS, Aula Pedagógica: infografías de prevención y actividades interactivas. */
+/** KAIRÓS, Aula Pedagógica: infografías de prevención. */
 export default function KairosClassroom() {
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
   const [headerFailed, setHeaderFailed] = useState(false);
@@ -125,13 +124,6 @@ export default function KairosClassroom() {
         </div>
         {wide && <p className="mt-3 text-center font-sans text-sm font-bold text-[#5C260E]">{wide.title}</p>}
       </section>
-    </div>
-
-    <div className="mt-10 w-full bg-background text-text-primary sm:mt-16">
-      <div className="mx-auto w-full max-w-7xl px-0 pt-2 sm:px-2">
-        <h2 className="px-4 pt-6 font-noto text-lg font-bold sm:px-6">Actividades interactivas</h2>
-        <PedagogicalPanel />
-      </div>
     </div>
 
     <p className="mx-auto mb-8 mt-10 w-full max-w-3xl px-6 text-center font-noto text-xs font-medium leading-relaxed text-[#B8531E] sm:mb-12 sm:mt-16 sm:text-sm">{KAIROS_CLOSING}</p>

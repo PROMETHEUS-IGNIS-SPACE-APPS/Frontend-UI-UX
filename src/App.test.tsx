@@ -120,7 +120,7 @@ describe('App shell de pestañas', () => {
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Abrir Instructivo metodológico' }));
-    expect(screen.getByRole('dialog', { name: 'PROMETHEUS IGNIS — Manual Metodológico' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Instructivo oficial de uso' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Guardar como PDF' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
   });
@@ -170,15 +170,16 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
-  it('muestra el Aula Pedagógica con lecciones y matriz interactiva', async () => {
+  it('muestra KAIRÓS, Aula Pedagógica con sus guías de prevención', async () => {
     const user = userEvent.setup();
     renderApp();
 
     const desktopTablist = screen.getByRole('tablist', { name: 'Módulos' });
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Aula Pedagógica' }));
 
-    expect(screen.getByRole('heading', { name: 'Aprende a leer las observaciones' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Matriz de Gestión del Riesgo 5×5' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '1. Prevención en el hogar' })).toBeInTheDocument();
+    expect(screen.queryByText('Actividades interactivas')).not.toBeInTheDocument();
   });
 
   it('deshabilita la exportación CSV sin registros visibles', () => {
