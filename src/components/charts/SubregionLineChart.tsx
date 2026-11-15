@@ -50,8 +50,8 @@ export default function SubregionLineChart({ title, badge, series, showArea = fa
       <span className="shrink-0 whitespace-nowrap rounded-md border border-border bg-surface px-2.5 py-0.5 font-source text-[11px] font-semibold text-text-secondary">{badge}</span>
     </div>
 
-    <div className="relative w-full">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-auto w-full select-none overflow-visible" role="img" aria-label={title} onMouseLeave={() => setHovered(null)}>
+    <div className="relative -mx-1 w-full overflow-x-auto px-1">
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-auto w-full min-w-[520px] select-none overflow-visible" role="img" aria-label={title} onMouseLeave={() => setHovered(null)}>
         {Array.from({ length: 5 }).map((_, index) => {
           const value = (yMax / 4) * index;
           return <g key={index}>

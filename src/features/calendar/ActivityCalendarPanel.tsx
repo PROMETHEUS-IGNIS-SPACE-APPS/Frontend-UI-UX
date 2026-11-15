@@ -98,7 +98,7 @@ export default function ActivityCalendarPanel({ observations, totalMatching, pro
     <article className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
         <div><h2 className="font-noto text-sm font-bold text-text-primary">Frecuencia mensual</h2><p className="mt-0.5 font-source text-[11px] text-text-secondary">Hasta 12 meses disponibles · conteos por instrumento</p></div>
-        <div className="flex gap-3 font-source text-[11px] font-bold"><span className="text-red-400">● VIIRS</span><span className="text-yellow-300">● MODIS</span></div>
+        <div className="flex gap-3 font-source text-[11px] font-bold"><span className="text-sensor-viirs">● VIIRS</span><span className="text-sensor-modis">● MODIS</span></div>
       </div>
       {monthly.length ? <div className="grid min-h-48 grid-cols-3 items-end gap-3 border-b border-l border-border-strong px-2 sm:grid-cols-6 lg:grid-cols-12">{monthly.map(([month, count]) => <div key={month} className="flex h-48 min-w-0 flex-col items-center justify-end gap-1"><div className="flex h-[86%] w-full items-end justify-center gap-1"><span title={`VIIRS: ${count.VIIRS}`} className="w-1/2 rounded-t-sm bg-red-500/80" style={{ height: `${Math.max(count.VIIRS ? 4 : 0, (count.VIIRS / maxMonthly) * 100)}%` }} /><span title={`MODIS: ${count.MODIS}`} className="w-1/2 rounded-t-sm bg-yellow-400/80" style={{ height: `${Math.max(count.MODIS ? 4 : 0, (count.MODIS / maxMonthly) * 100)}%` }} /></div><span className="pb-1 font-source text-[10px] uppercase text-text-secondary">{new Intl.DateTimeFormat('es', { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(new Date(`${month}-01T00:00:00Z`))}</span></div>)}</div> : <p className="rounded-xl border border-border bg-surface p-4 text-xs text-text-secondary">No hay fechas para resumir en la consulta.</p>}
     </article>
@@ -115,8 +115,8 @@ export default function ActivityCalendarPanel({ observations, totalMatching, pro
             <div style={{ width: `${Math.max(8, Math.round((total / maxDaily) * 100))}%` }} className={`h-full rounded-full ${day.highFrp > 0 ? 'bg-danger' : 'bg-accent-solid'}`} />
           </div>
           <dl className="grid grid-cols-2 gap-1.5 rounded-xl border border-border bg-surface p-2.5 font-source text-[11px]">
-            <div className="flex items-center justify-between"><dt className="font-semibold text-red-400">VIIRS:</dt><dd className="font-bold text-text-primary">{day.VIIRS}</dd></div>
-            <div className="flex items-center justify-between"><dt className="font-semibold text-yellow-300">MODIS:</dt><dd className="font-bold text-text-primary">{day.MODIS}</dd></div>
+            <div className="flex items-center justify-between"><dt className="font-semibold text-sensor-viirs">VIIRS:</dt><dd className="font-bold text-text-primary">{day.VIIRS}</dd></div>
+            <div className="flex items-center justify-between"><dt className="font-semibold text-sensor-modis">MODIS:</dt><dd className="font-bold text-text-primary">{day.MODIS}</dd></div>
             <div className="flex items-center justify-between"><dt className="font-semibold text-danger">FRP≥30:</dt><dd className="font-bold text-text-primary">{day.highFrp}</dd></div>
             <div className="col-span-2 flex items-center justify-between"><dt className="font-semibold text-info">FRP promedio:</dt><dd className="font-bold text-text-primary">{day.frpCount ? `${(day.frpTotal / day.frpCount).toFixed(1)} MW` : 'No disponible'}</dd></div>
           </dl>

@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Calendar, Flame, Info, Moon, Satellite, Sun } from 'lucide-react';
+import { Activity, AlertTriangle, Calendar, Download, Flame, Info, Moon, Satellite, Sun } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Observation } from '@/types/api/observations';
 import { ModuleHeader, ModulePage, ProvenanceNote } from '@/components/common/ModuleLayout';
@@ -7,9 +7,10 @@ interface AnalyticsPanelProps {
   observations: Observation[];
   totalMatching: number;
   provenance: string;
+  onExportCsv?: () => void;
 }
 
-export default function AnalyticsPanel({ observations, totalMatching, provenance }: AnalyticsPanelProps) {
+export default function AnalyticsPanel({ observations, totalMatching, provenance, onExportCsv }: AnalyticsPanelProps) {
   const viirs = observations.filter((item) => item.sensor === 'VIIRS');
   const modis = observations.filter((item) => item.sensor === 'MODIS');
   const hasObservations = observations.length > 0;
@@ -43,6 +44,7 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
       icon={Activity}
       title="Analítica Territorial"
       description="Indicadores descriptivos de los registros recibidos del Backend-API, separados por instrumento."
+      actions={onExportCsv && <button type="button" onClick={onExportCsv} disabled={!observations.length} className="ignis-action ignis-action-primary"><Download className="h-4 w-4" aria-hidden />Exportar consulta CSV (<span className="font-source">{observations.length.toLocaleString()}</span>)</button>}
     />
 
     <div className="flex items-start gap-3 rounded-2xl bg-warning-soft p-4 text-xs text-text-primary">
@@ -50,9 +52,9 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
       <div className="space-y-1"><p className="font-semibold text-warning">Regla metodológica de armonización:</p><p className="text-[11px] leading-relaxed text-text-secondary">MODIS y VIIRS tienen resoluciones y horarios de observación distintos. Se muestran por separado: más detecciones no significa necesariamente más incendios.</p></div>
     </div>
 
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <KpiCard label="Sensor VIIRS (~375 m)" tag="Detecciones" value={viirs.length.toLocaleString()} detail="Conteo de observaciones VIIRS" color="text-red-400" icon={<Satellite className="h-4 w-4" />} />
-      <KpiCard label="Sensor MODIS (~1 km)" tag="Detecciones" value={modis.length.toLocaleString()} detail="Conteo de observaciones MODIS" color="text-yellow-300" icon={<Satellite className="h-4 w-4" />} />
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
+      <KpiCard label="Sensor VIIRS (~375 m)" tag="Detecciones" value={viirs.length.toLocaleString()} detail="Conteo de observaciones VIIRS" color="text-sensor-viirs" icon={<Satellite className="h-4 w-4" />} />
+      <KpiCard label="Sensor MODIS (~1 km)" tag="Detecciones" value={modis.length.toLocaleString()} detail="Conteo de observaciones MODIS" color="text-sensor-modis" icon={<Satellite className="h-4 w-4" />} />
       <KpiCard label="Índice de Recurrencia" tag="Ordinal" value={hasObservations ? `${recurrenceScore} / 100` : 'No disponible'} detail={hasObservations ? recurrenceLevel : 'Sin observaciones para calcularlo'} color="text-info" icon={<Activity className="h-4 w-4" />} />
       <KpiCard label="FRP promedio / máxima" tag="MW" value={frpValues.length ? `${(frpValues.reduce((sum, value) => sum + value, 0) / frpValues.length).toFixed(1)} / ${maximumFrp} MW` : 'No disponible'} detail={`${frpValues.length} observaciones con FRP disponible`} color="text-danger" icon={<Flame className="h-4 w-4" />} />
     </div>
@@ -88,8 +90,8 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
         <div className="overflow-x-auto"><table className="w-full border-collapse text-left text-xs">
           <thead><tr className="border-b border-border font-noto text-[11px] text-text-secondary"><th className="py-2">Sensor</th><th className="py-2">Plataformas</th><th className="py-2">Resolución</th><th className="py-2">Implicación territorial</th></tr></thead>
           <tbody className="divide-y divide-border font-source text-[11px]">
-            <tr><td className="py-2 font-bold text-red-400">VIIRS</td><td className="py-2 text-text-primary">Suomi-NPP, NOAA-20/21</td><td className="py-2 text-text-primary">~375 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Detecta anomalías térmicas más pequeñas.</td></tr>
-            <tr><td className="py-2 font-bold text-yellow-300">MODIS</td><td className="py-2 text-text-primary">Terra, Aqua</td><td className="py-2 text-text-primary">~1000 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Serie histórica más larga, menor detalle espacial.</td></tr>
+            <tr><td className="py-2 font-bold text-sensor-viirs">VIIRS</td><td className="py-2 text-text-primary">Suomi-NPP, NOAA-20/21</td><td className="py-2 text-text-primary">~375 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Detecta anomalías térmicas más pequeñas.</td></tr>
+            <tr><td className="py-2 font-bold text-sensor-modis">MODIS</td><td className="py-2 text-text-primary">Terra, Aqua</td><td className="py-2 text-text-primary">~1000 m</td><td className="py-2 font-sans text-[10px] text-text-secondary">Serie histórica más larga, menor detalle espacial.</td></tr>
           </tbody>
         </table></div>
       </article>
@@ -113,9 +115,9 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
 }
 
 function KpiCard({ label, tag, value, detail, color, icon }: { label: string; tag: string; value: string; detail: string; color: string; icon: ReactNode }) {
-  return <article className="relative space-y-2 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm">
-    <div className="flex items-center justify-between text-xs text-text-secondary"><span className="font-source">{label}</span><span className={`flex items-center gap-1 font-source text-[10px] font-semibold ${color}`}>{tag}{icon}</span></div>
-    <p className={`font-source text-3xl font-extrabold ${color}`}>{value}</p>
+  return <article className="relative min-w-0 space-y-2 overflow-hidden rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
+    <div className="flex items-start justify-between gap-1 text-[11px] text-text-secondary sm:text-xs"><span className="font-source leading-tight">{label}</span><span className={`flex items-center gap-1 font-source text-[10px] font-semibold ${color}`}>{tag}{icon}</span></div>
+    <p className={`break-words font-source text-xl font-extrabold sm:text-3xl ${color}`}>{value}</p>
     <span className="block text-[11px] text-text-secondary">{detail}</span>
   </article>;
 }

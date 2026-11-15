@@ -105,6 +105,43 @@ describe('App shell de pestañas', () => {
     expect(await screen.findByText('Capa predictiva pendiente')).toBeInTheDocument();
   });
 
+  it('cambia entre tema oscuro y claro desde el encabezado', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Cambiar a modo claro' }));
+    expect(document.documentElement).toHaveClass('light');
+    await user.click(screen.getByRole('button', { name: 'Cambiar a modo oscuro' }));
+    expect(document.documentElement).not.toHaveClass('light');
+  });
+
+  it('abre el Instructivo con opción de guardarlo como PDF', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Abrir Instructivo metodológico' }));
+    expect(screen.getByRole('dialog', { name: 'PROMETHEUS IGNIS — Manual Metodológico' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guardar como PDF' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
+  });
+
+  it('muestra la pestaña Fuentes/API con los endpoints consultados', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('tab', { name: 'Fuentes/API' }));
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Fuentes/API');
+    expect(screen.getByText('/api/fusion/historical-all?region')).toBeInTheDocument();
+  });
+
+  it('ofrece Guía y Reportar en Terreno sobre el mapa', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(await screen.findByRole('button', { name: 'Reportar en terreno' }));
+    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+  });
+
   it('abre el módulo Calendario desde la navegación', async () => {
     const user = userEvent.setup();
     renderApp();
