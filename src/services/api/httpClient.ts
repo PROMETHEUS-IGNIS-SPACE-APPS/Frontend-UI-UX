@@ -45,8 +45,8 @@ function readBaseUrl(): string {
 }
 
 /** Construye la URL absoluta de un endpoint del API, p. ej. `buildApiUrl('/health')`. */
-export function buildApiUrl(path: string): string {
-  return `${readBaseUrl()}${API_VERSION_PREFIX}${path}`;
+export function buildApiUrl(path: string, apiPrefix = API_VERSION_PREFIX): string {
+  return `${readBaseUrl()}${apiPrefix}${path}`;
 }
 
 /**
@@ -55,10 +55,12 @@ export function buildApiUrl(path: string): string {
  */
 export async function requestJson(
   path: string,
-  options: { timeoutMs?: number } = {},
+  options: { timeoutMs?: number; signal?: AbortSignal; apiPrefix?: '/api' | '/api/v1' } = {},
 ): Promise<{ status: number; body: unknown }> {
-  const url = buildApiUrl(path);
+  const url = buildApiUrl(path, options.apiPrefix ?? API_VERSION_PREFIX);
   const controller = new AbortController();
+  const abortFromCaller = () => controller.abort();
+  options.signal?.addEventListener('abort', abortFromCaller, { once: true });
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -91,5 +93,6 @@ export async function requestJson(
     throw new ApiError('network', `No fue posible contactar el Backend-API (${path}).`, null);
   } finally {
     clearTimeout(timeoutHandle);
+    options.signal?.removeEventListener('abort', abortFromCaller);
   }
 }

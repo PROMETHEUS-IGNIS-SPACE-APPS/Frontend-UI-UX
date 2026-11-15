@@ -11,10 +11,10 @@ interface ModulePlaceholderProps {
  */
 export default function ModulePlaceholder({ title, description }: ModulePlaceholderProps) {
   return (
-    <section className="flex min-h-[50vh] flex-col items-center justify-center gap-3 rounded-xl border border-slate-800 bg-[#08111e] p-10 text-center">
-      <h2 className="text-2xl font-semibold text-amber-400">{title}</h2>
-      <p className="max-w-md text-sm text-slate-400">{description}</p>
-      <p className="text-xs font-medium uppercase tracking-widest text-slate-500">
+    <section className="flex min-h-[50vh] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-10 text-center">
+      <h2 className="text-2xl font-semibold text-accent">{title}</h2>
+      <p className="max-w-md text-sm text-text-secondary">{description}</p>
+      <p className="text-xs font-medium uppercase tracking-widest text-text-secondary">
         Módulo en desarrollo
       </p>
     </section>

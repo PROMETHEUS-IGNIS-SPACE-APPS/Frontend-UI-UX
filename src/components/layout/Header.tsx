@@ -1,14 +1,18 @@
-import { Activity, BookOpen, Cpu, Download, Layers, Sparkles } from 'lucide-react';
-
+import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Moon, Radar, Satellite, Server, Sun, TrendingUp } from 'lucide-react';
+import { useUiStore } from '@/stores/uiStore';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
+import EmergencyAccess from './EmergencyAccess';
+import LocalCsvAccess from './LocalCsvAccess';
+import ManualAccess from './ManualAccess';
+import MobileBottomNav from './MobileBottomNav';
+import NoveltyReportAccess from './NoveltyReportAccess';
 import logoPng from '@/assets/PROMETHEUS_IGNIS.png';
 
 interface HeaderProps {
   activeModule: AppModuleId;
   onModuleChange: (moduleId: AppModuleId) => void;
-  /** Número de registros visibles tras los filtros (export CSV). */
   totalVisibleCount: number;
   onExportCsv: () => void;
   onOpenGlossary: () => void;
@@ -16,162 +20,126 @@ interface HeaderProps {
 
 const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   explorer: Layers,
+  predictability: TrendingUp,
+  'markov-heatmap': Radar,
+  calendar: CalendarDays,
   analytics: Activity,
-  comparison: Sparkles,
+  comparison: HeartHandshake,
   laboratory: Cpu,
+  sources: Server,
+};
+
+/** Etiquetas visibles cortas, como en la barra del ejemplo. */
+const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
+  explorer: 'Mapa',
+  predictability: 'Predictibilidad',
+  'markov-heatmap': 'Mapa de Calor Markov',
+  calendar: 'Calendario',
+  analytics: 'Analítica',
+  comparison: 'Aula Pedagógica',
+  laboratory: 'Modelos IA',
+  sources: 'Fuentes/API',
 };
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
+  predictability: 'Predicción',
+  'markov-heatmap': 'Calor Markov',
+  calendar: 'Calendario',
   analytics: 'Analítica',
-  comparison: 'Matriz 5×5',
+  comparison: 'Aula',
   laboratory: 'Modelos IA',
+  sources: 'Fuentes',
 };
 
-/**
- * Cabecera congelada de la interfaz (plantilla `../prometheus-ignis`):
- * logo institucional, navegación por pestañas (escritorio + móvil),
- * indicador pasivo de conexión, glosario y exportación CSV.
- * Sin pestaña FastAPI Lab y sin conmutador Demostración/Lab Real (fuera de alcance).
- */
-export default function Header({
-  activeModule,
-  onModuleChange,
-  totalVisibleCount,
-  onExportCsv,
-  onOpenGlossary,
-}: HeaderProps) {
+const SMALL_BUTTON = 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400';
+
+export default function Header({ activeModule, onModuleChange, totalVisibleCount, onExportCsv, onOpenGlossary }: HeaderProps) {
+  const theme = useUiStore((state) => state.theme);
+  const toggleTheme = useUiStore((state) => state.toggleTheme);
   const canExport = totalVisibleCount > 0;
   const exportTitle = canExport
     ? `Exportar ${totalVisibleCount} registros filtrados a CSV`
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
 
   return (
-    <header className="border-b border-slate-800/80 bg-[#070e1a]/90 backdrop-blur-md sticky top-0 z-40 select-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-3">
-          {/* Logo & Title */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10">
-              <img
-                src={logoPng}
-                alt=""
-                className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-orange-500/20 ring-1 ring-white/20"
-              />
-              <div
-                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-cyan-400 rounded-full border-2 border-[#070e1a]"
-                title="Armonización MODIS + VIIRS"
-                aria-hidden
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold tracking-wider text-base sm:text-lg bg-gradient-to-r from-amber-200 via-orange-300 to-amber-500 bg-clip-text text-transparent font-mono whitespace-nowrap">
-                  PROMETHEUS IGNIS
-                </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 font-mono whitespace-nowrap">
-                  MODIS · VIIRS
-                </span>
+    <header className="relative z-40 md:sticky md:top-0 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card text-text-primary shadow-xs">
+      <div className="mx-auto w-full max-w-[1440px] px-2.5 sm:px-4">
+        {/* Fila superior: marca, navegación y herramientas */}
+        <div className="flex flex-nowrap items-center justify-between gap-2 py-2 lg:flex-wrap 2xl:flex-nowrap">
+          <div className="flex min-w-0 items-center gap-2.5 lg:shrink-0">
+            <img src={logoPng} alt="" className="h-8 w-8 shrink-0 sm:h-9 sm:w-9 rounded-xl object-cover shadow-md" />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="whitespace-nowrap font-noto text-sm font-extrabold tracking-wide text-text-primary sm:text-[15px]">PROMETHEUS IGNIS</span>
+                <span className="hidden whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 font-source text-[10px] font-bold tracking-wide text-accent sm:inline">MODIS · VIIRS</span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                Plataforma de Inteligencia Territorial ·{' '}
-                <span className="text-slate-300">Semillero de Astronomía ITM</span>
-              </p>
+              <p className="hidden truncate text-[11px] leading-tight text-text-secondary sm:block">Plataforma de Inteligencia Territorial · Semillero ITM</p>
             </div>
           </div>
 
-          {/* Navigation Tabs (desktop) */}
-          <nav
-            aria-label="Módulos"
-            role="tablist"
-            className="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800"
-          >
-            {renderDesktopTabs()}
+          <nav aria-label="Módulos" role="tablist" className="order-3 hidden w-full max-w-full flex-wrap items-center justify-center gap-0.5 rounded-xl border border-border bg-card p-1 lg:flex 2xl:order-2 2xl:w-auto 2xl:flex-nowrap">
+            {renderTabs('desktop')}
           </nav>
 
-          {/* Right Controls: connection status & actions */}
-          <div className="flex items-center gap-2">
-            <ConnectionIndicator />
-
-            {/* Glossary Button */}
-            <button
-              type="button"
-              onClick={onOpenGlossary}
-              title="Glosario Científico de Términos (FIRMS, FRP, Píxel, Recurrencia)"
-              aria-label="Abrir glosario científico"
-              className="p-1.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-amber-300 hover:border-slate-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
-            >
-              <BookOpen className="w-4 h-4" aria-hidden />
+          <div className="order-2 flex shrink-0 items-center gap-1 sm:gap-1.5 2xl:order-3">
+            <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-accent transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+              {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
             </button>
-
-            {/* CSV Export Button */}
-            <button
-              type="button"
-              onClick={onExportCsv}
-              disabled={!canExport}
-              title={exportTitle}
-              aria-label={exportTitle}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
-            >
-              <Download className="w-3.5 h-3.5 text-amber-400" aria-hidden />
-              <span className="hidden sm:inline">CSV ({totalVisibleCount})</span>
+            <button type="button" onClick={onOpenGlossary} aria-label="Abrir glosario científico" title="Guía y Glosario Científico" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+              <BookOpen className="h-4 w-4" aria-hidden />
             </button>
+            <ManualAccess />
           </div>
         </div>
 
-        {/* Mobile Navigation Bar */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-800/60 text-xs">
-          {renderMobileTabs()}
+        {/* Fila inferior: estado de datos y acciones rápidas */}
+        <div className="-mx-2.5 flex flex-nowrap items-center justify-between gap-2 overflow-x-auto border-t border-border px-2.5 py-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+          <div className="flex shrink-0 items-center gap-1.5 sm:min-w-0 sm:shrink sm:flex-wrap">
+            <div className="hidden items-center gap-1 overflow-x-auto md:flex lg:hidden">{renderTabs('mobile')}</div>
+            <ConnectionIndicator />
+            <LocalCsvAccess />
+            <span className={`${SMALL_BUTTON.replace('inline-flex ', '')} hidden bg-card text-text-primary sm:inline-flex`}>
+              <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+              <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>
+            </span>
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5 sm:flex-wrap">
+            <EmergencyAccess />
+            <NoveltyReportAccess />
+            <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
+              <Download className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+              <span className="hidden sm:inline">Descargar Reportes (.CSV)</span>
+              <span className="sm:hidden">CSV</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount}</span>
+            </button>
+          </div>
         </div>
       </div>
+      <MobileBottomNav activeModule={activeModule} onModuleChange={onModuleChange} />
     </header>
   );
 
-  function renderDesktopTabs() {
+  function renderTabs(variant: 'desktop' | 'mobile') {
     return APP_MODULES.map((module) => {
       const Icon = MODULE_ICONS[module.id];
       const isActive = module.id === activeModule;
-      return (
-        <button
-          key={module.id}
-          type="button"
-          role="tab"
-          id={`tab-${module.id}-desktop`}
-          aria-selected={isActive}
-          aria-controls={`panel-${module.id}`}
-          onClick={() => onModuleChange(module.id)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${
-            isActive
-              ? 'bg-amber-500 text-slate-950 font-semibold shadow-sm shadow-amber-500/20'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-          }`}
-        >
-          <Icon className="w-3.5 h-3.5" aria-hidden />
-          <span>{module.label}</span>
-        </button>
-      );
-    });
-  }
-
-  function renderMobileTabs() {
-    return APP_MODULES.map((module) => {
-      const isActive = module.id === activeModule;
-      return (
-        <button
-          key={`mobile-${module.id}`}
-          type="button"
-          role="tab"
-          id={`tab-${module.id}-mobile`}
-          aria-selected={isActive}
-          aria-controls={`panel-${module.id}`}
-          onClick={() => onModuleChange(module.id)}
-          className={`px-2 py-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${
-            isActive ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          {MOBILE_MODULE_LABELS[module.id]}
-        </button>
-      );
+      const visibleLabel = variant === 'mobile' ? MOBILE_MODULE_LABELS[module.id] : DESKTOP_MODULE_LABELS[module.id];
+      return <button
+        key={`${variant}-${module.id}`}
+        type="button"
+        role="tab"
+        id={`tab-${module.id}-${variant}`}
+        aria-selected={isActive}
+        aria-controls={`panel-${module.id}`}
+        aria-label={variant === 'desktop' ? module.label : undefined}
+        title={module.label}
+        onClick={() => onModuleChange(module.id)}
+        className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 font-noto text-[11px] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${isActive ? 'bg-accent-solid font-bold text-accent-fg shadow-sm' : 'font-medium text-text-primary/80 hover:bg-surface-hover hover:text-text-primary'}`}
+      >
+        <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span>{visibleLabel}</span>
+      </button>;
     });
   }
 }

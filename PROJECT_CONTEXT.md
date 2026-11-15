@@ -14,7 +14,7 @@ La interfaz de referencia aprobada es la propuesta exportada de Google AI Studio
 
 Reglas de la fuente congelada:
 
-1. **La UI es innegociable.** Las pantallas, componentes, jerarquías, leyendas, microcopy y estructura de los 4 módulos se reproduce fielmente. Los textos de la plantilla (banners científicos, glosario, advertencias, guía rápida) son contenido canónico; solo admiten ajustes mínimos de redacción sin alterar su sentido.
+1. **La UI de referencia guía la implementación.** Las pantallas, componentes, jerarquías, leyendas y microcopy se reproducen fielmente cuando son compatibles con los contratos y las decisiones del equipo. La navegación actual de seis pestañas fue aprobada por solicitud del usuario; no se presentan módulos sin datos como si estuvieran operativos.
 2. **Quedan excluidos del alcance**, por decisión del equipo:
    - La pestaña y el modal **FastAPI Lab** (el backend se consume exclusivamente mediante `VITE_API_BASE_URL`; los errores de conexión se muestran como estados en línea, sin panel de configuración de URL).
    - Las capas de **límites administrativos** (`ANTIOQUIA_SUBREGIONS_GEOJSON` / `COLOMBIA_BOUNDARIES_GEOJSON` y sus checks en el panel Capas). Quedan como extensión futura con geometrías oficiales (IGAC/DANE) y procedencia citada, si el equipo las aprueba.
@@ -28,14 +28,17 @@ Reglas de la fuente congelada:
 
 PROMETHEUS IGNIS es una plataforma de inteligencia territorial para explorar, analizar y comunicar detecciones de focos de calor obtenidas por los instrumentos MODIS y VIIRS, con alcance territorial **Antioquia → Colombia**.
 
-Es una aplicación de **una sola página con navegación por pestañas** (sin React Router en v1). Los cuatro módulos comparten la misma sesión: el mismo estado de filtros, la misma conexión y el mismo conjunto de observaciones descargadas del backend.
+Es una aplicación de **una sola página con navegación por pestañas** (sin React Router en v1). Los módulos comparten la misma sesión: el mismo estado de filtros, la misma conexión y el mismo conjunto de observaciones descargadas del backend.
 
 El producto entregado en esta versión:
 
 - Explora geográficamente las observaciones del backend (Mapa Territorial) con filtros por departamento/municipio, período, sensor, plataforma, confianza, día/noche, FRP mínimo y búsqueda.
 - Registra la evolución temporal de las observaciones con una línea de tiempo funcional (reproducción, scrubber e histograma diario) que filtra los puntos del mapa.
 - Presenta analítica histórica descriptiva: conteos por sensor (nunca sumados), índice de recurrencia oficial v1.0, FRP promedio/máxima, evolución mensual, distribución día/noche y ficha técnica comparativa de sensores.
+- Resume en un calendario analítico la actividad diaria del conjunto cargado, con conteos separados por sensor y FRP disponible por fecha en UTC; los meses de distintos años se mantienen diferenciados.
+- Presenta la pestaña Predictibilidad como estado informativo hasta que existan modelos publicados y validados; no calcula pronósticos en el frontend.
 - Sitúa la gestión del riesgo territorial con la Matriz 5×5 oficial (P = Amenaza × Consecuencia) sobre zonas documentadas.
+- Incluye un Aula Pedagógica con lecciones y preguntas de comprensión sobre los conceptos y cautelas científicas del producto; la matriz 5×5 interactiva está integrada en esa pestaña.
 - Expone las fichas de los modelos entrenados por el AI-Pipeline del proyecto (Laboratorio IA), sin ejecutar nada en el navegador.
 - Permite exportar a CSV los registros descargados y filtrados, y explica la procedencia del conjunto consultado.
 - Incluye glosario científico y guía de uso.
@@ -44,9 +47,11 @@ El producto entregado en esta versión:
 
 #### 2.1 Módulos navegables (pestañas)
 
+La navegación actual organiza seis pestañas: Mapa Territorial, Predictibilidad, Calendario, Aula Pedagógica, Analítica y Laboratorio IA. FastAPI Lab permanece excluido.
+
 1. **Mapa Territorial** (`TerritorialMap.tsx`)
    - Mapa MapLibre GL centrado en Antioquia `[longitude, latitude] = [-75.6, 6.4]`, zoom 7.
-   - 4 basemaps intercambiables: OpenFreeMap Liberty, Satélite (Esri World Imagery + etiquetas), Topográfico (Esri World Topo) y Oscuro (Carto dark). Se conservan las atribuciones de cada proveedor y las capas de datos se re-agregan tras el cambio de estilo.
+   - Selector de estilos OpenFreeMap Liberty, Bright, Positron y Dark. Los estilos comparten proveedor para conservar atribución y comportamiento coherente; imagery satelital/topográfica de otros proveedores sigue pendiente de evaluación.
    - Vistas rápidas de cámara (`flyTo`): Antioquia (z 7.2), Colombia [-73.5, 4.5] (z 5.2), Valle de Aburrá [-75.58, 6.25] (z 11.0), Bajo Cauca [-75.1, 7.75] (z 8.6) y Urabá [-76.7, 8.1] (z 8.8). Son presets de cámara, no capas de límites.
    - Capas de focos sobre una única source GeoJSON (render WebGL, nunca un marcador DOM por punto): puntos por sensor (VIIRS naranja `#ea580c`, MODIS ámbar `#fbbf24`), halo según sensor y capa de densidad térmica (heatmap FRP) activable.
    - Colores de datos: halo MODIS `#f59e0b`, halo VIIRS `#ff5722`; bordes de punto blancos, en cian `#38bdf8` cuando la concordancia sea `coincident_high` (ver definiciones).
@@ -57,23 +62,35 @@ El producto entregado en esta versión:
    - Modal de ayuda «¿Cómo usar PROMETHEUS IGNIS en 3 pasos?» (texto canónico de la plantilla).
    - Sin capas de límites administrativos (excluidas por decisión del equipo).
 
-2. **Analítica & Tiempos** (`AnalyticsPanel.tsx`)
+2. **Predictibilidad** (`PredictabilityPanel.tsx`)
+   - Comunica que no hay modelos predictivos publicados y explica qué validación falta.
+   - No calcula probabilidades a partir de conteos históricos ni copia los resultados sintéticos de `Ejemplo`.
+
+3. **Calendario** (`ActivityCalendarPanel.tsx`)
+   - Agrega actividad diaria y mensual por fecha UTC, separando VIIRS y MODIS y conservando FRP nula como no disponible.
+   - Permite abrir una fecha seleccionada en el mapa. Resume como máximo los registros recibidos; una consulta truncada puede omitir observaciones.
+
+4. **Analítica** (`AnalyticsPanel.tsx`)
    - Título con la zona evaluada (municipio → departamento → conjunto nacional).
    - Banner metodológico canónico: resoluciones y horarios de MODIS/VIIRS difieren; contar detecciones de ambos sensores junto sin armonización sesga el análisis; una mayor cantidad de detecciones no implica más incendios.
    - 4 tarjetas KPI: detecciones VIIRS, detecciones MODIS (siempre separadas), Índice de Recurrencia (score 0–100 + nivel oficial v1.0) y FRP promedio/máxima.
-   - Histograma mensual con barras agrupadas VIIRS/MODIS, tooltip por mes (conteo y FRP promedio) y leyenda.
-   - Distribución por horario orbital (pases diurnos/nocturnos), condicionada a la disponibilidad del campo `daynight` (ver modelo de datos).
-   - Ficha técnica comparativa de sensores (plataformas, resoluciones, implicación territorial) con referencias Giglio et al. (2016) y Schroeder et al. (2014).
+   - Tarjetas KPI para conteos VIIRS/MODIS, recurrencia v1.0 y FRP disponible.
+   - Distribución día/noche no disponible porque el contrato actual no contiene `daynight`.
+   - Ficha técnica comparativa de sensores sigue pendiente de su integración visual en esta pestaña.
    - Exportación CSV del conjunto filtrado.
 
-3. **Matriz 5×5** (`RiskMatrix5x5.tsx`)
+5. **Aula Pedagógica** (`PedagogicalPanel.tsx`)
+   - Lecciones breves y preguntas de comprensión sobre observaciones frente a incendios, diferencias entre MODIS y VIIRS, confianza original y FRP.
+   - Integra la matriz interactiva descrita abajo. El contenido educativo no presenta detecciones como incendios confirmados ni inventa equivalencias entre sensores.
+
+   **Matriz 5×5** (`RiskMatrix5x5.tsx`, dentro del aula)
    - Matriz de gestión del riesgo territorial 5×5: eje vertical Consecuencia (C), eje horizontal Amenaza (A), producto `P = A × C` (1–25) mostrado por celda.
    - Interactiva: clic en celda y sliders para fijar A y C manualmente; selector de zonas documentadas.
    - Perfil de zona: justificación de la amenaza, justificación de la consecuencia, elementos expuestos (población, infraestructura crítica, áreas protegidas, accesibilidad) y recomendaciones preventivas de planificación.
    - Advertencia metodológica canónica: el producto ordinal es un esquema ilustrativo de priorización; no estima riesgo probabilístico futuro; la distinción se comunica con texto y nivel ordinal, nunca solo con color.
    - Pie: orientaciones de planificación; no son instrucciones operativas para emergencias.
 
-4. **Laboratorio IA** (`AILaboratory.tsx`)
+6. **Laboratorio IA** (`AILaboratory.tsx`)
    - Muestra las fichas documentadas de los modelos publicados por el **AI-Pipeline** (ver «Arquitectura del sistema»): objetivo (`targetName`), versión, algoritmo, muestras, dataset, métrica base, CV F1 / CV accuracy / recall de la clase minoritaria, importancia de variables por permutación con descripción, variables excluidas por regla anti-fuga, matriz de confusión y nota de cautela científica.
    - Auditoría de ingesta (registros limpios/descartados por producto y año).
    - Control de reentrenamiento **bloqueado**: los modelos nunca se entrenan ni ejecutan en el navegador.
@@ -81,7 +98,7 @@ El producto entregado en esta versión:
 
 #### 2.2 Componentes compartidos
 
-- **Header** (`Header.tsx`): logo con núcleo de fuego y punto cian (armonización MODIS+VIIRS), título con degradado ámbar, badge cian «MODIS · VIIRS», subtítulo institucional; navegación por pestañas (barra horizontal en escritorio, barra compacta en móvil); **indicador pasivo de conexión con el backend** (sin configuración de URL); botón de glosario; botón de exportación CSV con contador de registros visibles. Sin conmutador de modo demostración.
+- **Header** (`Header.tsx`): logo con núcleo de fuego y punto cian (armonización MODIS+VIIRS), título con degradado ámbar, badge cian «MODIS · VIIRS», subtítulo institucional; navegación por pestañas (barra horizontal en escritorio, barra compacta en móvil); **indicador pasivo de conexión con el backend** (sin configuración de URL); botón de glosario; exportación CSV del conjunto visible con contador; acceso SOS voluntario con enlaces 123/119 y acción «Reportar Novedad». Esta última informa que el backend actual no recibe reportes ciudadanos; no simula ni almacena reportes. Sin conmutador de modo demostración.
 - **Modal Glosario** (`GlossaryModal.tsx`): 7 términos canónicos (foco de calor, MODIS vs VIIRS, FRP, confianza FIRMS, recurrencia histórica, marco UNDRR, matriz 5×5) con fuentes.
 - **Estados de UI** en toda la aplicación: carga, error de conexión, vacío, truncamiento y procedencia, siempre distinguibles entre sí.
 
@@ -173,20 +190,26 @@ Reglas transversales del modelo:
 
 - Repositorio: https://github.com/PROMETHEUS-IGNIS/Backend-API
 - Tecnología: Python + FastAPI + Pydantic.
-- Base URL local documentada: `http://127.0.0.1:8000`; prefijo de API `/api/v1`.
+- Base URL local documentada: `http://127.0.0.1:8000`; ingesta real en `/api`, endpoints demo heredados en `/api/v1`.
 - Swagger: `http://127.0.0.1:8000/docs`; OpenAPI: `http://127.0.0.1:8000/openapi.json`; contrato compartido: `docs/api-contracts.md` del backend.
 - **El OpenAPI servido y `docs/api-contracts.md` son la fuente de verdad.** Si este documento difiere del contrato vigente, no adivines: inspecciona el contrato actual y comunica la discrepancia.
 
-#### Endpoints documentados (API v0.1.0)
+#### Endpoints documentados (API v0.2.0)
 
 | Método | Ruta | Propósito |
 |---|---|---|
 | GET | `/api/v1/health` | Estado del servicio |
 | GET | `/api/v1/observations` | Consulta de observaciones |
+| GET | `/api/health` | Estado y capacidades de ingesta |
+| GET | `/api/ideam/directory` | Directorio de CSV IDEAM |
+| GET | `/api/ideam/observations` | Observaciones IDEAM por rango/área |
+| GET | `/api/firms/observations` | Feed público NASA FIRMS NRT de 7 días |
+| GET | `/api/fusion/observations` | Fusión IDEAM + FIRMS por rango/área |
+| GET | `/api/fusion/historical-all` | Cobertura histórica muestreada con tope documentado |
 
-Parámetros de `GET /api/v1/observations`: `sensor` (MODIS o VIIRS, opcional) y `limit` (entero 1–1000, por defecto 100). La versión documentada no tiene paginación; `total_matching` permite detectar truncamiento. La colección contiene `data`, `count`, `total_matching` y `data_provenance`.
+La interfaz consume IDEAM, FIRMS o fusión en vivo. IDEAM/fusión aceptan `from`, `to` (inclusivos), `region` y `bbox`; el rango IDEAM es de máximo 90 días. FIRMS entrega su feed NRT público de 7 días y acepta `region`/`bbox`. Estos endpoints devuelven `observations` y metadatos de procedencia; no usan la colección demo v0.1 (`data`, `count`, `total_matching`).
 
-Cada observación contiene: `observation_id`, `sensor` (MODIS/VIIRS), `latitude`, `longitude`, `acquired_at` (ISO 8601 UTC), `frp_mw` (MW o `null`), `confidence_raw` (entero o string) y `source`.
+Las observaciones reales incluyen `observation_id`, sensor, coordenadas, `acquired_at`, FRP nullable, `confidence_raw`, `department`, `municipality`, `daynight`, satélite, fuente/procedencia y URL de referencia. `confidence_score` del backend es una heurística provisional: no se presenta como puntuación científica ni se usa para filtrar.
 
 #### Discrepancia conocida con la plantilla
 
@@ -202,7 +225,7 @@ El cliente HTTP exportado de la plantilla (`src/services/fastapiClient.ts`) asum
 
 #### Dependencias solicitadas al backend (contratos futuros)
 
-La tabla completa y priorizada está en `ROADMAP.md` (sección «Dependencias y solicitudes al equipo backend»): campos FIRMS nativos (`satellite`, `daynight`, `brightness_k`, `department`, `municipality`), paginación/cursor, y el contrato de publicación de artefactos del AI-Pipeline.
+Pendientes de contrato adicional: paginación/cursor para consultas con tope y publicación de artefactos del AI-Pipeline. Los campos geográficos y temporales ya están disponibles en los endpoints v0.2.
 
 ### 7. Stack frontend previsto
 
