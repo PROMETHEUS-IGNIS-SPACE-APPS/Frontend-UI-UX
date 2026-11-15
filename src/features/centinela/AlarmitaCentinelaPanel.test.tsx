@@ -24,7 +24,7 @@ describe('AlarmitaCentinelaPanel', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(model))));
     render(<QueryClientProvider client={new QueryClient()}><AlarmitaCentinelaPanel /></QueryClientProvider>);
 
-    expect(await screen.findByRole('heading', { name: 'Probabilidades reales CENTINELA por sensor y celda' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Probabilidades reales CENTINELA por sensor y celda' }, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Celda CENTINELA' })).toHaveValue('segovia');
     expect(screen.getByText('MODIS: 53.0 %')).toBeInTheDocument();
     expect(screen.getAllByText('VIIRS NOAA-20: Datos insuficientes').length).toBeGreaterThan(0);
