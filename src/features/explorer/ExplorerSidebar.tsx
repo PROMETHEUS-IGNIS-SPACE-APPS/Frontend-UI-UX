@@ -37,9 +37,9 @@ interface ExplorerSidebarProps {
   sampling?: ObservationSamplingInfo;
   isTruncated: boolean;
   onReset: () => void;
-  categories: Pick<MapLayerState, 'viirs' | 'modis' | 'highIntensity'>;
-  categoryCounts: Record<'viirs' | 'modis' | 'highIntensity', number>;
-  onToggleCategory: (key: 'viirs' | 'modis' | 'highIntensity') => void;
+  categories: Pick<MapLayerState, 'viirs' | 'modis' | 'highIntensity' | 'citizen'>;
+  categoryCounts: Record<'viirs' | 'modis' | 'highIntensity' | 'citizen', number>;
+  onToggleCategory: (key: 'viirs' | 'modis' | 'highIntensity' | 'citizen') => void;
   onApplySourcePreset: (preset: SourcePreset) => void;
 }
 
@@ -60,6 +60,7 @@ const CATEGORY_ITEMS = [
   { key: 'viirs' as const, label: 'VIIRS', color: 'bg-[#ef4444]' },
   { key: 'modis' as const, label: 'MODIS', color: 'bg-[#facc15]' },
   { key: 'highIntensity' as const, label: `Alta (≥${HIGH_INTENSITY_FRP_MW}MW)`, color: 'bg-[#f97316]' },
+  { key: 'citizen' as const, label: 'Ciudadanos', color: 'bg-[#3b82f6]' },
 ];
 
 export default function ExplorerSidebar(props: ExplorerSidebarProps) {
@@ -86,7 +87,7 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
 
     <section className="space-y-1.5 rounded-xl border border-border bg-surface p-3">
       <h2 className="font-noto text-xs font-bold text-text-primary">Categorías Visuales (PROMETHEUS):</h2>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+      <div className="grid grid-cols-1 gap-y-0.5">
         {CATEGORY_ITEMS.map((item) => <label key={item.key} className="flex cursor-pointer items-center gap-2 py-1">
           <input type="checkbox" checked={props.categories[item.key]} onChange={() => props.onToggleCategory(item.key)} aria-label={`Mostrar ${item.label}`} className="accent-accent" />
           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-border-strong ${item.color}`} aria-hidden />
@@ -94,7 +95,7 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
           <span className="ml-auto pl-1 font-source text-[10px] text-text-secondary">{props.categoryCounts[item.key].toLocaleString()}</span>
         </label>)}
       </div>
-      <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS.</p>
+      <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS. Ciudadanos: reportes guardados en este dispositivo, sin verificación oficial.</p>
     </section>
 
     <section className="overflow-hidden rounded-xl border border-border bg-surface">

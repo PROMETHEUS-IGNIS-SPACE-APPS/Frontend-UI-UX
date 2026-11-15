@@ -6,7 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { Observation } from '@/types/api/observations';
 import { ANTIOQUIA_SUBREGIONS_GEOJSON, COLOMBIA_BOUNDARIES_GEOJSON } from '@/data/schematicBoundaries';
-import { DEFAULT_MAP_LAYERS, observationCategory, probabilityColor, type MapFocusPreset, type MapLayerState, type MapProbabilityCell, type MapStylePreset } from './mapPresets';
+import { DEFAULT_MAP_LAYERS, observationCategory, probabilityColor, type MapFocusPreset, type MapLayerState, type MapCitizenReport, type MapProbabilityCell, type MapStylePreset, CITIZEN_COLOR } from './mapPresets';
 
 interface ObservationMapProps {
   observations: Observation[];
@@ -21,12 +21,15 @@ interface ObservationMapProps {
   onSelectCell?: (id: string) => void;
   /** `squares`: celdas cuadradas (Mapa). `heat`: mancha difuminada por celda (Mapa de Calor, como el ejemplo). */
   cellStyle?: 'squares' | 'heat';
+  /** Reportes ciudadanos (se muestran si `layers.citizen`). */
+  reports?: MapCitizenReport[];
+  onSelectReport?: (id: string) => void;
 }
 
 const CATEGORY_COLORS = { viirs: '#ef4444', modis: '#facc15', highIntensity: '#f97316' };
 const POINT_LAYERS = ['observation-halo', 'observation-points'];
 
-export default function ObservationMap({ observations, selected, onSelect, focusTarget, mapStyle, layers, cells = [], onSelectCell, cellStyle = 'heat' }: ObservationMapProps) {
+export default function ObservationMap({ observations, selected, onSelect, focusTarget, mapStyle, layers, cells = [], onSelectCell, cellStyle = 'heat', reports = [], onSelectReport }: ObservationMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const currentObservations = useRef(observations);
@@ -37,6 +40,10 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   currentCells.current = cells;
   const onSelectCellRef = useRef(onSelectCell);
   onSelectCellRef.current = onSelectCell;
+  const currentReports = useRef(reports);
+  currentReports.current = reports;
+  const onSelectReportRef = useRef(onSelectReport);
+  onSelectReportRef.current = onSelectReport;
   const focusTargetRef = useRef(focusTarget);
   focusTargetRef.current = focusTarget;
   const mapStyleIdRef = useRef(mapStyle.id);
@@ -59,11 +66,13 @@ export default function ObservationMap({ observations, selected, onSelect, focus
     mapRef.current = map;
     map.addControl(new NavigationControl(), 'top-right');
     map.on('style.load', () => {
-      addDataLayers(map, currentObservations.current, currentCells.current);
+      addDataLayers(map, currentObservations.current, currentCells.current, currentReports.current);
       applyVisibility(map, layerStateRef.current, cellStyleRef.current);
     });
     map.on('click', (event) => {
       if (!map.getLayer('observation-points')) return;
+      const report = map.getLayoutProperty('citizen-points', 'visibility') !== 'none' ? map.queryRenderedFeatures(event.point, { layers: ['citizen-points'] })[0] : undefined;
+      if (report?.properties?.id) { onSelectReportRef.current?.(String(report.properties.id)); return; }
       const feature = map.queryRenderedFeatures(event.point, { layers: ['observation-points'] })[0];
       const id = feature?.properties?.id;
       const hit = currentObservations.current.find((item) => item.observation_id === id);
@@ -73,7 +82,7 @@ export default function ObservationMap({ observations, selected, onSelect, focus
       if (cell?.properties?.id) onSelectCellRef.current?.(String(cell.properties.id));
     });
     map.on('mousemove', (event) => {
-      const layersUnderCursor = ['observation-points', 'markov-cells', 'markov-heat-hit'].filter((id) => map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none');
+      const layersUnderCursor = ['observation-points', 'markov-cells', 'markov-heat-hit', 'citizen-points'].filter((id) => map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none');
       const hit = layersUnderCursor.length > 0 && map.queryRenderedFeatures(event.point, { layers: layersUnderCursor }).length > 0;
       map.getCanvas().style.cursor = hit ? 'pointer' : '';
     });
@@ -95,6 +104,10 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   }, [cells]);
 
   useEffect(() => {
+    (mapRef.current?.getSource('citizen-reports') as GeoJSONSource | undefined)?.setData(reportCollection(reports));
+  }, [reports]);
+
+  useEffect(() => {
     mapRef.current?.flyTo({ center: focusTarget.center, zoom: focusTarget.zoom, duration: 900 });
   }, [focusTarget.center, focusTarget.zoom]);
 
@@ -106,10 +119,10 @@ export default function ObservationMap({ observations, selected, onSelect, focus
     }
   }, [mapStyle]);
 
-  const { points, heatmap, colombiaBoundary, antioquiaSubregions, markov } = layerState;
+  const { points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen } = layerState;
   useEffect(() => {
-    if (mapRef.current) applyVisibility(mapRef.current, { ...DEFAULT_MAP_LAYERS, points, heatmap, colombiaBoundary, antioquiaSubregions, markov }, cellStyle);
-  }, [points, heatmap, colombiaBoundary, antioquiaSubregions, markov, cellStyle]);
+    if (mapRef.current) applyVisibility(mapRef.current, { ...DEFAULT_MAP_LAYERS, points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen }, cellStyle);
+  }, [points, heatmap, colombiaBoundary, antioquiaSubregions, markov, citizen, cellStyle]);
 
   useEffect(() => {
     if (selected) mapRef.current?.flyTo({ center: [selected.longitude, selected.latitude], zoom: 9 });
@@ -118,7 +131,7 @@ export default function ObservationMap({ observations, selected, onSelect, focus
   return <div ref={container} className="h-full min-h-[420px] w-full" aria-label="Mapa de observaciones MODIS y VIIRS" />;
 }
 
-function addDataLayers(map: MapLibreMap, observations: Observation[], cells: MapProbabilityCell[]) {
+function addDataLayers(map: MapLibreMap, observations: Observation[], cells: MapProbabilityCell[], reports: MapCitizenReport[]) {
   if (!map.getSource('colombia-boundaries')) {
     map.addSource('colombia-boundaries', { type: 'geojson', data: COLOMBIA_BOUNDARIES_GEOJSON });
     map.addLayer({ id: 'colombia-boundary-line', type: 'line', source: 'colombia-boundaries', paint: { 'line-color': '#0284c7', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': 0.9 } });
@@ -149,6 +162,7 @@ function addDataLayers(map: MapLibreMap, observations: Observation[], cells: Map
     map.addLayer({ id: 'markov-heat-hit', type: 'circle', source: 'markov-centroids', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 6, 9, 16, 12, 30], 'circle-opacity': 0 } });
   }
   if (map.getSource('observations')) return;
+  map.addSource('citizen-reports', { type: 'geojson', data: reportCollection(reports) });
   map.addSource('observations', { type: 'geojson', data: featureCollection(observations) });
   map.addLayer({
     id: 'observation-heatmap', type: 'heatmap', source: 'observations',
@@ -179,6 +193,15 @@ function addDataLayers(map: MapLibreMap, observations: Observation[], cells: Map
       'circle-stroke-color': '#ffffff',
     },
   });
+  map.addLayer({
+    id: 'citizen-points', type: 'circle', source: 'citizen-reports',
+    paint: {
+      'circle-radius': 7.5,
+      'circle-color': ['case', ['get', 'verified'], CITIZEN_COLOR, '#93c5fd'],
+      'circle-stroke-width': 2.2,
+      'circle-stroke-color': ['case', ['get', 'verified'], '#ffffff', CITIZEN_COLOR],
+    },
+  });
 }
 
 function applyVisibility(map: MapLibreMap, state: MapLayerState, cellStyle: 'squares' | 'heat' = 'squares') {
@@ -192,6 +215,14 @@ function applyVisibility(map: MapLibreMap, state: MapLayerState, cellStyle: 'squ
   set('markov-cells-line', state.markov && cellStyle === 'squares');
   set('markov-heat', state.markov && cellStyle === 'heat');
   set('markov-heat-hit', state.markov && cellStyle === 'heat');
+  set('citizen-points', state.citizen);
+}
+
+function reportCollection(reports: MapCitizenReport[]) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: reports.map((report) => ({ type: 'Feature' as const, geometry: { type: 'Point' as const, coordinates: report.center }, properties: { id: report.id, verified: report.verified } })),
+  };
 }
 
 function centroidCollection(cells: MapProbabilityCell[]) {

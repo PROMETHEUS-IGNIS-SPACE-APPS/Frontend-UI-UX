@@ -140,7 +140,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'list', items: [
         'Colapso: el botón ◀ / ▶ oculta o muestra el panel. En el celular aparece como “Filtros” desplegable.',
         'Modo Fácil / Filtros Pro: Filtros Pro añade paso orbital (día/noche), FRP mínima (MW) y confianza original.',
-        'Categorías Visuales: casillas para VIIRS (rojo), MODIS (amarillo) y Alta (≥ 30 MW, naranja), con su conteo.',
+        'Categorías Visuales: casillas para VIIRS (rojo), MODIS (amarillo), Alta (≥ 30 MW, naranja) y Ciudadanos (azul: reportes guardados en este dispositivo), con su conteo.',
         'Fuentes reales (IDEAM / FIRMS): accesos rápidos IDEAM últimos 2 días (Antioquia), IDEAM 45 días Antioquia, Fusión IDEAM (30 d) + NASA FIRMS (7 d) en toda Colombia, Subir CSV y NASA FIRMS 7 d.',
         'Fuente de observaciones: Combinado IDEAM + NASA FIRMS, IDEAM · SMByC, NASA FIRMS · NRT 7 días o Histórico muestreado 2024–hoy; cobertura Antioquia o Colombia; fechas Desde / Hasta en UTC (máximo 90 días).',
         'Sensor (Todos, VIIRS, MODIS), búsqueda por municipio, Departamento y Municipio.',
@@ -153,6 +153,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         'Capas Cartográficas (panel inferior izquierdo, plegable): Marcadores Térmicos, Mapa Calor Observado (ponderado por FRP) y Capa Predictiva Markov con selector 24h / 48h / 72h; muestra zonas de color según la probabilidad estimada de cada celda y un aviso si el historial es insuficiente.',
         'Controles de zoom y brújula, y leyenda inferior (VIIRS, MODIS, Alta ≥ 30 MW).',
       ] },
+      { kind: 'p', text: 'Al hacer clic sobre un reporte ciudadano (punto azul) se ven su intensidad observada, quién reporta, coordenadas y observaciones, con el botón Cambiar estado (Verificado / Pendiente). Es una marca local de quien usa el dispositivo, no una verificación oficial.' },
       { kind: 'p', text: 'Al hacer clic sobre un foco se abre su ficha: identificador, sensor, satélite, hora de adquisición (UTC), FRP en MW (o “No disponible”), confianza original, día/noche, concordancia, coordenadas, origen y enlace a la fuente original.' },
       { kind: 'h', text: '4.1.3 Línea de tiempo inferior' },
       { kind: 'list', items: ['Día anterior, Reproducir/Pausar y Día siguiente.', 'Velocidad 1x, 2x o 5x.', 'Fecha activa y número de fechas disponibles.', 'Histograma diario de observaciones y barra deslizante.'] },

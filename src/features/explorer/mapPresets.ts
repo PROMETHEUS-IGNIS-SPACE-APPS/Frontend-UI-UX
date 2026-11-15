@@ -71,6 +71,8 @@ export interface MapLayerState {
   antioquiaSubregions: boolean;
   /** Celdas de la estimación exploratoria Markov 3×3. */
   markov: boolean;
+  /** Reportes ciudadanos guardados en este dispositivo. */
+  citizen: boolean;
 }
 
 export const DEFAULT_MAP_LAYERS: MapLayerState = {
@@ -82,7 +84,17 @@ export const DEFAULT_MAP_LAYERS: MapLayerState = {
   colombiaBoundary: true,
   antioquiaSubregions: true,
   markov: false,
+  citizen: true,
 };
+
+export const CITIZEN_COLOR = '#3b82f6';
+
+/** Reporte ciudadano dibujado en el mapa. */
+export interface MapCitizenReport {
+  id: string;
+  center: [number, number];
+  verified: boolean;
+}
 
 /** Escala de probabilidad P(S1 ∪ S2) del ejemplo (5 rangos, sin degradados). */
 export const PROBABILITY_SCALE = [

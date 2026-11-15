@@ -19,12 +19,15 @@ export interface CitizenReport {
   experience: string | null;
   name: string | null;
   contact: string | null;
+  /** Revisión hecha por la persona en este dispositivo; no es una verificación oficial. */
+  status?: 'pendiente' | 'verificado';
 }
 
 interface CitizenReportsState {
   reports: CitizenReport[];
   addReport: (report: CitizenReport) => void;
   clearReports: () => void;
+  toggleStatus: (id: string) => void;
 }
 
 export const CITIZEN_REPORTS_STORAGE_KEY = 'prometheus-ignis-reportes-ciudadanos';
@@ -34,6 +37,7 @@ export const useCitizenReportsStore = create<CitizenReportsState>()(persist(
     reports: [],
     addReport: (report) => set((state) => ({ reports: [...state.reports, report] })),
     clearReports: () => set({ reports: [] }),
+    toggleStatus: (id) => set((state) => ({ reports: state.reports.map((report) => report.id === id ? { ...report, status: report.status === 'verificado' ? 'pendiente' : 'verificado' } : report) })),
   }),
   { name: CITIZEN_REPORTS_STORAGE_KEY, storage: createJSONStorage(() => localStorage) },
 ));
@@ -50,9 +54,11 @@ const COLUMNS: { key: keyof CitizenReport; label: string }[] = [
   { key: 'experience', label: 'experiencia' },
   { key: 'name', label: 'nombre' },
   { key: 'contact', label: 'contacto' },
+  { key: 'status', label: 'estado' },
 ];
 
-const cell = (value: unknown) => value === null || value === undefined ? '' : `"${String(value).replaceAll('"', '""')}"`;
+const cell = (value: unknown) => value === undefined ? '"pendiente"' : cellRaw(value);
+const cellRaw = (value: unknown) => value === null || value === undefined ? '' : `"${String(value).replaceAll('"', '""')}"`;
 
 export function citizenReportsToCsv(reports: CitizenReport[]): string {
   return [COLUMNS.map((column) => column.label).join(','), ...reports.map((report) => COLUMNS.map((column) => cell(report[column.key])).join(','))].join('\n');
