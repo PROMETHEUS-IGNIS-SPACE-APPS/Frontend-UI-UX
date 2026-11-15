@@ -33,6 +33,8 @@
 - Información del Proyecto = Laboratorio IA + Fuentes/API (pestañas 'laboratory' y 'sources' fusionadas en 'project-info'). Aula KAIRÓS sin “Actividades interactivas” (PedagogicalPanel y RiskMatrixPanel eliminados).
 - Instructivo (.PDF): `components/layout/manualContent.ts`, estructura del “Instructivo Oficial v2” del equipo adaptada a funciones reales.
 
+- 2026-11-15: capa Markov en el Mapa (manchas difuminadas por celda con color de SU probabilidad; no heatmap de densidad, que exageraba) y Mapa de Calor con probabilidades del mismo motor; reportes ciudadanos en el mapa (azul, estado Verificado/Pendiente local); 123 SOS con 123/119/144/132 + “Ir a Reportar Novedad” (uiStore.noveltyOpen); Convención Cartográfica (botón Guía); ficha con hora Colombia y temperatura de brillo; buscador por municipio/fuente/ID; “Probar todas las APIs” con latencia y “Copiar enlace”; “Informe PDF con Mapa” imprimible con mapa SVG propio. Calendario: interpretación al final con procedencia en la etiqueta.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.

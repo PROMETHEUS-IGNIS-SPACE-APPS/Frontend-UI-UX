@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, BarChart3, FlaskConical, Info, MapPin, ShieldCheck, TrendingUp } from 'lucide-react';
+import { AlertTriangle, BarChart3, FileDown, FlaskConical, Info, MapPin, ShieldCheck, TrendingUp } from 'lucide-react';
+import PredictabilityReport from './PredictabilityReport';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 import type { Observation } from '@/types/api/observations';
 import { HIGH_COUNT, HIGH_FRP_MW, MIN_DAYS_VALIDATED, SMOOTHING_ALPHA, STATE_CODES, runMarkovEngine, type MarkovResult } from '@/utils/markovEngine';
@@ -27,6 +28,7 @@ interface PredictabilityPanelProps {
  */
 export default function PredictabilityPanel({ observations, provenance, onShowCell }: PredictabilityPanelProps) {
   const [horizon, setHorizon] = useState<0 | 1 | 2>(0);
+  const [reportOpen, setReportOpen] = useState(false);
   const result: MarkovResult = useMemo(() => runMarkovEngine(observations), [observations]);
   const forecast = result.horizons[horizon];
   const ready = result.status !== 'insufficient';
@@ -40,7 +42,9 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
       icon={TrendingUp}
       title="Motor Predictivo de Cadenas de Markov 3×3 (S0 · S1 · S2)"
       description="Estima la probabilidad estadística de registrar detecciones térmicas satelitales en celdas geográficas en los próximos días. No equivale a predicción de ignición ni de propagación física."
+      actions={<button type="button" onClick={() => setReportOpen(true)} disabled={!ready} className="ignis-action ignis-action-primary disabled:cursor-not-allowed disabled:opacity-50"><FileDown className="h-3.5 w-3.5" aria-hidden />Informe PDF con Mapa</button>}
     />
+    {reportOpen && <PredictabilityReport result={result} provenance={provenance} onClose={() => setReportOpen(false)} />}
 
     <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning-soft p-4 text-text-primary">
       <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />

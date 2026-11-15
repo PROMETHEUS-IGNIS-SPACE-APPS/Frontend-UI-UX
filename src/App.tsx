@@ -109,7 +109,7 @@ export default function App() {
     return allObservations.filter((item) => (sensor === 'ALL' || item.sensor === sensor)
       && (department === 'ALL' || item.department === department)
       && (municipality === 'ALL' || item.municipality === municipality)
-      && (!search || item.municipality?.toLocaleLowerCase('es').includes(search))
+      && (!search || [item.municipality, item.department, item.source, item.source_origin, item.observation_id, item.satellite].some((value) => value?.toLocaleLowerCase('es').includes(search)))
       && (daynight === 'ALL' || item.daynight?.toUpperCase() === daynight)
       && (confidenceRaw === 'ALL' || String(item.confidence_raw) === confidenceRaw)
       && (minFrp === null || (item.frp_mw !== null && item.frp_mw >= minFrp)));

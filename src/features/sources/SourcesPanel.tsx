@@ -1,4 +1,6 @@
-import { CheckCircle2, Database, FileSpreadsheet, RefreshCw, Server, ShieldAlert, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, CheckCircle2, Copy, Database, FileSpreadsheet, RefreshCw, Server, ShieldAlert, XCircle } from 'lucide-react';
+import { checkEndpoint, diagnosticEndpoints, type EndpointResult } from '@/services/api/diagnosticsService';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import { useLocalCsvStore } from '@/stores/localCsvStore';
@@ -46,6 +48,18 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
   const datasets = useLocalCsvStore((state) => state.datasets);
   const status = STATUS[outcome];
   const StatusIcon = status.icon;
+  const [results, setResults] = useState<EndpointResult[] | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const testAll = async () => {
+    setTesting(true);
+    setResults(await Promise.all(diagnosticEndpoints().map(checkEndpoint)));
+    setTesting(false);
+    checkNow();
+  };
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(window.location.href); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
+  };
   const baseUrl = typeof import.meta.env.VITE_API_BASE_URL === 'string' && import.meta.env.VITE_API_BASE_URL.trim() ? import.meta.env.VITE_API_BASE_URL : null;
 
   return <ModulePage>
@@ -55,7 +69,11 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
       icon={Server}
       title="Fuentes de Datos y Backend-API"
       description="Qué servicios consulta la plataforma, en qué estado están y qué límites tiene cada fuente."
-      actions={<button type="button" onClick={checkNow} className="ignis-action ignis-action-secondary"><RefreshCw className="h-3.5 w-3.5" aria-hidden />Comprobar conexión</button>}
+      actions={<>
+        <button type="button" onClick={() => void copyLink()} className="ignis-action ignis-action-secondary"><Copy className="h-3.5 w-3.5" aria-hidden />{copied ? '¡Enlace copiado!' : 'Copiar enlace'}</button>
+        <button type="button" onClick={() => void testAll()} disabled={testing} className="ignis-action ignis-action-primary disabled:opacity-60"><Activity className={`h-3.5 w-3.5 ${testing ? 'animate-pulse' : ''}`} aria-hidden />{testing ? 'Probando…' : 'Probar todas las APIs'}</button>
+        <button type="button" onClick={checkNow} className="ignis-action ignis-action-secondary"><RefreshCw className="h-3.5 w-3.5" aria-hidden />Comprobar conexión</button>
+      </>}
     />
 
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -85,6 +103,15 @@ export default function SourcesPanel({ sourceMode, provenance, loadedCount, tota
         {datasets.length ? <ul className="space-y-1 font-source text-[11px]">{datasets.map((item) => <li key={item.id} className="flex justify-between gap-2"><span className="truncate text-text-primary">{item.fileName}</span><span className="shrink-0 text-text-secondary">{item.observations.length.toLocaleString()} obs.</span></li>)}</ul> : <p className="text-[11px] text-text-secondary">Usa “Cargar / Gestionar .CSV” en la barra superior. Los archivos no salen de este navegador.</p>}
       </article>
     </div>
+
+    {results && <article className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="flex items-center gap-2 font-noto text-base font-bold"><Activity className="h-4 w-4 text-accent" aria-hidden />Diagnóstico en tiempo real</h2><span className="font-source text-[11px] text-text-secondary">{results.filter((item) => item.ok).length} de {results.length} responden</span></div>
+      <ul className="divide-y divide-border">{results.map((item) => <li key={item.path} className="flex flex-wrap items-center justify-between gap-2 py-2 font-source text-[11px]">
+        <span className="min-w-0"><span className="block font-semibold text-text-primary">{item.label}</span><span className="block break-all text-text-secondary">{item.apiPrefix}{item.path.split('?')[0]}</span></span>
+        <span className="flex shrink-0 items-center gap-2"><span className="tabular-nums text-text-secondary">{item.latencyMs.toLocaleString()} ms</span><span className={`rounded px-2 py-0.5 font-bold ${item.ok ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>{item.ok ? 'OK' : 'FALLO'} · {item.detail}</span></span>
+      </li>)}</ul>
+      <p className="text-[10px] text-text-secondary">Consultas cortas (Antioquia, 2 días) para no recargar el servidor. La latencia incluye la descarga de la fuente cuando el backend no la tiene en caché.</p>
+    </article>}
 
     <article className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
       <h2 className="font-noto text-base font-bold">Endpoints consultados</h2>
