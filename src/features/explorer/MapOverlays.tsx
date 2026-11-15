@@ -56,11 +56,6 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
               return <button key={style.id} type="button" aria-pressed={active} onClick={() => onStyleChange(style)} className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${active ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-secondary hover:bg-surface-hover hover:text-text-primary'}`}><Icon className="h-3.5 w-3.5" aria-hidden />{style.label}</button>;
             })}
           </div>
-          <div className="space-y-1.5 border-t border-border pt-2">
-            <Toggle label="Límite de Colombia" checked={layers.colombiaBoundary} onChange={() => onToggleLayer('colombiaBoundary')} />
-            <Toggle label="Subregiones de Antioquia" checked={layers.antioquiaSubregions} onChange={() => onToggleLayer('antioquiaSubregions')} />
-            <p className="text-[10px] leading-tight text-text-secondary">Contornos esquemáticos de referencia visual; no son límites oficiales.</p>
-          </div>
         </div>}
       </div>
     </div>

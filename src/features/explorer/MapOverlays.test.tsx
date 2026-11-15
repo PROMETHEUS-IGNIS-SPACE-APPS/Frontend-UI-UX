@@ -20,8 +20,8 @@ describe('MapOverlays', () => {
     await user.click(screen.getByRole('button', { name: /Base: Liberty/ }));
     await user.click(screen.getByRole('button', { name: 'Satélite' }));
     expect(onStyleChange).toHaveBeenCalledWith(MAP_STYLE_PRESETS[1]);
-    await user.click(screen.getByRole('checkbox', { name: 'Subregiones de Antioquia' }));
-    expect(onToggleLayer).toHaveBeenCalledWith('antioquiaSubregions');
+    expect(screen.queryByRole('checkbox', { name: 'Límite de Colombia' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Subregiones de Antioquia' })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('checkbox', { name: 'Marcadores Térmicos' }));
     expect(onToggleLayer).toHaveBeenCalledWith('points');
