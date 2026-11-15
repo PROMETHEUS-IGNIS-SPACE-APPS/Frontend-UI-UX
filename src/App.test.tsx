@@ -116,14 +116,14 @@ describe('App shell de pestañas', () => {
     expect(document.documentElement).not.toHaveClass('light');
   });
 
-  it('abre el Instructivo con opción de guardarlo como PDF', async () => {
+  it('abre el Instructivo oficial en PDF dentro de la página', async () => {
     const user = userEvent.setup();
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Abrir Instructivo metodológico' }));
     expect(screen.getByRole('dialog', { name: 'Instructivo oficial de uso' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'PDF oficial del equipo' })).toHaveAttribute('href', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf');
-    expect(screen.getByRole('button', { name: 'Guardar como PDF' })).toBeInTheDocument();
+    expect(screen.getByTitle('Instructivo oficial de uso (PDF)')).toHaveAttribute('src', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf#view=FitH');
+    expect(screen.getByRole('link', { name: /Descargar PDF/ })).toHaveAttribute('href', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf');
     await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
   });
 
