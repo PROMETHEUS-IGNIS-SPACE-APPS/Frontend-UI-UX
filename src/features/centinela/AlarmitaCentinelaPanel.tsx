@@ -22,14 +22,22 @@ export default function AlarmitaCentinelaPanel({ onShowCell }: AlarmitaCentinela
   const [cellId, setCellId] = useState('');
   const [showAll, setShowAll] = useState(false);
   const forecasts = useMemo(() => model.data?.forecasts ?? [], [model.data]);
-  const cells = useMemo(() => [...new Map(forecasts.map((item) => [item.cell_id, item])).values()].sort((a, b) => (b.historical_frequency ?? 0) - (a.historical_frequency ?? 0)), [forecasts]);
+  // Una entrada por celda, ordenada por la mayor frecuencia histórica entre sus sensores.
+  const cells = useMemo(() => {
+    const byCell = new Map<string, CentinelaForecast>();
+    for (const item of forecasts) {
+      const current = byCell.get(item.cell_id);
+      if (!current || (item.historical_frequency ?? -1) > (current.historical_frequency ?? -1)) byCell.set(item.cell_id, item);
+    }
+    return [...byCell.values()].sort((a, b) => (b.historical_frequency ?? -1) - (a.historical_frequency ?? -1));
+  }, [forecasts]);
   const activeCell = cellId || cells[0]?.cell_id || '';
   const selected = forecasts.filter((item) => item.cell_id === activeCell);
   const rows = useMemo(() => [...forecasts].sort((a, b) => (b.historical_frequency ?? -1) - (a.historical_frequency ?? -1)), [forecasts]);
   const visibleRows = showAll ? rows : rows.slice(0, TABLE_PAGE);
   const anyPrediction = forecasts.some((item) => item.prediction.probability !== null);
 
-  const summaryFor = (pick: (item: CentinelaForecast) => string) => selected.length ? selected.map((item) => `${productLabel(item.product)}: ${pick(item)}`).join(' · ') : CENTINELA_UNKNOWN;
+  const summaryFor = (pick: (item: CentinelaForecast) => string) => selected.length ? selected.map((item) => `${productLabel(item.product)}: ${pick(item)}`) : [CENTINELA_UNKNOWN];
 
   return <section aria-label="Panel Alarmita CENTINELA" className={`space-y-4 p-5 ${CARD}`}>
     <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 lg:flex-row lg:items-center">
@@ -86,10 +94,10 @@ export default function AlarmitaCentinelaPanel({ onShowCell }: AlarmitaCentinela
   </section>;
 }
 
-function Tile({ label, value, note, valueClass = 'text-text-primary' }: { label: string; value: string; note: string; valueClass?: string }) {
+function Tile({ label, value, note, valueClass = 'text-text-primary' }: { label: string; value: string | string[]; note: string; valueClass?: string }) {
   return <div className="space-y-1 rounded-xl border border-border bg-surface p-3.5">
     <span className="block text-[10px] uppercase text-text-secondary">{label}</span>
-    <div className={`text-sm font-bold ${valueClass}`}>{value}</div>
+    <div className={`space-y-0.5 text-sm font-bold ${valueClass}`}>{(Array.isArray(value) ? value : [value]).map((line) => <p key={line} className={line.endsWith(CENTINELA_UNKNOWN) ? 'text-xs font-semibold text-text-secondary' : ''}>{line}</p>)}</div>
     <span className="block text-[10px] text-text-secondary">{note}</span>
   </div>;
 }
