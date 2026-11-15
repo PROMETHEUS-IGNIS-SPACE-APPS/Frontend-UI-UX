@@ -6,6 +6,7 @@ import ModulePlaceholder from '@/components/common/ModulePlaceholder';
 import Header from '@/components/layout/Header';
 import ObservationMap from '@/features/explorer/ObservationMap';
 import { fetchIngestedObservations } from '@/services/api/ingestionService';
+import { demoCollection } from '@/data/syntheticDemo';
 import { useUiStore } from '@/stores/uiStore';
 import { selectLocalObservations, useLocalCsvStore } from '@/stores/localCsvStore';
 import type { Observation, ObservationSourceMode, Sensor } from '@/types/api/observations';
@@ -13,15 +14,19 @@ import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
 import ActivityCalendarPanel from '@/features/calendar/ActivityCalendarPanel';
 import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
-import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
+import KairosClassroom from '@/features/pedagogy/KairosClassroom';
 import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
 import MarkovHeatmapPanel from '@/features/markov/MarkovHeatmapPanel';
 import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
+import CartographicGuideModal from '@/features/explorer/CartographicGuideModal';
 import TimelineControls from '@/features/explorer/TimelineControls';
 import { DEFAULT_MAP_LAYERS, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, observationCategory, type MapFocusPreset, type MapLayerState, type MapStylePreset } from '@/features/explorer/mapPresets';
 import type { SourcePreset } from '@/features/explorer/ExplorerSidebar';
+import { STATE_CODES, runMarkovEngine } from '@/utils/markovEngine';
+import { MAX_REFERENCE_DISTANCE_KM, locationLabel, referenceDistanceKm } from '@/utils/subregions';
+import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
@@ -65,11 +70,21 @@ export default function App() {
   const [mapStyle, setMapStyle] = useState<MapStylePreset>(MAP_STYLE_PRESETS[0]);
   const [mapLayers, setMapLayers] = useState<MapLayerState>(DEFAULT_MAP_LAYERS);
   const toggleMapLayer = (key: keyof MapLayerState) => setMapLayers((current) => ({ ...current, [key]: !current[key] }));
+  const [markovHorizon, setMarkovHorizon] = useState<0 | 1 | 2>(0);
+  const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
+  const [isCartoGuideOpen, setIsCartoGuideOpen] = useState(false);
+  const citizenReports = useCitizenReportsStore((state) => state.reports);
+  const toggleReportStatus = useCitizenReportsStore((state) => state.toggleStatus);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const selectedReport = citizenReports.find((report) => report.id === selectedReportId) ?? null;
+  const mapReports = useMemo(() => citizenReports.map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const dataMode = useUiStore((state) => state.dataMode);
   const observationsQuery = useQuery({
-    queryKey: ['observations', sourceMode, dateFrom, dateTo, region],
-    queryFn: ({ signal }) => fetchIngestedObservations({
+    queryKey: ['observations', dataMode, sourceMode, dateFrom, dateTo, region],
+    // Modo Demostración: conjunto sintético rotulado (ver data/syntheticDemo.ts); nunca se mezcla con datos reales.
+    queryFn: ({ signal }) => dataMode === 'demo' ? Promise.resolve(demoCollection(region)) : fetchIngestedObservations({
       sourceMode,
       from: dateFrom,
       to: dateTo,
@@ -84,14 +99,21 @@ export default function App() {
   const allObservations = useMemo(() => localObservations.length ? [...backendObservations, ...localObservations] : backendObservations, [backendObservations, localObservations]);
   const hasData = observationsQuery.isSuccess || localObservations.length > 0;
   const totalMatching = (observationsQuery.data?.total_matching ?? 0) + localObservations.length;
-  const provenance = [observationsQuery.data?.data_provenance, localObservations.length ? `CSV local (${localObservations.length.toLocaleString()} observaciones)` : null].filter(Boolean).join(' + ') || (observationsQuery.isPending ? 'Cargando fuente…' : 'No disponible');
+  const provenance = [observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'DATOS SINTÉTICOS DE DEMOSTRACIÓN (no son observaciones reales de NASA ni del IDEAM)' : observationsQuery.data?.data_provenance, localObservations.length ? `CSV local (${localObservations.length.toLocaleString()} observaciones)` : null].filter(Boolean).join(' + ') || (observationsQuery.isPending ? 'Cargando fuente…' : 'No disponible');
+  /** Estimación exploratoria Markov para la capa del mapa (solo se calcula si la capa está activa). */
+  const markovResult = useMemo(() => (mapLayers.markov ? runMarkovEngine(allObservations) : null), [mapLayers.markov, allObservations]);
+  const markovKey = (['p24', 'p48', 'p72'] as const)[markovHorizon];
+  const markovCells = useMemo(() => markovResult && markovResult.status !== 'insufficient'
+    ? markovResult.cells.map((cell) => ({ id: cell.id, center: [cell.centerLon, cell.centerLat] as [number, number], sizeDeg: markovResult.gridDeg, p: cell[markovKey] }))
+    : [], [markovResult, markovKey]);
+  const selectedCell = markovResult?.cells.find((cell) => cell.id === selectedCellId) ?? null;
   const matchingObservations = useMemo(() => {
     const minFrp = minimumFrp.trim() ? Number(minimumFrp) : null;
     const search = municipalitySearch.trim().toLocaleLowerCase('es');
     return allObservations.filter((item) => (sensor === 'ALL' || item.sensor === sensor)
       && (department === 'ALL' || item.department === department)
       && (municipality === 'ALL' || item.municipality === municipality)
-      && (!search || item.municipality?.toLocaleLowerCase('es').includes(search))
+      && (!search || [item.municipality, item.department, item.source, item.source_origin, item.observation_id, item.satellite].some((value) => value?.toLocaleLowerCase('es').includes(search)))
       && (daynight === 'ALL' || item.daynight?.toUpperCase() === daynight)
       && (confidenceRaw === 'ALL' || String(item.confidence_raw) === confidenceRaw)
       && (minFrp === null || (item.frp_mw !== null && item.frp_mw >= minFrp)));
@@ -100,10 +122,10 @@ export default function App() {
   const countsByDate = useMemo(() => matchingObservations.reduce<Record<string, number>>((counts, item) => { const date = item.acquired_at.slice(0, 10); counts[date] = (counts[date] ?? 0) + 1; return counts; }, {}), [matchingObservations]);
   const dateFiltered = useMemo(() => matchingObservations.filter((item) => !activeDate || item.acquired_at.startsWith(activeDate)), [matchingObservations, activeDate]);
   const categoryCounts = useMemo(() => {
-    const counts = { viirs: 0, modis: 0, highIntensity: 0 };
+    const counts = { viirs: 0, modis: 0, highIntensity: 0, citizen: citizenReports.length };
     for (const item of dateFiltered) counts[observationCategory(item)] += 1;
     return counts;
-  }, [dateFiltered]);
+  }, [dateFiltered, citizenReports.length]);
   const visible = useMemo(() => dateFiltered.filter((item) => mapLayers[observationCategory(item)]), [dateFiltered, mapLayers]);
   const applySourcePreset = (preset: SourcePreset) => {
     const today = new Date().toISOString().slice(0, 10);
@@ -147,6 +169,7 @@ export default function App() {
   return (
     <div className="flex min-h-dvh w-full max-w-full flex-col overflow-x-hidden lg:h-dvh bg-background font-sans text-text-primary">
       <Header activeModule={activeModule} onModuleChange={setActiveModule} totalVisibleCount={visible.length} onExportCsv={handleExport} onOpenGlossary={() => setIsGlossaryOpen(true)} />
+      {dataMode === 'demo' && <div role="status" className="flex items-center gap-2 border-b border-warning/40 bg-warning-soft px-4 py-1.5 font-noto text-[11px] font-semibold text-warning"><AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />Modo Demostración activo: los focos mostrados son sintéticos (2024–2025) para pruebas y capacitación; no son observaciones reales. Cambia a «Lab Real» para ver datos del Backend-API.</div>}
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <div key={active.id} id={`panel-${active.id}`} role="tabpanel" aria-labelledby={`tab-${active.id}-desktop`} tabIndex={0} className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {activeModule === 'explorer' ? (
@@ -193,14 +216,26 @@ export default function App() {
               <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background lg:min-h-0">
                 <button type="button" onClick={() => setIsSidebarOpen((value) => !value)} aria-expanded={isSidebarOpen} aria-label={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} title={isSidebarOpen ? 'Cerrar panel lateral' : 'Abrir panel lateral'} className="absolute left-0 top-1/2 z-30 hidden h-11 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border bg-card text-[10px] text-text-secondary shadow-sm transition-colors hover:bg-card hover:text-text-primary lg:flex"><span aria-hidden>{isSidebarOpen ? '◀' : '▶'}</span></button>
                 <div className="relative h-[max(440px,64dvh)] shrink-0 overflow-hidden bg-background lg:h-auto lg:min-h-0 lg:flex-1 lg:shrink">
-                  <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} layers={mapLayers} />
+                  <ObservationMap observations={visible} selected={selected} onSelect={(item) => { setSelectedCellId(null); setSelectedReportId(null); setSelected(item); }} focusTarget={focusTarget} mapStyle={mapStyle} layers={mapLayers} cells={markovCells} onSelectCell={(id) => { setSelected(null); setSelectedReportId(null); setSelectedCellId(id); }} reports={mapReports} onSelectReport={(id) => { setSelected(null); setSelectedCellId(null); setSelectedReportId(id); }} />
                   {observationsQuery.isPending && <div className="absolute left-1/2 top-28 z-30 flex w-[min(28rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-xl shadow-2xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones…</div>}
                   {observationsQuery.isError && <div role="alert" className="absolute left-1/2 top-28 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-start gap-3 rounded-xl border border-danger/40 bg-card shadow-2xl p-4 text-sm text-danger"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-danger">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-danger-soft" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                   {hasData && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-text-secondary" /><p className="mt-2 font-medium text-text-primary">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-text-secondary">La consulta respondió correctamente con una colección vacía.</p></div></div>}
-                  <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} layers={mapLayers} onToggleLayer={toggleMapLayer} pointCount={visible.length} frpCount={visible.filter((item) => item.frp_mw !== null).length} onOpenGuide={() => setIsGlossaryOpen(true)} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />
+                  <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} layers={mapLayers} onToggleLayer={toggleMapLayer} pointCount={visible.length} frpCount={visible.filter((item) => item.frp_mw !== null).length} onOpenGuide={() => setIsCartoGuideOpen(true)} markovHorizon={markovHorizon} onMarkovHorizonChange={setMarkovHorizon} markovNote={markovResult?.status === 'insufficient' ? markovResult.message : null} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />
+                  {selectedReport && mapLayers.citizen && !selected && <aside aria-label="Reporte ciudadano seleccionado" className="absolute inset-x-2 bottom-2 z-30 max-h-[70%] space-y-2.5 overflow-y-auto rounded-2xl border border-[#3b82f6]/60 bg-card p-4 text-xs shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-16 sm:max-h-[calc(100%-5rem)] sm:w-80">
+                    <div className="flex items-start justify-between gap-2 border-b border-border pb-2"><div className="min-w-0"><h2 className="font-noto text-sm font-bold text-text-primary">Reporte ciudadano</h2><p className="font-source text-[10px] font-semibold text-[#3b82f6]">{selectedReport.createdAt} · {selectedReport.sector ?? `${selectedReport.latitude}, ${selectedReport.longitude}`}</p></div><button type="button" onClick={() => setSelectedReportId(null)} aria-label="Cerrar reporte ciudadano" className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary"><X className="h-4 w-4" /></button></div>
+                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['Intensidad observada', selectedReport.intensity], ['Quién reporta', selectedReport.role], ['Coordenadas', `${selectedReport.latitude}, ${selectedReport.longitude}`], ['Estado', selectedReport.status === 'verificado' ? 'Verificado' : 'Pendiente']].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
+                    <p className="rounded-lg border border-border bg-surface p-2 leading-5 text-text-primary">{selectedReport.note}</p>
+                    <button type="button" onClick={() => toggleReportStatus(selectedReport.id)} className={`w-full rounded-lg px-3 py-2 font-noto text-[11px] font-bold transition-colors ${selectedReport.status === 'verificado' ? 'border border-border-strong bg-surface text-text-primary hover:bg-surface-hover' : 'bg-[#3b82f6] text-white hover:opacity-90'}`}>{selectedReport.status === 'verificado' ? 'Cambiar estado a Pendiente' : 'Cambiar estado a Verificado'}</button>
+                    <p className="text-[10px] leading-4 text-text-secondary">Información declarada por quien reporta y guardada solo en este dispositivo. “Verificado” es una marca local suya, no una confirmación oficial.</p>
+                  </aside>}
+                  {selectedCell && mapLayers.markov && !selected && <aside aria-label="Celda Markov seleccionada" className="absolute inset-x-2 bottom-2 z-30 space-y-2.5 rounded-2xl border border-predictive/60 bg-card p-4 text-xs shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-16 sm:w-80">
+                    <div className="flex items-start justify-between gap-2 border-b border-border pb-2"><div className="min-w-0"><h2 className="truncate font-noto text-sm font-bold text-text-primary">{selectedCell.municipality ?? 'Celda sin municipio'}</h2><p className="font-source text-[10px] font-semibold text-predictive">Celda Markov {selectedCell.centerLat.toFixed(2)}, {selectedCell.centerLon.toFixed(2)} · estimación exploratoria</p></div><button type="button" onClick={() => setSelectedCellId(null)} aria-label="Cerrar detalle de celda" className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary"><X className="h-4 w-4" /></button></div>
+                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px] tabular-nums">{[['P(+24 h)', `${(selectedCell.p24 * 100).toFixed(1)}%`], ['48 h / 72 h', `${(selectedCell.p48 * 100).toFixed(0)}% / ${(selectedCell.p72 * 100).toFixed(0)}%`], ['Estado / vecinos', `${STATE_CODES[selectedCell.state]} · ${selectedCell.activeNeighbors}/8`], ['Detecciones', `${selectedCell.detections} reg.`]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 font-bold text-text-primary">{value}</dd></div>)}</dl>
+                    <p className="text-[10px] leading-4 text-text-secondary">Probabilidad de actividad térmica satelital en la celda; no confirma ni predice un incendio. Revise la validación en Predictibilidad.</p>
+                  </aside>}
                   {selected && <aside aria-label="Observación seleccionada" className="absolute inset-x-2 bottom-2 z-30 max-h-[70%] space-y-3 overflow-y-auto rounded-2xl border border-accent/60 bg-card p-4 text-xs shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-16 sm:max-h-[calc(100%-5rem)] sm:w-96">
-                    <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-sensor-viirs' : 'border-yellow-400/50 bg-yellow-400/10 text-sensor-modis'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
-                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
+                    <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-sensor-viirs' : 'border-yellow-400/50 bg-yellow-400/10 text-sensor-modis'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ? locationLabel(selected) : 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
+                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Hora Colombia (UTC-5)', colombiaTime(selected.acquired_at)], ['Adquisición UTC', selected.acquired_at], ['Tamaño de píxel (scan × track)', selected.scan_km != null && selected.track_km != null ? `${selected.scan_km} × ${selected.track_km} km` : 'No disponible'], ['Temperatura de brillo', selected.brightness_k == null ? 'No disponible' : `${selected.brightness_k.toFixed(1)} K (${(selected.brightness_k - 273.15).toFixed(1)} °C)`], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Municipio de referencia', selected.municipality ? `${selected.municipality}${referenceDistanceKm(selected) !== null ? ` · a ${Math.round(referenceDistanceKm(selected)!)} km${referenceDistanceKm(selected)! > MAX_REFERENCE_DISTANCE_KM ? ' (lejano)' : ''}` : ''}` : 'No disponible'], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
                     <p className="flex items-start gap-1.5 text-[10px] leading-4 text-text-secondary"><MapPin className="mt-0.5 h-3 w-3 shrink-0 text-accent" />Una observación satelital no equivale necesariamente a un incendio independiente.</p>
                     {selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="inline-block text-[11px] font-semibold text-info underline underline-offset-2">Consultar fuente original</a>}
                   </aside>}
@@ -210,7 +245,7 @@ export default function App() {
             </section>
           ) : activeModule === 'analytics' ? (
             hasData
-              ? <AnalyticsPanel observations={visible} totalMatching={totalMatching} provenance={provenance} onExportCsv={handleExport} />
+              ? <AnalyticsPanel observations={visible} totalMatching={totalMatching} provenance={provenance} zoneLabel={department !== 'ALL' ? (municipality !== 'ALL' ? `${municipality}, ${department}` : department) : region === 'colombia' ? 'Colombia' : 'Antioquia'} onExportCsv={handleExport} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'calendar' ? (
             hasData
@@ -220,16 +255,26 @@ export default function App() {
             hasData
               ? <MarkovHeatmapPanel observations={allObservations} provenance={provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
-          ) : activeModule === 'predictability' ? <PredictabilityPanel />
-            : activeModule === 'comparison' ? <PedagogicalPanel />
-            : activeModule === 'laboratory' ? <LaboratoryPanel provenance={provenance} />
-            : activeModule === 'sources' ? <SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} />
+          ) : activeModule === 'predictability' ? (
+            hasData
+              ? <PredictabilityPanel observations={allObservations} provenance={provenance} onLoadLongerWindow={() => applySourcePreset({ sourceMode: 'ideam', region: 'antioquia_ideam', days: 45 })} onShowCell={(center) => { setFocusTarget({ id: `celda-${center.join(',')}`, label: 'Celda Markov', center, zoom: 10 }); setSelected(null); setActiveModule('explorer'); }} />
+              : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
+          ) : activeModule === 'comparison' ? <KairosClassroom />
+            : activeModule === 'project-info' ? <div className="flex flex-col"><LaboratoryPanel provenance={provenance} /><SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} /></div>
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
       </main>
+      <CartographicGuideModal isOpen={isCartoGuideOpen} onClose={() => setIsCartoGuideOpen(false)} onOpenGlossary={() => setIsGlossaryOpen(true)} />
       <GlossaryModal isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
     </div>
   );
+}
+
+/** Hora local de Colombia (UTC-5, sin horario de verano) a partir de un ISO UTC. */
+function colombiaTime(isoUtc: string) {
+  const ms = Date.parse(isoUtc);
+  if (Number.isNaN(ms)) return 'No disponible';
+  return `${new Date(ms - 5 * 3_600_000).toISOString().slice(0, 16).replace('T', ' ')} (COT)`;
 }
 
 function csvValue(value: unknown) {

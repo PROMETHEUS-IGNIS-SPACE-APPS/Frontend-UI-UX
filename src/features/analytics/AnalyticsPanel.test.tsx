@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import AnalyticsPanel from './AnalyticsPanel';
 import type { Observation } from '@/types/api/observations';
@@ -13,28 +13,34 @@ describe('AnalyticsPanel', () => {
   afterEach(() => cleanup());
 
   it('keeps sensor counts separate and computes the approved recurrence index', () => {
-    render(<AnalyticsPanel observations={testObservations} totalMatching={3} provenance="test_fixture" />);
+    render(<AnalyticsPanel observations={testObservations} totalMatching={3} provenance="test_fixture" zoneLabel="Antioquia" />);
 
-    expect(screen.getByText('2', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.getByText('1', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.getByText('23 / 100')).toBeInTheDocument();
-    expect(screen.getAllByText('Baja')).toHaveLength(2);
-    expect(screen.getByText('60.0 / 80 MW')).toBeInTheDocument();
+    const kpis = screen.getByRole('region', { name: 'Indicadores clave' });
+    expect(within(kpis).getByText('2', { selector: 'p' })).toBeInTheDocument();
+    expect(within(kpis).getByText('1', { selector: 'p' })).toBeInTheDocument();
+    expect(within(kpis).getByText((_, element) => element?.tagName === 'P' && element.textContent === '23 / 100')).toBeInTheDocument();
+    expect(within(kpis).getByText('Baja')).toBeInTheDocument();
+    expect(within(kpis).getByText('Máx: 80 MW')).toBeInTheDocument();
+    expect(within(kpis).getByText((_, element) => element?.tagName === 'P' && element.textContent === '60.0 MW prom.')).toBeInTheDocument();
+    expect(screen.getByText('Antioquia')).toBeInTheDocument();
   });
 
   it('reports FRP unavailable when every received FRP value is null', () => {
     const withoutFrp = testObservations.map((item) => ({ ...item, frp_mw: null }));
     render(<AnalyticsPanel observations={withoutFrp} totalMatching={3} provenance="test_fixture" />);
 
-    expect(screen.getByText('No disponible')).toBeInTheDocument();
-    expect(screen.getAllByText('Muy baja')).toHaveLength(2);
+    const kpis = screen.getByRole('region', { name: 'Indicadores clave' });
+    expect(within(kpis).getByText('Máx: N/D')).toBeInTheDocument();
+    expect(within(kpis).getByText('Muy baja')).toBeInTheDocument();
+    expect(screen.getAllByText('No disponible').length).toBeGreaterThan(0);
   });
 
   it('does not convert an empty collection into a recurrence score', () => {
     render(<AnalyticsPanel observations={[]} totalMatching={0} provenance="backend" />);
 
-    expect(screen.getAllByText('No disponible')).toHaveLength(3);
-    expect(screen.getByText('La consulta no contiene observaciones para resumir.')).toBeInTheDocument();
+    const kpis = screen.getByRole('region', { name: 'Indicadores clave' });
+    expect(within(kpis).queryByText(/\/ 100/)).toBeInTheDocument();
+    expect(within(kpis).getAllByText('—').length).toBeGreaterThan(0);
+    expect(screen.getByText('No hay registros disponibles para el rango seleccionado.')).toBeInTheDocument();
   });
-
 });

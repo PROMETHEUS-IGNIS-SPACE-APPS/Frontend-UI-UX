@@ -18,7 +18,7 @@ Reglas de la fuente congelada:
 2. **Quedan excluidos del alcance**, por decisión del equipo:
    - La pestaña y el modal **FastAPI Lab** (el backend se consume exclusivamente mediante `VITE_API_BASE_URL`; los errores de conexión se muestran como estados en línea, sin panel de configuración de URL).
    - Las capas de **límites administrativos** (`ANTIOQUIA_SUBREGIONS_GEOJSON` / `COLOMBIA_BOUNDARIES_GEOJSON` y sus checks en el panel Capas). Quedan como extensión futura con geometrías oficiales (IGAC/DANE) y procedencia citada, si el equipo las aprueba.
-   - El interruptor **Demostración / Lab Real** y todo dataset sintético de producto. La única fuente de datos es el Backend-API (sección «Modelo de datos»).
+   - ~~El interruptor **Demostración / Lab Real** y todo dataset sintético de producto.~~ **Revertido el 2026-11-15 por decisión del usuario (pendiente de aprobación del equipo):** existe el selector Demostración / Lab Real con el conjunto sintético del `ejemplo` (`src/data/syntheticDemo.ts`, 520 registros 2024–2025, `is_synthetic: true`, procedencia `synthetic_demo`). Arranca siempre en Lab Real, muestra una franja de aviso y rotula la procedencia en todos los módulos. Los datos reales siguen viniendo solo del Backend-API.
 3. **Lo que sí es ajustable:** la capa de servicios y adaptadores (parsing según el OpenAPI vigente, manejo de errores, derivación de campos compatibles) siempre que la UI resultante sea idéntica. Ver «Correcciones de integridad obligadas al portar».
 4. Cambios de navegación, nuevos módulos o cambios visuales requieren decisión explícita del equipo antes de implementarse.
 
@@ -63,8 +63,9 @@ La navegación actual organiza seis pestañas: Mapa Territorial, Predictibilidad
    - Sin capas de límites administrativos (excluidas por decisión del equipo).
 
 2. **Predictibilidad** (`PredictabilityPanel.tsx`)
-   - Comunica que no hay modelos predictivos publicados y explica qué validación falta.
-   - No calcula probabilidades a partir de conteos históricos ni copia los resultados sintéticos de `Ejemplo`.
+   - Muestra una **estimación exploratoria** de Cadenas de Markov 3×3 (S0/S1/S2) calculada en el navegador con las observaciones reales cargadas (`src/utils/markovEngine.ts`), por decisión del equipo del 2026-11-14 (pendiente de aprobación formal del equipo científico).
+   - Siempre rotulada «Estimación exploratoria · no es un modelo publicado»; exige ≥ 3 días para estimar y ≥ 5 para validar (partición cronológica 70/30, Brier, BSS frente a climatología, ROC-AUC, log-loss).
+   - No usa datos sintéticos, clima ni factores inventados, ni copia resultados del `Ejemplo`. El modelo oficial sigue siendo el que publique el AI-Pipeline.
 
 3. **Calendario** (`ActivityCalendarPanel.tsx`)
    - Agrega actividad diaria y mensual por fecha UTC, separando VIIRS y MODIS y conservando FRP nula como no disponible.

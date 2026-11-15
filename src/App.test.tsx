@@ -35,7 +35,7 @@ describe('App shell de pestañas', () => {
   });
 
   beforeEach(() => {
-    useUiStore.setState({ activeModule: 'explorer' });
+    useUiStore.setState({ activeModule: 'explorer', noveltyOpen: false, dataMode: 'real' });
     vi.mocked(fetchIngestedObservations).mockResolvedValue({
       data: appObservations, count: 2, total_matching: 2, data_provenance: 'IDEAM + NASA FIRMS',
     });
@@ -66,33 +66,34 @@ describe('App shell de pestañas', () => {
     renderApp();
 
     expect(screen.getByRole('button', { name: 'Abrir líneas de emergencia de Colombia' })).toBeInTheDocument();
-    expect(screen.getByText('Descargar Reportes (.CSV)')).toBeInTheDocument();
+    expect(screen.getByText('Descargar observaciones (.CSV)')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Reportar una novedad territorial' }));
-    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Reportar Novedad de Incendio Forestal' })).toBeInTheDocument();
   });
 
   it('cambia de módulo al activar otra pestaña de escritorio', async () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Laboratorio IA' }));
+    await user.click(screen.getByRole('tab', { name: 'Información del Proyecto' }));
 
-    expect(screen.getByRole('tab', { name: 'Laboratorio IA' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'Información del Proyecto' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
-  it('abre Predictibilidad con una explicación clara de su estado pendiente', async () => {
+  it('abre Predictibilidad como estimación exploratoria claramente rotulada', async () => {
     const user = userEvent.setup();
     renderApp();
 
     await user.click(screen.getByRole('tab', { name: 'Predictibilidad' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Predictibilidad');
-    expect(screen.getByRole('heading', { name: 'Predictibilidad' })).toBeInTheDocument();
-    expect(screen.getByText('Sin modelo publicado')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ })).toBeInTheDocument();
+    expect(screen.getByText('Estimación exploratoria')).toBeInTheDocument();
+    expect(screen.getByText('No es un modelo publicado')).toBeInTheDocument();
   });
 
   it('abre el Mapa de Calor Markov sin probabilidades inventadas', async () => {
@@ -102,7 +103,7 @@ describe('App shell de pestañas', () => {
     await user.click(screen.getByRole('tab', { name: 'Mapa de Calor Markov' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Mapa de Calor Markov');
-    expect(await screen.findByText('Capa predictiva pendiente')).toBeInTheDocument();
+    expect(await screen.findByText('Estimación exploratoria')).toBeInTheDocument();
   });
 
   it('cambia entre tema oscuro y claro desde el encabezado', async () => {
@@ -115,31 +116,30 @@ describe('App shell de pestañas', () => {
     expect(document.documentElement).not.toHaveClass('light');
   });
 
-  it('abre el Instructivo con opción de guardarlo como PDF', async () => {
+  it('abre el Instructivo oficial en PDF dentro de la página', async () => {
     const user = userEvent.setup();
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Abrir Instructivo metodológico' }));
-    expect(screen.getByRole('dialog', { name: 'PROMETHEUS IGNIS — Manual Metodológico' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Guardar como PDF' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Instructivo oficial de uso' })).toBeInTheDocument();
+    expect(screen.getByTitle('Instructivo oficial de uso (PDF)')).toHaveAttribute('src', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf#view=FitH');
+    expect(screen.getByRole('link', { name: /Descargar PDF/ })).toHaveAttribute('href', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf');
     await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
   });
 
-  it('muestra la pestaña Fuentes/API con los endpoints consultados', async () => {
+  it('reúne modelos IA y fuentes en Información del Proyecto', async () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Fuentes/API' }));
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Fuentes/API');
+    await user.click(screen.getByRole('tab', { name: 'Información del Proyecto' }));
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
+    expect(screen.getByRole('heading', { name: 'Laboratorio IA' })).toBeInTheDocument();
     expect(screen.getByText('/api/fusion/historical-all?region')).toBeInTheDocument();
   });
 
-  it('ofrece Guía y Reportar en Terreno sobre el mapa', async () => {
-    const user = userEvent.setup();
+  it('ya no muestra Reportar en Terreno sobre el mapa', () => {
     renderApp();
-
-    await user.click(await screen.findByRole('button', { name: 'Reportar en terreno' }));
-    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reportar en terreno' })).not.toBeInTheDocument();
   });
 
   it('abre el módulo Calendario desde la navegación', async () => {
@@ -167,20 +167,27 @@ describe('App shell de pestañas', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Modelos IA' }));
+    await user.click(screen.getByRole('tab', { name: 'Proyecto' }));
 
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
-  it('muestra el Aula Pedagógica con lecciones y matriz interactiva', async () => {
+  it('muestra KAIRÓS, Aula Pedagógica con sus guías de prevención', async () => {
     const user = userEvent.setup();
     renderApp();
 
     const desktopTablist = screen.getByRole('tablist', { name: 'Módulos' });
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Aula Pedagógica' }));
 
-    expect(screen.getByRole('heading', { name: 'Aprende a leer las observaciones' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Matriz de Gestión del Riesgo 5×5' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' })).toBeInTheDocument();
+    expect(screen.getByText('¡Explora el Aula!')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '1. Prevención en el hogar' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^Reproducir podcast de/ })).toHaveLength(4);
+    expect(screen.getByRole('heading', { name: '4. Interpretación de los datos de PROMETHEUS IGNIS' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Aprendizaje Basado en Problemas (ABP)' })).toBeInTheDocument();
+    expect(screen.getByText('1 / 36')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mensaje final de KAIRÓS' })).toHaveAccessibleDescription(/Paulo Freire/);
+    expect(screen.queryByText('Actividades interactivas')).not.toBeInTheDocument();
   });
 
   it('deshabilita la exportación CSV sin registros visibles', () => {
@@ -191,6 +198,17 @@ describe('App shell de pestañas', () => {
     });
     expect(exportButton).toBeDisabled();
     expect(exportButton).toHaveAttribute('title', expect.stringMatching(/Sin registros visibles/));
+  });
+
+  it('cambia a modo Demostración con datos sintéticos rotulados y vuelve a Lab Real', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Demostración' }));
+    expect((await screen.findAllByText(/Modo Demostración activo/)).length).toBeGreaterThan(0);
+    expect(useUiStore.getState().dataMode).toBe('demo');
+    await user.click(screen.getByRole('button', { name: 'Lab Real' }));
+    await waitFor(() => expect(screen.queryAllByText(/Modo Demostración activo/)).toHaveLength(0));
   });
 
   it('abre y cierra el glosario científico desde el header', async () => {

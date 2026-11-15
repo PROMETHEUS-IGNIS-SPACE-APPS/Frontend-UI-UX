@@ -16,7 +16,7 @@ function renderSidebar(sourceMode: 'fusion' | 'historical' = 'fusion') {
     onMinimumFrpChange: vi.fn(), onConfidenceRawChange: vi.fn(), onReset: vi.fn(),
     onToggleCategory: vi.fn(), onApplySourcePreset: vi.fn(),
   };
-  render(<ExplorerSidebar {...callbacks} categories={{ viirs: true, modis: true, highIntensity: true }} categoryCounts={{ viirs: 1, modis: 0, highIntensity: 0 }} sensor="ALL" sourceMode={sourceMode} region="antioquia_ideam" dateFrom="2026-11-08" dateTo="2026-11-14" department="ALL" municipality="ALL" municipalitySearch="" daynight="ALL" minimumFrp="" confidenceRaw="ALL" observations={observations} visibleCount={4} recordCount={1} totalMatching={1} provenance="IDEAM + NASA FIRMS" sampling={sourceMode === 'historical' ? { from: '2024-01-01', to: '2026-11-14', rawCount: 11539, filesLoaded: ['day.csv'] } : undefined} isTruncated onReset={callbacks.onReset} />);
+  render(<ExplorerSidebar {...callbacks} categories={{ viirs: true, modis: true, highIntensity: true, citizen: true }} categoryCounts={{ viirs: 1, modis: 0, highIntensity: 0, citizen: 0 }} sensor="ALL" sourceMode={sourceMode} region="antioquia_ideam" dateFrom="2026-11-08" dateTo="2026-11-14" department="ALL" municipality="ALL" municipalitySearch="" daynight="ALL" minimumFrp="" confidenceRaw="ALL" observations={observations} visibleCount={4} recordCount={1} totalMatching={1} provenance="IDEAM + NASA FIRMS" sampling={sourceMode === 'historical' ? { from: '2024-01-01', to: '2026-11-14', rawCount: 11539, filesLoaded: ['day.csv'] } : undefined} isTruncated onReset={callbacks.onReset} />);
   return callbacks;
 }
 

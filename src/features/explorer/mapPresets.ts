@@ -69,6 +69,10 @@ export interface MapLayerState {
   heatmap: boolean;
   colombiaBoundary: boolean;
   antioquiaSubregions: boolean;
+  /** Celdas de la estimación exploratoria Markov 3×3. */
+  markov: boolean;
+  /** Reportes ciudadanos guardados en este dispositivo. */
+  citizen: boolean;
 }
 
 export const DEFAULT_MAP_LAYERS: MapLayerState = {
@@ -79,7 +83,37 @@ export const DEFAULT_MAP_LAYERS: MapLayerState = {
   heatmap: false,
   colombiaBoundary: true,
   antioquiaSubregions: true,
+  markov: false,
+  citizen: true,
 };
+
+export const CITIZEN_COLOR = '#3b82f6';
+
+/** Reporte ciudadano dibujado en el mapa. */
+export interface MapCitizenReport {
+  id: string;
+  center: [number, number];
+  verified: boolean;
+}
+
+/** Escala de probabilidad P(S1 ∪ S2) del ejemplo (5 rangos, sin degradados). */
+export const PROBABILITY_SCALE = [
+  { max: 0.15, color: '#fde047', label: '<15%' },
+  { max: 0.3, color: '#facc15', label: '15–30%' },
+  { max: 0.5, color: '#f97316', label: '30–50%' },
+  { max: 0.7, color: '#ef4444', label: '50–70%' },
+  { max: Infinity, color: '#b91c1c', label: '>70%' },
+] as const;
+
+export const probabilityColor = (p: number) => PROBABILITY_SCALE.find((step) => p < step.max)?.color ?? '#b91c1c';
+
+/** Celda que se dibuja en el mapa: centro [lon, lat], tamaño en grados y probabilidad del horizonte activo. */
+export interface MapProbabilityCell {
+  id: string;
+  center: [number, number];
+  sizeDeg: number;
+  p: number;
+}
 
 /** Categoría visual de una observación: la alta intensidad tiene prioridad sobre el sensor. */
 export function observationCategory(item: { sensor: string; frp_mw: number | null }): 'viirs' | 'modis' | 'highIntensity' {

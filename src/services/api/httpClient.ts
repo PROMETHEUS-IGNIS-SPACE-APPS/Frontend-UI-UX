@@ -49,13 +49,22 @@ export function buildApiUrl(path: string, apiPrefix = API_VERSION_PREFIX): strin
   return `${readBaseUrl()}${apiPrefix}${path}`;
 }
 
-/**
- * Ejecuta una petición GET y devuelve el estado HTTP con el cuerpo como
- * JSON genérico. No interpreta contratos: cada servicio valida su respuesta.
- */
-export async function requestJson(
+interface RequestOptions { timeoutMs?: number; signal?: AbortSignal; apiPrefix?: '/api' | '/api/v1' }
+
+/** Mensaje de error del backend (`detail` de FastAPI) cuando viene como texto. */
+function backendDetail(body: unknown): string | null {
+  if (body && typeof body === 'object' && 'detail' in body) {
+    const detail = (body as { detail: unknown }).detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+  }
+  return null;
+}
+
+async function send(
+  method: 'GET' | 'POST',
   path: string,
-  options: { timeoutMs?: number; signal?: AbortSignal; apiPrefix?: '/api' | '/api/v1' } = {},
+  payload: unknown,
+  options: RequestOptions,
 ): Promise<{ status: number; body: unknown }> {
   const url = buildApiUrl(path, options.apiPrefix ?? API_VERSION_PREFIX);
   const controller = new AbortController();
@@ -66,8 +75,9 @@ export async function requestJson(
 
   try {
     const response = await fetch(url, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
+      method,
+      headers: method === 'POST' ? { Accept: 'application/json', 'Content-Type': 'application/json' } : { Accept: 'application/json' },
+      body: method === 'POST' ? JSON.stringify(payload) : undefined,
       signal: controller.signal,
     });
 
@@ -79,7 +89,7 @@ export async function requestJson(
     }
 
     if (!response.ok) {
-      throw new ApiError('http', `El backend respondió con el estado HTTP ${response.status}.`, response.status);
+      throw new ApiError('http', backendDetail(body) ?? `El backend respondió con el estado HTTP ${response.status}.`, response.status);
     }
 
     return { status: response.status, body };
@@ -95,4 +105,17 @@ export async function requestJson(
     clearTimeout(timeoutHandle);
     options.signal?.removeEventListener('abort', abortFromCaller);
   }
+}
+
+/**
+ * Ejecuta una petición GET y devuelve el estado HTTP con el cuerpo como
+ * JSON genérico. No interpreta contratos: cada servicio valida su respuesta.
+ */
+export function requestJson(path: string, options: RequestOptions = {}): Promise<{ status: number; body: unknown }> {
+  return send('GET', path, undefined, options);
+}
+
+/** Ejecuta una petición POST con cuerpo JSON. Igual que `requestJson`, no valida contratos. */
+export function postJson(path: string, payload: unknown, options: RequestOptions = {}): Promise<{ status: number; body: unknown }> {
+  return send('POST', path, payload, options);
 }

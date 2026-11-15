@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import LocalCsvAccess from './LocalCsvAccess';
+import { CLEAR_DATA_PIN } from './clearDataPin';
 import { useLocalCsvStore } from '@/stores/localCsvStore';
 
 const FIRMS_CSV = 'latitude,longitude,acq_date,acq_time,satellite,instrument,confidence,frp,daynight\n6.2,-75.5,2026-11-12,0545,N20,VIIRS,n,3.1,N\n6.3,-75.6,2026-11-12,1720,A,MODIS,80,,D';
@@ -9,7 +10,7 @@ const FIRMS_CSV = 'latitude,longitude,acq_date,acq_time,satellite,instrument,con
 describe('LocalCsvAccess', () => {
   afterEach(() => { cleanup(); useLocalCsvStore.getState().clear(); });
 
-  it('loads a FIRMS CSV in the browser and clears it after confirmation', async () => {
+  it('loads a FIRMS CSV in the browser and clears it only with the PIN', async () => {
     const user = userEvent.setup();
     render(<LocalCsvAccess />);
 
@@ -23,6 +24,13 @@ describe('LocalCsvAccess', () => {
 
     await user.click(screen.getByRole('button', { name: 'Cerrar gestor de archivos CSV' }));
     await user.click(screen.getByRole('button', { name: /Limpiar \.CSV/ }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar Limpieza' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Ingresa la contraseña');
+    await user.type(screen.getByLabelText('Contraseña numérica de autorización:'), '0000');
+    await user.click(screen.getByRole('button', { name: 'Confirmar Limpieza' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Contraseña incorrecta');
+    expect(useLocalCsvStore.getState().datasets).toHaveLength(1);
+    await user.type(screen.getByLabelText('Contraseña numérica de autorización:'), CLEAR_DATA_PIN);
     await user.click(screen.getByRole('button', { name: 'Confirmar Limpieza' }));
     expect(useLocalCsvStore.getState().datasets).toHaveLength(0);
   });

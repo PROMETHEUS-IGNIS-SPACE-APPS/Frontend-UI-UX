@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Activity, ChevronDown, ChevronUp, Compass, Flame, Globe, HelpCircle, Layers, Map as MapIcon, Moon, Mountain, Sparkles, Sun } from 'lucide-react';
-import NoveltyReportAccess from '@/components/layout/NoveltyReportAccess';
-import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
+import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, PROBABILITY_SCALE, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
   focusId: string;
@@ -15,12 +14,17 @@ interface MapOverlaysProps {
   /** Abre la guía/glosario; si falta, no se muestra el botón “Guía”. */
   onOpenGuide?: () => void;
   sourceLabel?: string;
+  /** Horizonte de la capa Markov: 0 = 24 h, 1 = 48 h, 2 = 72 h. */
+  markovHorizon?: 0 | 1 | 2;
+  onMarkovHorizonChange?: (horizon: 0 | 1 | 2) => void;
+  /** Aviso cuando la estimación no se puede calcular (p. ej. pocos días). */
+  markovNote?: string | null;
 }
 
 const PANEL = 'border border-border-strong bg-card shadow-2xl';
 const STYLE_ICONS: Record<MapStylePreset['id'], typeof MapIcon> = { liberty: MapIcon, satellite: Globe, topographic: Mountain, dark: Moon, positron: Sun };
 
-export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, layers, onToggleLayer, pointCount, frpCount, onOpenGuide, sourceLabel }: MapOverlaysProps) {
+export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, layers, onToggleLayer, pointCount, frpCount, onOpenGuide, sourceLabel, markovHorizon = 0, onMarkovHorizonChange, markovNote }: MapOverlaysProps) {
   // En teléfonos los paneles empiezan plegados para dejar ver el mapa.
   const [layersOpen, setLayersOpen] = useState(() => typeof window === 'undefined' || typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 768px)').matches);
   const [baseOpen, setBaseOpen] = useState(false);
@@ -35,7 +39,6 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
         </div>
         <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
           {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {pointCount.toLocaleString()} pts</span>}
-          <NoveltyReportAccess variant="map" />
           {onOpenGuide && <button type="button" onClick={onOpenGuide} className="flex items-center gap-1 rounded-lg bg-card px-2 py-1.5 text-xs font-semibold text-info shadow-sm hover:underline" aria-label="Abrir guía y glosario"><HelpCircle className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Guía</span></button>}
         </div>
       </div>
@@ -71,22 +74,36 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
         <Toggle icon={<Flame className="h-3.5 w-3.5 text-accent" />} label="Marcadores Térmicos" count={pointCount} checked={layers.points} onChange={() => onToggleLayer('points')} />
         <Toggle icon={<Activity className="h-3.5 w-3.5 text-danger" />} label="Mapa Calor Observado" count={frpCount} checked={layers.heatmap} onChange={() => onToggleLayer('heatmap')} />
         {layers.heatmap && <p className="text-[10px] leading-tight text-text-secondary">Ponderado por FRP informada; las observaciones sin FRP no participan.</p>}
-        <div className="space-y-1 border-t border-border pt-1.5">
-          <label className="flex cursor-not-allowed items-center justify-between gap-2 font-semibold text-predictive opacity-60">
+        <div className="space-y-1.5 border-t border-border pt-1.5">
+          <label className="flex cursor-pointer items-center justify-between gap-2 font-semibold text-predictive">
             <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" aria-hidden />Capa Predictiva Markov</span>
-            <input type="checkbox" disabled checked={false} readOnly aria-label="Capa Predictiva Markov" className="accent-accent" />
+            <input type="checkbox" checked={layers.markov} onChange={() => onToggleLayer('markov')} aria-label="Capa Predictiva Markov" className="accent-accent" />
           </label>
-          <p className="text-[10px] leading-tight text-text-secondary">Pendiente: se habilita cuando el AI-Pipeline publique un modelo evaluado.</p>
+          {layers.markov && <>
+            <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-surface p-0.5" role="group" aria-label="Horizonte de la capa Markov">
+              {(['24h', '48h', '72h'] as const).map((label, index) => <button key={label} type="button" aria-pressed={markovHorizon === index} onClick={() => onMarkovHorizonChange?.(index as 0 | 1 | 2)} className={`rounded-md py-1 font-source text-[11px] font-bold transition-colors ${markovHorizon === index ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:text-text-primary'}`}>{label}</button>)}
+            </div>
+            {markovNote
+              ? <p className="rounded-md border border-warning/40 bg-warning-soft px-2 py-1 text-[10px] leading-tight text-warning">{markovNote}</p>
+              : <p className="text-[10px] leading-tight text-text-secondary">Estimación exploratoria con los datos cargados (no es un modelo publicado). Toca una zona de color para ver la celda.</p>}
+          </>}
         </div>
       </div>}
     </section>
 
-    <div className={`absolute bottom-6 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-3 rounded-xl px-3.5 py-2 font-source text-[11px] lg:flex ${PANEL}`}>
+    <div className={`absolute bottom-6 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 font-source text-[11px] lg:flex ${PANEL}`}>
+      <div className="flex items-center gap-3">
       <LegendDot color="bg-[#ef4444]" label="VIIRS" />
       <span className="h-3 w-px bg-border-strong" />
       <LegendDot color="bg-[#facc15]" label="MODIS" />
       <span className="h-3 w-px bg-border-strong" />
       <LegendDot color="bg-[#f97316]" label={`Alta (≥${HIGH_INTENSITY_FRP_MW} MW)`} />
+      {layers.citizen && <><span className="h-3 w-px bg-border-strong" /><LegendDot color="bg-[#3b82f6]" label="Reporte ciudadano" /></>}
+      </div>
+      {layers.markov && !markovNote && <div className="flex items-center gap-2 border-t border-border pt-1.5">
+        <span className="font-bold text-predictive">P(S1 ∪ S2)</span>
+        {PROBABILITY_SCALE.map((step) => <span key={step.label} className="flex items-center gap-1"><span className="inline-block h-2.5 w-4 rounded-xs" style={{ backgroundColor: step.color }} /><span className="text-text-secondary">{step.label}</span></span>)}
+      </div>}
     </div>
   </>;
 }

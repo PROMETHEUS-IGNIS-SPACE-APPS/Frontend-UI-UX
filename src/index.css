@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&family=Noto+Sans:ital,wght@0,400..800;1,400..800&family=Source+Sans+3:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&family=Noto+Sans:ital,wght@0,400..800;1,400..800&family=Sniglet:wght@400;800&family=Source+Sans+3:ital,wght@0,400..800;1,400..800&display=swap');
 @import "tailwindcss";
 
 /*
@@ -125,6 +125,7 @@
   --font-sans: 'Inclusive Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-noto: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-source: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-kairos: 'Sniglet', 'Inclusive Sans', 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --radius-xs: 0.0625rem;
   --radius-sm: 0.125rem;
@@ -284,4 +285,113 @@
   body.print-manual {
     background: #ffffff !important;
   }
+}
+
+/* Detector de Riesgos Cotidianos (Aula KAIRÓS): paleta fija crema como el resto del Aula. */
+.risk-detector {
+  --rd-ink: #4A2E1B;
+  --rd-red: #C62828;
+  --rd-yellow: #EAB308;
+  --rd-green: #2E7D32;
+  --rd-blue: #1B5FA8;
+  --rd-rust: #A93E08;
+  --vec-wall: #F7EBD6;
+  --vec-floor: #E2CFAE;
+  --vec-floor-line: #CDB48C;
+  --vec-wood: #C99E72;
+  --vec-wood-dark: #9D7349;
+  --vec-metal: #CBD5E1;
+  --vec-metal-dark: #64748B;
+  --vec-glass: #DCEBF8;
+  --vec-fabric: #8E5A3A;
+  --vec-fabric-light: #B98563;
+  --vec-white: #FFFDF8;
+  --vec-safe-soft: #EAF5EB;
+}
+
+.risk-detector .rd-item {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 120ms ease-out, filter 120ms ease-out;
+}
+
+.risk-detector .rd-item:hover {
+  filter: drop-shadow(0 4px 8px rgba(74, 46, 27, 0.2));
+  transform: translateY(-2px);
+}
+
+.risk-detector .rd-item:focus-visible {
+  outline: none;
+}
+
+.risk-detector .rd-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 3;
+  transition: stroke 220ms ease-out;
+}
+
+.risk-detector .rd-item:hover .rd-hit,
+.risk-detector .rd-item:focus-visible .rd-hit {
+  stroke: #D9692B;
+  stroke-dasharray: 6 4;
+}
+
+.risk-detector .rd-item.is-safe .rd-hit {
+  stroke: var(--rd-green);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+.risk-detector .rd-item.is-hazard .rd-hit {
+  stroke: var(--rd-red);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+.risk-detector .rd-item.is-hazard .rd-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rd-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rd-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-detector .rd-item,
+  .risk-detector .rd-item.is-hazard .rd-badge {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Sol del paisaje final del Aula KAIRÓS: relieve sobre el sol dibujado y mensaje al pasar el cursor. */
+.kairos-sun {
+  background: radial-gradient(circle at 34% 30%, rgba(255, 244, 214, 0.75) 0%, rgba(255, 214, 150, 0.35) 22%, rgba(236, 132, 52, 0) 52%),
+    radial-gradient(circle at 68% 74%, rgba(120, 40, 10, 0.38) 0%, rgba(120, 40, 10, 0) 55%);
+  box-shadow: inset -0.5rem -0.6rem 1.1rem rgba(122, 45, 12, 0.35), inset 0.4rem 0.5rem 0.9rem rgba(255, 238, 200, 0.45);
+  /* Mask traced from the drawing: the relief only covers the visible sun, never the hills. */
+  -webkit-mask: url('/assets/kairos/sol-mascara.png') center / 100% 100% no-repeat;
+  mask: url('/assets/kairos/sol-mascara.png') center / 100% 100% no-repeat;
+  transition: filter 300ms ease-out;
+  animation: kairos-sun-glow 3.2s ease-in-out infinite;
+}
+
+.kairos-sun:hover,
+.kairos-sun:focus {
+  filter: brightness(1.15) saturate(1.2);
+  animation: none;
+}
+
+@keyframes kairos-sun-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kairos-sun { animation: none; transition: none; }
 }

@@ -1,5 +1,6 @@
-import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Moon, Radar, Satellite, Server, Sun, TrendingUp } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Download, HeartHandshake, Info, Layers, Moon, Radar, Sun, TrendingUp } from 'lucide-react';
 import { useUiStore } from '@/stores/uiStore';
+import { downloadCitizenReportsCsv, useCitizenReportsStore } from '@/stores/citizenReportsStore';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
 import ConnectionIndicator from './ConnectionIndicator';
@@ -25,20 +26,18 @@ const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   calendar: CalendarDays,
   analytics: Activity,
   comparison: HeartHandshake,
-  laboratory: Cpu,
-  sources: Server,
+  'project-info': Info,
 };
 
 /** Etiquetas visibles cortas, como en la barra del ejemplo. */
 const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
   predictability: 'Predictibilidad',
-  'markov-heatmap': 'Mapa de Calor Markov',
+  'markov-heatmap': 'Mapa de Calor',
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula Pedagógica',
-  laboratory: 'Modelos IA',
-  sources: 'Fuentes/API',
+  'project-info': 'Información del Proyecto',
 };
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
@@ -48,8 +47,7 @@ const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula',
-  laboratory: 'Modelos IA',
-  sources: 'Fuentes',
+  'project-info': 'Proyecto',
 };
 
 const SMALL_BUTTON = 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400';
@@ -58,8 +56,11 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
   const theme = useUiStore((state) => state.theme);
   const toggleTheme = useUiStore((state) => state.toggleTheme);
   const canExport = totalVisibleCount > 0;
+  const citizenReports = useCitizenReportsStore((state) => state.reports);
+  const dataMode = useUiStore((state) => state.dataMode);
+  const setDataMode = useUiStore((state) => state.setDataMode);
   const exportTitle = canExport
-    ? `Exportar ${totalVisibleCount} registros filtrados a CSV`
+    ? `Descargar las ${totalVisibleCount} observaciones satelitales visibles en un archivo .CSV`
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
 
   return (
@@ -97,21 +98,27 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
         <div className="-mx-2.5 flex flex-nowrap items-center justify-between gap-2 overflow-x-auto border-t border-border px-2.5 py-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           <div className="flex shrink-0 items-center gap-1.5 sm:min-w-0 sm:shrink sm:flex-wrap">
             <div className="hidden items-center gap-1 overflow-x-auto md:flex lg:hidden">{renderTabs('mobile')}</div>
+            <div role="group" aria-label="Selector de fuente de datos" className="inline-flex shrink-0 items-center rounded-lg border border-border bg-surface p-0.5">
+              <button type="button" aria-pressed={dataMode === 'demo'} onClick={() => setDataMode('demo')} title="Conjunto sintético de demostración (2024–2025), rotulado en toda la plataforma" className={`whitespace-nowrap rounded-md px-2.5 py-1 font-noto text-[11px] transition-colors ${dataMode === 'demo' ? 'bg-accent-solid font-bold text-accent-fg shadow-xs' : 'font-medium text-text-secondary hover:text-text-primary'}`}>Demostración</button>
+              <button type="button" aria-pressed={dataMode === 'real'} onClick={() => setDataMode('real')} title="Datos reales del Backend-API (IDEAM SMByC + NASA FIRMS)" className={`whitespace-nowrap rounded-md px-2.5 py-1 font-noto text-[11px] transition-colors ${dataMode === 'real' ? 'bg-emerald-500 font-bold text-slate-950 shadow-xs' : 'font-medium text-text-secondary hover:text-text-primary'}`}>Lab Real</button>
+            </div>
             <ConnectionIndicator />
             <LocalCsvAccess />
-            <span className={`${SMALL_BUTTON.replace('inline-flex ', '')} hidden bg-card text-text-primary sm:inline-flex`}>
-              <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
-              <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>
-            </span>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5 sm:flex-wrap">
-            <EmergencyAccess />
-            <NoveltyReportAccess />
             <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
               <Download className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+              <span className="hidden sm:inline">Descargar observaciones (.CSV)</span>
+              <span className="sm:hidden">Descargar</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount.toLocaleString()}</span>
+            </button>
+          </div>
+          <div role="group" aria-label="Emergencias y reportes ciudadanos" className="order-first flex shrink-0 items-center gap-1.5 sm:order-none sm:flex-wrap">
+            <EmergencyAccess />
+            <NoveltyReportAccess />
+            <button type="button" onClick={() => downloadCitizenReportsCsv(citizenReports)} disabled={!citizenReports.length} title={citizenReports.length ? `Descargar los ${citizenReports.length} reportes ciudadanos guardados en este dispositivo` : 'Aún no hay reportes ciudadanos guardados en este dispositivo'} aria-label="Descargar Reportes (.CSV)" className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
+              <Download className="h-3.5 w-3.5 shrink-0 text-info" aria-hidden />
               <span className="hidden sm:inline">Descargar Reportes (.CSV)</span>
-              <span className="sm:hidden">CSV</span>
-              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount}</span>
+              <span className="sm:hidden">Reportes</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-info px-1.5 font-source text-[10px] font-extrabold tabular-nums text-white">{citizenReports.length}</span>
             </button>
           </div>
         </div>

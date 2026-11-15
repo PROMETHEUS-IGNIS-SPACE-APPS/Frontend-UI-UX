@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Activity, CalendarDays, Cpu, HeartHandshake, Layers, MoreHorizontal, Radar, Server, TrendingUp, X } from 'lucide-react';
+import { Activity, CalendarDays, HeartHandshake, Info, Layers, MoreHorizontal, Radar, TrendingUp, X } from 'lucide-react';
 import type { AppModuleId } from '@/types/domain/module';
 
 interface MobileBottomNavProps {
@@ -19,8 +19,7 @@ const PRIMARY: NavItem[] = [
 const SECONDARY: NavItem[] = [
   { id: 'predictability', label: 'Predictibilidad', icon: TrendingUp },
   { id: 'markov-heatmap', label: 'Mapa de Calor Markov', icon: Radar },
-  { id: 'laboratory', label: 'Modelos IA', icon: Cpu },
-  { id: 'sources', label: 'Fuentes/API', icon: Server },
+  { id: 'project-info', label: 'Información del Proyecto', icon: Info },
 ];
 
 /**
@@ -47,7 +46,7 @@ export default function MobileBottomNav({ activeModule, onModuleChange }: Mobile
           <span className="font-noto text-xs font-bold text-text-primary">Más módulos</span>
           <button type="button" onClick={() => setMoreOpen(false)} aria-label="Cerrar menú de módulos" className="rounded-lg p-1.5 text-text-secondary hover:bg-surface-hover"><X className="h-4 w-4" aria-hidden /></button>
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-1.5">
           {SECONDARY.map(({ id, label, icon: Icon }) => {
             const active = id === activeModule;
             return <button key={id} type="button" onClick={() => go(id)} aria-current={active ? 'page' : undefined} className={`flex min-h-12 items-center gap-2 rounded-xl border px-3 py-2.5 text-left font-noto text-xs font-semibold transition-colors ${active ? 'border-accent bg-accent-soft text-accent' : 'border-border bg-surface text-text-primary hover:bg-surface-hover'}`}>

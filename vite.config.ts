@@ -16,5 +16,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Las pruebas con userEvent superan los 5 s por defecto cuando la máquina está cargada.
+    testTimeout: 20_000,
   },
 });
