@@ -68,7 +68,7 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('button', { name: 'Abrir líneas de emergencia de Colombia' })).toBeInTheDocument();
     expect(screen.getByText('Descargar Reportes (.CSV)')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Reportar una novedad territorial' }));
-    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Reportar Novedad de Incendio Forestal' })).toBeInTheDocument();
   });
 
   it('cambia de módulo al activar otra pestaña de escritorio', async () => {

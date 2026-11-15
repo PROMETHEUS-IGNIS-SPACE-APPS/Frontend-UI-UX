@@ -46,7 +46,7 @@ const SECTIONS = [
     title: '5. Emergencias',
     items: [
       'Ante una emergencia real, comunícate con la línea nacional 123 o con Bomberos 119. Las detecciones del mapa son contexto y no verifican un incidente.',
-      'El botón Reportar Novedad todavía no recibe ni guarda reportes ciudadanos.',
+      'Reportar Novedad arma un resumen (ubicación, intensidad observada y descripción) para copiarlo o compartirlo con el 123, los bomberos o el CMGRD. La plataforma no recibe ni guarda reportes.',
     ],
   },
 ];
