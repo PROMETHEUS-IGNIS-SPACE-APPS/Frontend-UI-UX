@@ -35,7 +35,7 @@ describe('App shell de pestañas', () => {
   });
 
   beforeEach(() => {
-    useUiStore.setState({ activeModule: 'explorer' });
+    useUiStore.setState({ activeModule: 'explorer', noveltyOpen: false });
     vi.mocked(fetchIngestedObservations).mockResolvedValue({
       data: appObservations, count: 2, total_matching: 2, data_provenance: 'IDEAM + NASA FIRMS',
     });

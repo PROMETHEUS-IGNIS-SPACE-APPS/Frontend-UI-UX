@@ -12,9 +12,9 @@ describe('EmergencyAccess', () => {
 
     await user.click(screen.getByRole('button', { name: 'Abrir líneas de emergencia de Colombia' }));
 
-    expect(screen.getByRole('dialog', { name: 'Líneas de emergencia · Colombia' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /línea nacional 123/i })).toHaveAttribute('href', 'tel:123');
-    expect(screen.getByRole('link', { name: /bomberos 119/i })).toHaveAttribute('href', 'tel:119');
+    expect(screen.getByRole('dialog', { name: 'Líneas de Emergencia · 123 SOS' })).toBeInTheDocument();
+    for (const number of ['123', '119', '144', '132']) expect(screen.getByRole('link', { name: `Llamar al ${number}` })).toHaveAttribute('href', `tel:${number}`);
+    expect(screen.getByRole('button', { name: 'Ir a Reportar Novedad' })).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

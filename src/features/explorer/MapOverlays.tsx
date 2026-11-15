@@ -98,7 +98,7 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
       <LegendDot color="bg-[#facc15]" label="MODIS" />
       <span className="h-3 w-px bg-border-strong" />
       <LegendDot color="bg-[#f97316]" label={`Alta (≥${HIGH_INTENSITY_FRP_MW} MW)`} />
-      {layers.citizen && <><span className="h-3 w-px bg-border-strong" /><LegendDot color="bg-[#3b82f6]" label="Ciudadanos" /></>}
+      {layers.citizen && <><span className="h-3 w-px bg-border-strong" /><LegendDot color="bg-[#3b82f6]" label="Reporte ciudadano" /></>}
       </div>
       {layers.markov && !markovNote && <div className="flex items-center gap-2 border-t border-border pt-1.5">
         <span className="font-bold text-predictive">P(S1 ∪ S2)</span>

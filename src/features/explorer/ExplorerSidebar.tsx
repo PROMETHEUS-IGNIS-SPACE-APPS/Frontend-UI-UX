@@ -60,7 +60,7 @@ const CATEGORY_ITEMS = [
   { key: 'viirs' as const, label: 'VIIRS', color: 'bg-[#ef4444]' },
   { key: 'modis' as const, label: 'MODIS', color: 'bg-[#facc15]' },
   { key: 'highIntensity' as const, label: `Alta (≥${HIGH_INTENSITY_FRP_MW}MW)`, color: 'bg-[#f97316]' },
-  { key: 'citizen' as const, label: 'Ciudadanos', color: 'bg-[#3b82f6]' },
+  { key: 'citizen' as const, label: 'Reporte ciudadano', color: 'bg-[#3b82f6]' },
 ];
 
 export default function ExplorerSidebar(props: ExplorerSidebarProps) {
@@ -95,7 +95,7 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
           <span className="ml-auto pl-1 font-source text-[10px] text-text-secondary">{props.categoryCounts[item.key].toLocaleString()}</span>
         </label>)}
       </div>
-      <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS. Ciudadanos: reportes guardados en este dispositivo, sin verificación oficial.</p>
+      <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS. Reporte ciudadano: reportes guardados en este dispositivo, sin verificación oficial.</p>
     </section>
 
     <section className="overflow-hidden rounded-xl border border-border bg-surface">

@@ -19,6 +19,7 @@ import MarkovHeatmapPanel from '@/features/markov/MarkovHeatmapPanel';
 import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
+import CartographicGuideModal from '@/features/explorer/CartographicGuideModal';
 import TimelineControls from '@/features/explorer/TimelineControls';
 import { DEFAULT_MAP_LAYERS, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, observationCategory, type MapFocusPreset, type MapLayerState, type MapStylePreset } from '@/features/explorer/mapPresets';
 import type { SourcePreset } from '@/features/explorer/ExplorerSidebar';
@@ -69,6 +70,7 @@ export default function App() {
   const toggleMapLayer = (key: keyof MapLayerState) => setMapLayers((current) => ({ ...current, [key]: !current[key] }));
   const [markovHorizon, setMarkovHorizon] = useState<0 | 1 | 2>(0);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
+  const [isCartoGuideOpen, setIsCartoGuideOpen] = useState(false);
   const citizenReports = useCitizenReportsStore((state) => state.reports);
   const toggleReportStatus = useCitizenReportsStore((state) => state.toggleStatus);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
@@ -213,7 +215,7 @@ export default function App() {
                   {observationsQuery.isPending && <div className="absolute left-1/2 top-28 z-30 flex w-[min(28rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-xl shadow-2xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones…</div>}
                   {observationsQuery.isError && <div role="alert" className="absolute left-1/2 top-28 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-start gap-3 rounded-xl border border-danger/40 bg-card shadow-2xl p-4 text-sm text-danger"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-danger">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-danger-soft" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                   {hasData && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-text-secondary" /><p className="mt-2 font-medium text-text-primary">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-text-secondary">La consulta respondió correctamente con una colección vacía.</p></div></div>}
-                  <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} layers={mapLayers} onToggleLayer={toggleMapLayer} pointCount={visible.length} frpCount={visible.filter((item) => item.frp_mw !== null).length} onOpenGuide={() => setIsGlossaryOpen(true)} markovHorizon={markovHorizon} onMarkovHorizonChange={setMarkovHorizon} markovNote={markovResult?.status === 'insufficient' ? markovResult.message : null} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />
+                  <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} layers={mapLayers} onToggleLayer={toggleMapLayer} pointCount={visible.length} frpCount={visible.filter((item) => item.frp_mw !== null).length} onOpenGuide={() => setIsCartoGuideOpen(true)} markovHorizon={markovHorizon} onMarkovHorizonChange={setMarkovHorizon} markovNote={markovResult?.status === 'insufficient' ? markovResult.message : null} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />
                   {selectedReport && mapLayers.citizen && !selected && <aside aria-label="Reporte ciudadano seleccionado" className="absolute inset-x-2 bottom-2 z-30 max-h-[70%] space-y-2.5 overflow-y-auto rounded-2xl border border-[#3b82f6]/60 bg-card p-4 text-xs shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-16 sm:max-h-[calc(100%-5rem)] sm:w-80">
                     <div className="flex items-start justify-between gap-2 border-b border-border pb-2"><div className="min-w-0"><h2 className="font-noto text-sm font-bold text-text-primary">Reporte ciudadano</h2><p className="font-source text-[10px] font-semibold text-[#3b82f6]">{selectedReport.createdAt} · {selectedReport.sector ?? `${selectedReport.latitude}, ${selectedReport.longitude}`}</p></div><button type="button" onClick={() => setSelectedReportId(null)} aria-label="Cerrar reporte ciudadano" className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary"><X className="h-4 w-4" /></button></div>
                     <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['Intensidad observada', selectedReport.intensity], ['Quién reporta', selectedReport.role], ['Coordenadas', `${selectedReport.latitude}, ${selectedReport.longitude}`], ['Estado', selectedReport.status === 'verificado' ? 'Verificado' : 'Pendiente']].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
@@ -228,7 +230,7 @@ export default function App() {
                   </aside>}
                   {selected && <aside aria-label="Observación seleccionada" className="absolute inset-x-2 bottom-2 z-30 max-h-[70%] space-y-3 overflow-y-auto rounded-2xl border border-accent/60 bg-card p-4 text-xs shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-16 sm:max-h-[calc(100%-5rem)] sm:w-96">
                     <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-sensor-viirs' : 'border-yellow-400/50 bg-yellow-400/10 text-sensor-modis'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
-                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
+                    <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Hora Colombia (UTC-5)', colombiaTime(selected.acquired_at)], ['Adquisición UTC', selected.acquired_at], ['Temperatura de brillo', selected.brightness_k == null ? 'No disponible' : `${selected.brightness_k.toFixed(1)} K (${(selected.brightness_k - 273.15).toFixed(1)} °C)`], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
                     <p className="flex items-start gap-1.5 text-[10px] leading-4 text-text-secondary"><MapPin className="mt-0.5 h-3 w-3 shrink-0 text-accent" />Una observación satelital no equivale necesariamente a un incendio independiente.</p>
                     {selected.reference_url && <a href={selected.reference_url} target="_blank" rel="noreferrer" className="inline-block text-[11px] font-semibold text-info underline underline-offset-2">Consultar fuente original</a>}
                   </aside>}
@@ -257,9 +259,17 @@ export default function App() {
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
       </main>
+      <CartographicGuideModal isOpen={isCartoGuideOpen} onClose={() => setIsCartoGuideOpen(false)} onOpenGlossary={() => setIsGlossaryOpen(true)} />
       <GlossaryModal isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
     </div>
   );
+}
+
+/** Hora local de Colombia (UTC-5, sin horario de verano) a partir de un ISO UTC. */
+function colombiaTime(isoUtc: string) {
+  const ms = Date.parse(isoUtc);
+  if (Number.isNaN(ms)) return 'No disponible';
+  return `${new Date(ms - 5 * 3_600_000).toISOString().slice(0, 16).replace('T', ' ')} (COT)`;
 }
 
 function csvValue(value: unknown) {

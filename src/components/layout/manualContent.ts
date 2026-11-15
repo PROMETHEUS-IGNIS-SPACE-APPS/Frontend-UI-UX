@@ -140,7 +140,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'list', items: [
         'Colapso: el botón ◀ / ▶ oculta o muestra el panel. En el celular aparece como “Filtros” desplegable.',
         'Modo Fácil / Filtros Pro: Filtros Pro añade paso orbital (día/noche), FRP mínima (MW) y confianza original.',
-        'Categorías Visuales: casillas para VIIRS (rojo), MODIS (amarillo), Alta (≥ 30 MW, naranja) y Ciudadanos (azul: reportes guardados en este dispositivo), con su conteo.',
+        'Categorías Visuales: casillas para VIIRS (rojo), MODIS (amarillo), Alta (≥ 30 MW, naranja) y Reporte ciudadano (azul: reportes guardados en este dispositivo), con su conteo.',
         'Fuentes reales (IDEAM / FIRMS): accesos rápidos IDEAM últimos 2 días (Antioquia), IDEAM 45 días Antioquia, Fusión IDEAM (30 d) + NASA FIRMS (7 d) en toda Colombia, Subir CSV y NASA FIRMS 7 d.',
         'Fuente de observaciones: Combinado IDEAM + NASA FIRMS, IDEAM · SMByC, NASA FIRMS · NRT 7 días o Histórico muestreado 2024–hoy; cobertura Antioquia o Colombia; fechas Desde / Hasta en UTC (máximo 90 días).',
         'Sensor (Todos, VIIRS, MODIS), búsqueda por municipio, Departamento y Municipio.',
@@ -148,13 +148,13 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       ] },
       { kind: 'h', text: '4.1.2 Lienzo cartográfico (MapLibre GL)' },
       { kind: 'list', items: [
-        'Barra superior: zonas Antioquia, Colombia, Valle de Aburrá, Bajo Cauca y Urabá; indicador de datos activos y botón Guía.',
+        'Barra superior: zonas Antioquia, Colombia, Valle de Aburrá, Bajo Cauca y Urabá; indicador de datos activos y botón Guía, que abre la Convención Cartográfica (apartado 5.5).',
         'Mapa base: Liberty, Satélite, Topográfico, Oscuro y Claro; casillas Límite de Colombia y Subregiones de Antioquia (contornos esquemáticos, no oficiales).',
         'Capas Cartográficas (panel inferior izquierdo, plegable): Marcadores Térmicos, Mapa Calor Observado (ponderado por FRP) y Capa Predictiva Markov con selector 24h / 48h / 72h; muestra zonas de color según la probabilidad estimada de cada celda y un aviso si el historial es insuficiente.',
         'Controles de zoom y brújula, y leyenda inferior (VIIRS, MODIS, Alta ≥ 30 MW).',
       ] },
       { kind: 'p', text: 'Al hacer clic sobre un reporte ciudadano (punto azul) se ven su intensidad observada, quién reporta, coordenadas y observaciones, con el botón Cambiar estado (Verificado / Pendiente). Es una marca local de quien usa el dispositivo, no una verificación oficial.' },
-      { kind: 'p', text: 'Al hacer clic sobre un foco se abre su ficha: identificador, sensor, satélite, hora de adquisición (UTC), FRP en MW (o “No disponible”), confianza original, día/noche, concordancia, coordenadas, origen y enlace a la fuente original.' },
+      { kind: 'p', text: 'Al hacer clic sobre un foco se abre su ficha: identificador, sensor, satélite, hora Colombia (UTC-5) y UTC, temperatura de brillo en K/°C (si existe), FRP en MW (o “No disponible”), confianza original, día/noche, concordancia, coordenadas, origen y enlace a la fuente original.' },
       { kind: 'h', text: '4.1.3 Línea de tiempo inferior' },
       { kind: 'list', items: ['Día anterior, Reproducir/Pausar y Día siguiente.', 'Velocidad 1x, 2x o 5x.', 'Fecha activa y número de fechas disponibles.', 'Histograma diario de observaciones y barra deslizante.'] },
       { kind: 'warn', text: 'Importante / Rigor científico: los satélites de órbita polar pasan por una zona solo algunas veces al día; la ausencia de focos en un instante no implica ausencia de fuego.' },
@@ -263,7 +263,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'sos', level: 2, title: '5.2 Líneas de emergencia (123 SOS)', blocks: [
-      { kind: 'list', items: ['Marcación directa a 123 (Línea Nacional de Emergencias) y 119 (Bomberos). La plataforma no llama por sí sola: usted decide.'] },
+      { kind: 'list', items: ['Protocolo de Respuesta Inmediata con marcación directa a 123 (Línea Única de Emergencias), 119 (Bomberos), 144 (Defensa Civil) y 132 (Cruz Roja). La plataforma no llama por sí sola: usted decide.', 'Botón Ir a Reportar Novedad, para preparar el reporte después de dar aviso a las autoridades.'] },
       { kind: 'warn', text: 'Importante: ningún reporte en la plataforma reemplaza la llamada a las líneas de emergencia. Llame primero.' },
     ],
   },
@@ -286,6 +286,11 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         'Gestor: arrastre o seleccione archivos, vea la lista cargada (formato, observaciones y hora) y quite archivos uno por uno.',
         'Limpiar todos (.CSV): pide confirmación en pantalla antes de borrar los archivos locales y los reportes ciudadanos guardados en el dispositivo.',
       ] },
+    ],
+  },
+  {
+    id: 'guia-mapa', level: 2, title: '5.5 Convención Cartográfica (botón Guía del mapa)', blocks: [
+      { kind: 'p', text: 'Ventana que explica los símbolos, colores y capas del lienzo cartográfico: VIIRS, MODIS, alta intensidad, reportes ciudadanos, Mapa Calor Observado, Capa Predictiva Markov, límite de Colombia y subregiones de Antioquia. Desde ella se puede abrir el Glosario completo.' },
     ],
   },
   {

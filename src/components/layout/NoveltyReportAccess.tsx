@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
+import { useUiStore } from '@/stores/uiStore';
 import { AlertTriangle, CheckCircle2, ClipboardCopy, Crosshair, Flame, Mail, MapPin, MessageCircle, PhoneCall, Send, Share2, UserCheck, Users, X } from 'lucide-react';
 
 /**
@@ -47,7 +48,8 @@ function Step({ n, title, aside, children }: { n: number; title: string; aside?:
 }
 
 export default function NoveltyReportAccess() {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = useUiStore((state) => state.noveltyOpen);
+  const setIsOpen = useUiStore((state) => state.setNoveltyOpen);
   const [hasExperience, setHasExperience] = useState(false);
   const [experience, setExperience] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -63,14 +65,14 @@ export default function NoveltyReportAccess() {
   const [copied, setCopied] = useState(false);
   const addReport = useCitizenReportsStore((state) => state.addReport);
 
-  const close = () => { setIsOpen(false); setSummary(null); setError(null); setCopied(false); };
+  const close = useCallback(() => { setIsOpen(false); setSummary(null); setError(null); setCopied(false); }, [setIsOpen]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen]);
+  }, [isOpen, close]);
 
   const chooseSector = (sector: Sector) => { setSectorId(sector.id); setLatitude(sector.lat.toFixed(4)); setLongitude(sector.lon.toFixed(4)); setGps({ busy: false }); };
 

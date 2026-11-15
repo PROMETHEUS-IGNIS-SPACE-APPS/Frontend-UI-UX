@@ -4,7 +4,7 @@ import SubregionLineChart from '@/components/charts/SubregionLineChart';
 import { MONTHS_FULL, SUBREGIONS, computeSubregionMatrix, resolveSubregion, type SubregionId } from '@/utils/subregions';
 import { runMarkovEngine } from '@/utils/markovEngine';
 import type { Observation } from '@/types/api/observations';
-import { ModuleHeader, ModulePage, ProvenanceNote } from '@/components/common/ModuleLayout';
+import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 
 interface ActivityCalendarPanelProps {
   observations: Observation[];
@@ -104,33 +104,6 @@ export default function ActivityCalendarPanel({ observations, totalMatching, pro
       <SubregionLineChart title="Intensidad térmica promedio por zona (FRP)" badge="FRP promedio (MW)" series={visibleSubregions.map((sub) => ({ subregion: sub, values: matrix.avgFrp[sub.id] }))} unit="MW" decimals={1} />
     </div>
 
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded border border-success/40 bg-success-soft px-2.5 py-0.5 font-source text-[11px] font-bold uppercase text-success">Calendario real (IDEAM / FIRMS)</span>
-        <span className="font-source text-xs tabular-nums text-text-secondary">{matrix.classifiedCount.toLocaleString()} registros clasificados en Antioquia</span>
-      </div>
-
-      <article className="space-y-3 rounded-2xl border border-border bg-card p-4 text-xs leading-relaxed shadow-sm sm:p-6">
-        <h2 className="flex items-center gap-2 font-noto text-sm font-bold text-text-primary"><Info className="h-4 w-4 shrink-0 text-info" aria-hidden />Interpretación Científica:</h2>
-        {insights.leader ? <>
-          <p className="text-text-secondary">
-            La distribución mensual de anomalías térmicas registradas en Antioquia muestra diferencias claras entre subregiones.{' '}
-            {insights.top.map((item, index) => <span key={item.sub.id}>{index > 0 && ' y '}<strong className="text-text-primary">{item.sub.label}</strong></span>)}{' '}
-            {insights.top.length > 1 ? 'concentran' : 'concentra'} la mayor cantidad de observaciones del conjunto cargado
-            ({insights.top.map((item) => `${item.total.toLocaleString()}${item.peak ? ` con pico en ${item.peak}` : ''}`).join(' y ')}).
-          </p>
-          <p className="text-text-secondary">
-            {insights.middle.length > 0 && <>En contraste, {insights.middle.map((item, index) => <span key={item.sub.id}>{index > 0 && ' y '}<strong className="text-text-primary">{item.sub.label}</strong> ({item.total.toLocaleString()})</span>)} registran una actividad intermedia</>}
-            {insights.rest.length > 0 && <>, mientras {insights.rest.map((item, index) => <span key={item.sub.id}>{index > 0 && (index === insights.rest.length - 1 ? ' y ' : ', ')}<strong className="text-text-primary">{item.sub.label}</strong> ({item.total.toLocaleString()})</span>)} {insights.rest.length > 1 ? 'presentan' : 'presenta'} menos observaciones</>}
-            {(insights.middle.length > 0 || insights.rest.length > 0) && '. '}
-            {insights.peakMonth && <>En la selección activa, el mes con más registros es <strong className="text-info">{insights.peakMonth.name}</strong> ({insights.peakMonth.foci.toLocaleString()} observaciones)</>}
-            {insights.intensity && <> y la intensidad térmica promedio más alta la tiene <strong className="text-accent">{insights.intensity.sub.label}</strong> ({insights.intensity.avg.toFixed(1)} MW)</>}.
-            {markov && <> En cruce con la estimación exploratoria Markov 3×3 (+24 h), la probabilidad regional de actividad es <strong className="text-predictive">{(markov.regional * 100).toFixed(1)}%</strong>{markov.topCell && markov.topCell.sub && <>, con la celda más alta en <strong className="text-accent">{markov.topCell.sub.label}</strong> ({(markov.topCell.cell.p24 * 100).toFixed(1)}%)</>}{markov.validated ? (markov.beatsClimatology ? '; en la validación retrospectiva supera a la climatología.' : '; en la validación retrospectiva todavía no supera a la climatología.') : '; aún no hay días suficientes para validarla.'}</>}
-          </p>
-        </> : <p className="text-text-secondary">No hay observaciones clasificadas en las subregiones seleccionadas.</p>}
-        <p className="border-t border-border pt-3 text-[11px] text-text-secondary">Los meses agregan todos los años cargados. La subregión se deriva del municipio de referencia que asigna el Backend-API por cercanía, así que es aproximada.{matrix.unclassifiedAntioquiaCount > 0 && ` ${matrix.unclassifiedAntioquiaCount.toLocaleString()} observaciones de Antioquia quedan fuera de estas seis agrupaciones (por ejemplo, Oriente).`} Un mes sin registros no prueba ausencia de incendios.</p>
-      </article>
-    </div>
 
     <div className="flex items-start gap-3 text-xs text-text-primary">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" />
@@ -170,6 +143,32 @@ export default function ActivityCalendarPanel({ observations, totalMatching, pro
       })}
     </div> : <div className="space-y-2 rounded-2xl border border-border bg-card p-10 text-center shadow-sm"><CalendarDays className="mx-auto h-8 w-8 text-text-secondary" /><p className="text-sm font-bold text-text-primary">Sin observaciones en el conjunto cargado</p><p className="text-xs text-text-secondary">Ajusta el rango de fechas o la fuente desde el panel lateral del Mapa.</p></div>}
 
-    <ProvenanceNote provenance={provenance}>{observations.length} registros cargados de {totalMatching} coincidentes. FRP nula se mantiene como no disponible.</ProvenanceNote>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded border border-success/40 bg-success-soft px-2.5 py-0.5 font-source text-[11px] font-bold uppercase text-success">Calendario real (IDEAM / FIRMS)</span>
+        <span className="font-source text-xs tabular-nums text-text-secondary">{matrix.classifiedCount.toLocaleString()} registros clasificados en Antioquia · {observations.length.toLocaleString()} cargados de {totalMatching.toLocaleString()} coincidentes · {provenance === 'synthetic_demo' ? 'datos sintéticos de demostración' : provenance}</span>
+      </div>
+
+      <article className="space-y-3 rounded-2xl border border-border bg-card p-4 text-xs leading-relaxed shadow-sm sm:p-6">
+        <h2 className="flex items-center gap-2 font-noto text-sm font-bold text-text-primary"><Info className="h-4 w-4 shrink-0 text-info" aria-hidden />Interpretación Científica:</h2>
+        {insights.leader ? <>
+          <p className="text-text-secondary">
+            La distribución mensual de anomalías térmicas registradas en Antioquia muestra diferencias claras entre subregiones.{' '}
+            {insights.top.map((item, index) => <span key={item.sub.id}>{index > 0 && ' y '}<strong className="text-text-primary">{item.sub.label}</strong></span>)}{' '}
+            {insights.top.length > 1 ? 'concentran' : 'concentra'} la mayor cantidad de observaciones del conjunto cargado
+            ({insights.top.map((item) => `${item.total.toLocaleString()}${item.peak ? ` con pico en ${item.peak}` : ''}`).join(' y ')}).
+          </p>
+          <p className="text-text-secondary">
+            {insights.middle.length > 0 && <>En contraste, {insights.middle.map((item, index) => <span key={item.sub.id}>{index > 0 && ' y '}<strong className="text-text-primary">{item.sub.label}</strong> ({item.total.toLocaleString()})</span>)} registran una actividad intermedia</>}
+            {insights.rest.length > 0 && <>, mientras {insights.rest.map((item, index) => <span key={item.sub.id}>{index > 0 && (index === insights.rest.length - 1 ? ' y ' : ', ')}<strong className="text-text-primary">{item.sub.label}</strong> ({item.total.toLocaleString()})</span>)} {insights.rest.length > 1 ? 'presentan' : 'presenta'} menos observaciones</>}
+            {(insights.middle.length > 0 || insights.rest.length > 0) && '. '}
+            {insights.peakMonth && <>En la selección activa, el mes con más registros es <strong className="text-info">{insights.peakMonth.name}</strong> ({insights.peakMonth.foci.toLocaleString()} observaciones)</>}
+            {insights.intensity && <> y la intensidad térmica promedio más alta la tiene <strong className="text-accent">{insights.intensity.sub.label}</strong> ({insights.intensity.avg.toFixed(1)} MW)</>}.
+            {markov && <> En cruce con la estimación exploratoria Markov 3×3 (+24 h), la probabilidad regional de actividad es <strong className="text-predictive">{(markov.regional * 100).toFixed(1)}%</strong>{markov.topCell && markov.topCell.sub && <>, con la celda más alta en <strong className="text-accent">{markov.topCell.sub.label}</strong> ({(markov.topCell.cell.p24 * 100).toFixed(1)}%)</>}{markov.validated ? (markov.beatsClimatology ? '; en la validación retrospectiva supera a la climatología.' : '; en la validación retrospectiva todavía no supera a la climatología.') : '; aún no hay días suficientes para validarla.'}</>}
+          </p>
+        </> : <p className="text-text-secondary">No hay observaciones clasificadas en las subregiones seleccionadas.</p>}
+        <p className="border-t border-border pt-3 text-[11px] text-text-secondary">Los meses agregan todos los años cargados. La subregión se deriva del municipio de referencia que asigna el Backend-API por cercanía, así que es aproximada.{matrix.unclassifiedAntioquiaCount > 0 && ` ${matrix.unclassifiedAntioquiaCount.toLocaleString()} observaciones de Antioquia quedan fuera de estas seis agrupaciones (por ejemplo, Oriente).`} Un mes sin registros no prueba ausencia de incendios. FRP nula se mantiene como no disponible.</p>
+      </article>
+    </div>
   </ModulePage>;
 }
