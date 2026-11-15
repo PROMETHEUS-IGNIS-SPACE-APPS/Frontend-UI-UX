@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowRight, Award, BookOpen, ChartColumn, CircleAlert, CircleCheck, Gamepad2, RotateCcw, Search, SquareCheck, TriangleAlert, X } from 'lucide-react';
+import { ArrowRight, Award, BookOpen, ChartColumn, CircleAlert, CircleCheck, CircleHelp, Gamepad2, RotateCcw, Search, SquareCheck, TriangleAlert, X } from 'lucide-react';
 import { RISK_NORMS, RISK_POINTS, RISK_SCENARIOS, type Nfpa704Rating, type RiskItem, type RiskScenario, type ScenarioId } from './riskDetectorContent';
 import { RiskScene } from './riskDetectorScenes';
 
 type Filter = 'all' | 'pending' | 'hazard' | 'safe';
-type ModalState = { kind: 'inspect'; itemId: string; wasNew: boolean } | { kind: 'summary' } | { kind: 'guide' } | null;
+type ModalState = { kind: 'inspect'; itemId: string; wasNew: boolean } | { kind: 'summary' } | { kind: 'guide' } | { kind: 'help' } | null;
 
 interface SavedProgress { activeId: ScenarioId; inspected: string[]; completed: ScenarioId[] }
 
@@ -194,7 +194,10 @@ export default function RiskDetectorGame() {
         </div>
         <span className="font-source text-xs font-semibold uppercase tracking-wide text-[#8E431E]">Progreso total: {totalHazardsFound} de {totalHazards} peligros</span>
       </div>
-      <h2 id="risk-detector-title" className="font-sans text-2xl font-bold leading-tight text-[#7B3314] sm:text-3xl">Detector de Riesgos Cotidianos</h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 id="risk-detector-title" className="font-sans text-2xl font-bold leading-tight text-[#7B3314] sm:text-3xl">Detector de Riesgos Cotidianos</h2>
+        <button type="button" onClick={() => setModal({ kind: 'help' })} className={`${SOFT_BUTTON} min-h-9 py-1.5`}><CircleHelp className="h-4 w-4" aria-hidden />¿Cómo jugar?</button>
+      </div>
       <p className="max-w-3xl font-noto text-sm leading-relaxed sm:text-base">Explora cada escenario, toca los objetos e instalaciones e identifica riesgos eléctricos, químicos, de incendio y de evacuación antes de que ocurra un accidente. Muchos incendios forestales también empiezan en casa: prevenir aquí es prevenir allá.</p>
     </header>
 
@@ -344,6 +347,25 @@ export default function RiskDetectorGame() {
       </div>
       <NormCallout tone="safe" title="Claves de prevención de este espacio">
         <ul className="list-disc space-y-1.5 pl-5">{scenario.takeaways.map((text) => <li key={text}>{text}</li>)}</ul>
+      </NormCallout>
+    </GameDialog>}
+
+    {modal?.kind === 'help' && <GameDialog
+      label="Cómo jugar"
+      tone="neutral"
+      onClose={() => setModal(null)}
+      banner={<><CircleHelp className="h-4 w-4" aria-hidden />¿Cómo jugar?</>}
+      footer={<button type="button" onClick={() => setModal(null)} className={ACCENT_BUTTON}>¡A jugar!</button>}
+    >
+      <h3 className="font-sans text-lg font-bold text-[#5C260E] sm:text-xl">Detector de Riesgos Cotidianos</h3>
+      <NormCallout tone="neutral" title="Explicación del juego">
+        <div className="space-y-2">
+          <p>Detector de Riesgos Cotidianos es un simulador interactivo que enseña a los niños a reconocer las situaciones que pueden causar un incendio.</p>
+          <p>El jugador recorre tres escenarios (cocina, oficina y sala) y hace clic sobre los objetos para descubrir cuáles son peligrosos y cuáles son seguros. Cada hallazgo explica el riesgo y cómo prevenirlo.</p>
+        </div>
+      </NormCallout>
+      <NormCallout tone="safe" title="Justificación">
+        <p>Muchos incendios en el hogar empiezan por descuidos que se pueden evitar. Este juego enseña a prevenirlos de forma activa y divertida, con base en las normas de seguridad NFPA. Además, lo que el niño aprende lo puede compartir con su familia.</p>
       </NormCallout>
     </GameDialog>}
 

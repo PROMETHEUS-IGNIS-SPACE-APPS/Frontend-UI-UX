@@ -40,6 +40,19 @@ describe('RiskDetectorGame', () => {
     expect(screen.getByRole('tab', { name: /Espacio de Trabajo/ })).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('muestra la explicación y justificación en «¿Cómo jugar?»', async () => {
+    const user = userEvent.setup();
+    render(<RiskDetectorGame />);
+
+    await user.click(screen.getByRole('button', { name: '¿Cómo jugar?' }));
+    const dialog = screen.getByRole('dialog', { name: 'Cómo jugar' });
+    expect(within(dialog).getByText('Explicación del juego')).toBeInTheDocument();
+    expect(within(dialog).getByText('Justificación')).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: '¡A jugar!' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('pide confirmación antes de reiniciar el progreso', async () => {
     const user = userEvent.setup();
     render(<RiskDetectorGame />);
