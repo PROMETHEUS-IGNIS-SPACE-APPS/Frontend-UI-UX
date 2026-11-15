@@ -23,7 +23,7 @@ describe('LocalCsvAccess', () => {
 
     await user.click(screen.getByRole('button', { name: 'Cerrar gestor de archivos CSV' }));
     await user.click(screen.getByRole('button', { name: /Limpiar \.CSV/ }));
-    await user.click(screen.getByRole('button', { name: 'Quitar archivos' }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar Limpieza' }));
     expect(useLocalCsvStore.getState().datasets).toHaveLength(0);
   });
 
