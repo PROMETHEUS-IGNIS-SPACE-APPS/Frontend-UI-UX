@@ -28,6 +28,16 @@ export interface ObservationCollection {
   warning?: string | null;
   degradedMode?: boolean;
   sourceMode?: ObservationSourceMode;
+  sampling?: ObservationSamplingInfo;
 }
 
-export type ObservationSourceMode = 'fusion' | 'ideam' | 'firms';
+export type ObservationSourceMode = 'fusion' | 'ideam' | 'firms' | 'historical';
+
+export interface ObservationSamplingInfo {
+  from?: string;
+  to?: string;
+  rawCount?: number;
+  deduplicatedCount?: number;
+  filesLoaded?: string[];
+  attribution?: string;
+}
