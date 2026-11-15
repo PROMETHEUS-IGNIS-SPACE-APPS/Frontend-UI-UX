@@ -18,6 +18,9 @@ export interface Observation {
   is_synthetic?: boolean;
   concordance?: string | null;
   brightness_k?: number | null;
+  /** Tamaño del píxel a lo largo del barrido y de la trayectoria (km), cuando la fuente lo informa. */
+  scan_km?: number | null;
+  track_km?: number | null;
 }
 
 export interface ObservationCollection {

@@ -19,6 +19,8 @@ interface PredictabilityPanelProps {
   provenance: string;
   /** Lleva al Mapa centrado en una celda. */
   onShowCell?: (center: [number, number]) => void;
+  /** Carga la ventana real IDEAM 45 días (Antioquia) para estimar y validar mejor. */
+  onLoadLongerWindow?: () => void;
 }
 
 /**
@@ -26,7 +28,7 @@ interface PredictabilityPanelProps {
  * EXPLORATORIA calculada en el navegador con las observaciones reales cargadas;
  * no es un modelo publicado por el AI-Pipeline.
  */
-export default function PredictabilityPanel({ observations, provenance, onShowCell }: PredictabilityPanelProps) {
+export default function PredictabilityPanel({ observations, provenance, onShowCell, onLoadLongerWindow }: PredictabilityPanelProps) {
   const [horizon, setHorizon] = useState<0 | 1 | 2>(0);
   const [reportOpen, setReportOpen] = useState(false);
   const result: MarkovResult = useMemo(() => runMarkovEngine(observations), [observations]);
@@ -59,6 +61,7 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
       <div className="space-y-1">
         <h2 className="font-noto text-sm font-bold text-warning">Historial insuficiente para estimar el modelo</h2>
         <p className="text-xs leading-relaxed text-text-primary">{result.message}</p>
+        {onLoadLongerWindow && <button type="button" onClick={onLoadLongerWindow} className="ignis-action ignis-action-primary mt-2">Cargar ventana real IDEAM 45 días (Antioquia)</button>}
       </div>
     </div>}
 
@@ -113,6 +116,7 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
           <p className={`border-t border-border pt-3 font-source text-[11px] font-semibold ${validation.brierSkillPct !== null && validation.brierSkillPct > 0 ? 'text-success' : 'text-warning'}`}>
             {validation.brierSkillPct !== null && validation.brierSkillPct > 0 ? 'Mejora a la climatología' : 'No supera a la climatología'} en {validation.testTransitions.toLocaleString()} transiciones de prueba ({validation.trainDays} días para estimar, {validation.testDays} para evaluar; umbral {validation.threshold} calibrado solo con días de entrenamiento).
           </p>
+          {onLoadLongerWindow && result.window.days < 30 && <button type="button" onClick={onLoadLongerWindow} className="ignis-action ignis-action-secondary">Ampliar a IDEAM 45 días (Antioquia) para validar con más historia</button>}
         </> : <p className="rounded-xl border border-border bg-surface p-4 text-xs text-text-secondary">Se necesitan al menos {MIN_DAYS_VALIDATED} días con datos para separar días de entrenamiento y de prueba. Cargue una ventana más larga (por ejemplo, IDEAM 45 días Antioquia en la pestaña Mapa).</p>}
       </article>
     </div>
