@@ -105,6 +105,15 @@ export const PROBABILITY_SCALE = [
   { max: Infinity, color: '#b91c1c', label: '>70%' },
 ] as const;
 
+/** Escala morada de la capa Markov en el Mapa principal (mismos rangos, opacidad creciente). */
+export const MARKOV_PURPLE_SCALE = [
+  { label: '<15%', opacity: 0.18 },
+  { label: '15–30%', opacity: 0.3 },
+  { label: '30–50%', opacity: 0.45 },
+  { label: '50–70%', opacity: 0.6 },
+  { label: '>70%', opacity: 0.8 },
+] as const;
+
 export const probabilityColor = (p: number) => PROBABILITY_SCALE.find((step) => p < step.max)?.color ?? '#b91c1c';
 
 /** Celda que se dibuja en el mapa: centro [lon, lat], tamaño en grados y probabilidad del horizonte activo. */
