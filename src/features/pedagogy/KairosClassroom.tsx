@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'l
 import {
   KAIROS_CLOSING,
   KAIROS_DATA_INFOGRAPHICS,
-  KAIROS_DATA_NOTICE,
   KAIROS_DATA_SECTION,
   KAIROS_EDUCATION_BLOCK,
   KAIROS_FOOTER_IMAGE,
@@ -26,14 +25,13 @@ const wrap = (index: number, length: number) => (index + length) % length;
 
 interface InfographicCardProps {
   section: KairosSection;
-  notice?: string;
   onExpand: (index: number) => void;
   audioActive: boolean;
   onToggleAudio: () => void;
   onAudioEnded: () => void;
 }
 
-function InfographicCard({ section, notice, onExpand, audioActive, onToggleAudio, onAudioEnded }: InfographicCardProps) {
+function InfographicCard({ section, onExpand, audioActive, onToggleAudio, onAudioEnded }: InfographicCardProps) {
   const [index, setIndex] = useState(0);
   const slide = section.slides[index];
   return <article className="flex h-full flex-col rounded-2xl bg-[#EEDFC5] p-4 sm:p-6">
@@ -55,7 +53,6 @@ function InfographicCard({ section, notice, onExpand, audioActive, onToggleAudio
       </div>
     </div>
     <p className="mt-1 flex-1 font-noto text-sm leading-relaxed text-[#4A2E1B] sm:text-justify">{section.description}</p>
-    {notice && <p role="note" className="mt-3 rounded-xl border border-[#D9692B]/40 bg-[#FDECCD] px-3 py-2 font-noto text-xs leading-relaxed text-[#6E3B21]"><strong className="text-[#7B3314]">Nota de lectura: </strong>{notice}</p>}
     {section.audioSrc && <PodcastPlayer src={section.audioSrc} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
   </article>;
 }
@@ -141,7 +138,6 @@ export default function KairosClassroom() {
         <div>
           <InfographicCard
             section={KAIROS_DATA_INFOGRAPHICS}
-            notice={KAIROS_DATA_NOTICE}
             onExpand={(index) => setLightbox({ section: KAIROS_DATA_INFOGRAPHICS, index })}
             audioActive={activeAudioId === KAIROS_DATA_INFOGRAPHICS.id}
             onToggleAudio={() => setActiveAudioId((current) => (current === KAIROS_DATA_INFOGRAPHICS.id ? null : KAIROS_DATA_INFOGRAPHICS.id))}

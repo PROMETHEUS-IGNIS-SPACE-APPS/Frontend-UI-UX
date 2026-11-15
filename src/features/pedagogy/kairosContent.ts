@@ -5,8 +5,8 @@
  * Guía 4 "Interpretación de los datos" (7 infografías + podcast) restaurada por
  * decisión del usuario (2026-11-15), igual que en el ejemplo. Algunas piezas
  * mencionan funciones que esta plataforma no tiene (factor clima, matriz 5 × 5)
- * o afirman que una detección nocturna "confirma" combustión; por eso la tarjeta
- * lleva KAIROS_DATA_NOTICE y conserva al lado las reglas de lectura propias.
+ * o afirman que una detección nocturna "confirma" combustión; la nota de lectura
+ * se quitó por decisión del usuario y al lado se conservan las reglas de lectura propias.
  */
 
 export interface KairosSlide {
@@ -98,8 +98,6 @@ export const KAIROS_DATA_INFOGRAPHICS: KairosSection = {
     { id: 'datos-7', title: 'Participación ciudadana', imageSrc: img('datos-participacion-ciudadana') },
   ],
 };
-
-export const KAIROS_DATA_NOTICE = 'Algunas piezas de esta guía mencionan funciones que la plataforma todavía no tiene (factor de clima, matriz de riesgo 5 × 5). Una detección nocturna indica calor persistente, pero ningún punto satelital confirma por sí solo un incendio: use las reglas de lectura de esta página.';
 
 /** Reglas de lectura de esta plataforma (texto propio, coherente con PROJECT_CONTEXT). */
 export const KAIROS_DATA_SECTION = {
