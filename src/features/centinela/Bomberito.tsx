@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
 import { fetchCentinelaModel } from '@/services/models/centinelaModelService';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
+import { useUiStore } from '@/stores/uiStore';
 import type { CentinelaEstimate, CentinelaForecast } from '@/types/api/centinela';
 import type { Observation } from '@/types/api/observations';
 import { nearestReferenceName } from '@/utils/subregions';
@@ -48,6 +49,8 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
     if (!seen) { setSeen(true); try { globalThis.localStorage?.setItem(SEEN_KEY, '1'); } catch { /* sin almacenamiento */ } }
   };
   const [cellId, setCellId] = useState('');
+  // En el Mapa se eleva para no tapar la línea de tiempo; en los demás módulos queda en la esquina.
+  const onMap = useUiStore((state) => state.activeModule) === 'explorer';
   const { outcome } = useBackendHealth();
   const model = useQuery({ queryKey: ['centinela-model'], queryFn: ({ signal }) => fetchCentinelaModel(signal), staleTime: Infinity, enabled: open });
 
@@ -66,7 +69,7 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
   const metrics = model.data?.evaluation.metrics;
 
   return <>
-    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex items-center gap-1 md:bottom-28 md:right-6">
+    <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex items-center gap-1 md:right-6 ${onMap ? 'md:bottom-28' : 'md:bottom-5'}`}>
       {!open && <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! ¿Necesitas ayuda?</span>}
       {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen ? 'bomberito-point--calm' : ''}`}>👉</span>}
       <button type="button" onClick={toggle} aria-expanded={open} aria-label="Abrir Bomberito Centinela" title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
@@ -78,7 +81,7 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
       </button>
     </div>
 
-    {open && <section role="dialog" aria-label="Bomberito Centinela" className="fixed inset-x-2 bottom-[calc(9rem+env(safe-area-inset-bottom,0px))] z-[45] flex max-h-[70dvh] flex-col overflow-hidden rounded-2xl border border-border-strong bg-card text-xs text-text-primary shadow-2xl md:inset-x-auto md:bottom-[12rem] md:right-6 md:w-[24rem]">
+    {open && <section role="dialog" aria-label="Bomberito Centinela" className={`fixed inset-x-2 bottom-[calc(9rem+env(safe-area-inset-bottom,0px))] z-[45] flex max-h-[70dvh] flex-col overflow-hidden rounded-2xl border border-border-strong bg-card text-xs text-text-primary shadow-2xl md:inset-x-auto ${onMap ? 'md:bottom-[12rem]' : 'md:bottom-[7.5rem]'} md:right-6 md:w-[24rem]`}>
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-[#B9200B] px-4 py-3 text-white">
         <div className="flex items-center gap-2.5">
           <img src={BOMBERITO_IMAGE} alt="" width={40} height={40} className="h-10 w-10 object-contain [image-rendering:pixelated]" />
