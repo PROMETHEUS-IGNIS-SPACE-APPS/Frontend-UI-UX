@@ -26,6 +26,8 @@
 
 - Móvil (< md): barra inferior fija `MobileBottomNav` (Mapa, Calendario, Analítica, Aula + “Más” con los otros 4); encabezado compacto en una fila con acciones desplazables; mapa con alto fijo `max(440px,64dvh)`, panel de capas plegado al inicio y ficha de observación como hoja inferior. Tablet (md–lg) usa pestañas en el encabezado.
 
+- Aula = KAIRÓS (`features/pedagogy/KairosClassroom.tsx`, `kairosContent.ts`), portado del ejemplo: 19 infografías de prevención (hogar, ecosistema, salud) en `public/assets/kairos/*.webp` (11,6 MB → 1,9 MB), visor ampliado, bloque de reglas de lectura propio y debajo “Actividades interactivas” (PedagogicalPanel). No se portan las 7 infografías de datos del ejemplo (Markov en vivo, reportes ciudadanos, “detección nocturna confirma combustión”) ni el “95 %” ni el espacio vacío 1920×1080.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.

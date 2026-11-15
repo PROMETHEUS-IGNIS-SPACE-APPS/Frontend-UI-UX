@@ -3,7 +3,6 @@ import { Map as MapLibre, NavigationControl, setWorkerUrl, type GeoJSONSource, t
 import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre resolves its worker relative to `import.meta.url`, which breaks when Vite pre-bundles
 // the library into node_modules/.vite/deps. Pinning the worker URL keeps tiles rendering.
-// @ts-ignore -- `?url` is a Vite-specific import.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { Observation } from '@/types/api/observations';
 import { ANTIOQUIA_SUBREGIONS_GEOJSON, COLOMBIA_BOUNDARIES_GEOJSON } from '@/data/schematicBoundaries';

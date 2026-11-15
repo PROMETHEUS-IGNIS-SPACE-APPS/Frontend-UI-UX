@@ -13,7 +13,7 @@ import { APP_MODULES } from '@/types/domain/module';
 import AnalyticsPanel from '@/features/analytics/AnalyticsPanel';
 import ActivityCalendarPanel from '@/features/calendar/ActivityCalendarPanel';
 import LaboratoryPanel from '@/features/laboratory/LaboratoryPanel';
-import PedagogicalPanel from '@/features/pedagogy/PedagogicalPanel';
+import KairosClassroom from '@/features/pedagogy/KairosClassroom';
 import PredictabilityPanel from '@/features/predictability/PredictabilityPanel';
 import MarkovHeatmapPanel from '@/features/markov/MarkovHeatmapPanel';
 import SourcesPanel from '@/features/sources/SourcesPanel';
@@ -221,7 +221,7 @@ export default function App() {
               ? <MarkovHeatmapPanel observations={allObservations} provenance={provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'predictability' ? <PredictabilityPanel />
-            : activeModule === 'comparison' ? <PedagogicalPanel />
+            : activeModule === 'comparison' ? <KairosClassroom />
             : activeModule === 'laboratory' ? <LaboratoryPanel provenance={provenance} />
             : activeModule === 'sources' ? <SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} />
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
