@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FileText, Printer, X } from 'lucide-react';
+import { FileText, Printer, X, Download } from 'lucide-react';
 import { MANUAL_SECTIONS, type ManualBlock } from './manualContent';
 
 const BROWN = 'text-[#6B2A12]';
@@ -54,6 +54,7 @@ export default function ManualAccess() {
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#E3CDB0] bg-[#FBF5EC] px-3 py-2 print:hidden">
           <span className="font-noto text-xs font-semibold text-[#6B2A12]">Instructivo oficial de uso</span>
           <div className="flex items-center gap-1.5">
+            <a href="/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf" download className="inline-flex items-center gap-1.5 rounded-lg border border-[#6B2A12]/40 px-3 py-1.5 font-noto text-xs font-bold text-[#6B2A12] hover:bg-[#F2E3CF]"><Download className="h-3.5 w-3.5" aria-hidden />PDF oficial del equipo</a>
             <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg bg-[#6B2A12] px-3 py-1.5 font-noto text-xs font-bold text-white hover:bg-[#55210E]"><Printer className="h-3.5 w-3.5" aria-hidden />Guardar como PDF</button>
             <button type="button" onClick={() => setIsOpen(false)} aria-label="Cerrar instructivo" className="rounded-lg p-1.5 text-[#6B2A12] hover:bg-[#F2E3CF]"><X className="h-4 w-4" aria-hidden /></button>
           </div>

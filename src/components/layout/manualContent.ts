@@ -2,7 +2,7 @@
  * Instructivo oficial de uso. Sigue el documento del equipo
  * "PROMETHEUS IGNIS — Instructivo Oficial de Uso" (noviembre 2026, 14 páginas),
  * adaptado a las funciones que esta interfaz tiene realmente. Omitimos lo que no
- * existe aquí: Gemini, Open-Meteo / "+ Clima", contraseña de limpieza, DAGRAN,
+ * existe aquí: Gemini, Open-Meteo / "+ Clima", DAGRAN,
  * Matriz de Riesgo 5 × 5, Diccionario Sin Enredos y el modal FastAPI. Tampoco
  * usamos la cifra "más del 95 %", que no tiene fuente.
  */
@@ -112,7 +112,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       ] },
       { kind: 'warn', text: 'Importante: los archivos se leen solo en su navegador. No se envían al servidor y se pierden al recargar la página. Como no traen municipio ni departamento, no aparecen en los filtros por ubicación ni en el agrupamiento por subregión.' },
       { kind: 'h', text: 'Limpiar .CSV' },
-      { kind: 'list', items: ['Abre la confirmación Limpiar Reportes Ciudadanos (.CSV): borra de este dispositivo los reportes ciudadanos guardados y los archivos .CSV cargados. Los datos del Backend-API no cambian.'] },
+      { kind: 'list', items: ['Abre el diálogo de autenticación Limpiar Reportes Ciudadanos (.CSV), que pide una contraseña numérica de autorización. Con la contraseña correcta borra de este dispositivo los reportes ciudadanos guardados y los archivos .CSV cargados; con una incorrecta no borra nada. Los datos del Backend-API no cambian.'] },
       { kind: 'warn', text: 'Importante: la acción no se puede deshacer. Si necesita conservar los reportes, use primero Descargar Reportes (.CSV).' },
       { kind: 'h', text: 'Botón 123 SOS' },
       { kind: 'list', items: ['Abre las líneas de emergencia con marcación directa (apartado 5.2).'] },
@@ -325,7 +325,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: 'csv', level: 2, title: '5.4 Gestor de archivos .CSV', blocks: [
       { kind: 'list', items: [
         'Gestor: arrastre o seleccione archivos, vea la lista cargada (formato, observaciones y hora) y quite archivos uno por uno.',
-        'Limpiar todos (.CSV): pide confirmación en pantalla antes de borrar los archivos locales y los reportes ciudadanos guardados en el dispositivo.',
+        'Limpiar todos (.CSV): abre el mismo diálogo con contraseña numérica antes de borrar los archivos locales y los reportes ciudadanos guardados en el dispositivo.',
       ] },
     ],
   },

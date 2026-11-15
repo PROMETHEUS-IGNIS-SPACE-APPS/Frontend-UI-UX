@@ -122,6 +122,7 @@ describe('App shell de pestañas', () => {
 
     await user.click(screen.getByRole('button', { name: 'Abrir Instructivo metodológico' }));
     expect(screen.getByRole('dialog', { name: 'Instructivo oficial de uso' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'PDF oficial del equipo' })).toHaveAttribute('href', '/docs/PROMETHEUS_IGNIS_Instructivo_Oficial_de_Uso.pdf');
     expect(screen.getByRole('button', { name: 'Guardar como PDF' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
   });

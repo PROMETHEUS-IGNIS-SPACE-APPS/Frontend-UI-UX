@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, AlertTriangle, CheckCircle2, FileSpreadsheet, ShieldCheck, Trash2, Upload, X } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { AlertCircle, AlertTriangle, CheckCircle2, FileSpreadsheet, Lock, ShieldAlert, ShieldCheck, Trash2, Upload, X } from 'lucide-react';
 import { parseLocalCsv } from '@/services/csv/localCsvParser';
 import { useLocalCsvStore } from '@/stores/localCsvStore';
 import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
+import { CLEAR_DATA_PIN } from './clearDataPin';
 
 const BUTTON = 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] font-semibold transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 disabled:cursor-not-allowed disabled:opacity-40';
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
@@ -25,6 +26,8 @@ export default function LocalCsvAccess() {
   const managerOpen = useLocalCsvStore((state) => state.managerOpen);
   const setManagerOpen = useLocalCsvStore((state) => state.setManagerOpen);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
   const reportsCount = useCitizenReportsStore((state) => state.reports.length);
   const clearReports = useCitizenReportsStore((state) => state.clearReports);
   const canClear = datasets.length > 0 || reportsCount > 0;
@@ -34,6 +37,14 @@ export default function LocalCsvAccess() {
   const totalRecords = datasets.reduce((sum, item) => sum + item.observations.length, 0);
   useEscape(managerOpen, () => setManagerOpen(false));
   useEscape(confirmOpen, () => setConfirmOpen(false));
+  const openConfirm = () => { setPin(''); setPinError(null); setConfirmOpen(true); };
+  const submitClear = (event: FormEvent) => {
+    event.preventDefault();
+    const value = pin.trim();
+    if (!value) { setPinError('Ingresa la contraseña numérica para autorizar la limpieza.'); return; }
+    if (value !== CLEAR_DATA_PIN) { setPinError('Contraseña incorrecta. Acción denegada: no se borró nada.'); setPin(''); return; }
+    clear(); clearReports(); setMessages([]); setConfirmOpen(false);
+  };
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -56,7 +67,7 @@ export default function LocalCsvAccess() {
       <span className="hidden sm:inline">Cargar / Gestionar .CSV</span><span className="sm:hidden">Cargar CSV</span>
       {datasets.length > 0 && <span className="rounded bg-surface-hover px-1.5 py-0.5 font-source text-[10px] font-bold tabular-nums text-accent">+{totalRecords.toLocaleString()} ({datasets.length})</span>}
     </button>
-    <button type="button" onClick={() => setConfirmOpen(true)} disabled={!canClear} aria-label="Limpiar .CSV" className={`${BUTTON} text-danger`} title={canClear ? 'Borrar reportes ciudadanos y archivos .CSV de este dispositivo' : 'No hay reportes ni archivos .CSV en este dispositivo'}>
+    <button type="button" onClick={openConfirm} disabled={!canClear} aria-label="Limpiar .CSV" className={`${BUTTON} text-danger`} title={canClear ? 'Borrar reportes ciudadanos y archivos .CSV de este dispositivo' : 'No hay reportes ni archivos .CSV en este dispositivo'}>
       <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span className="hidden sm:inline">Limpiar .CSV</span>
     </button>
@@ -120,7 +131,7 @@ export default function LocalCsvAccess() {
         </div>
 
         <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-surface px-5 py-3.5">
-          <button type="button" disabled={!canClear} onClick={() => setConfirmOpen(true)} className="flex items-center gap-1.5 rounded-lg border border-danger/50 bg-danger-soft px-3 py-1.5 font-semibold text-danger transition-colors hover:border-danger disabled:cursor-not-allowed disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" aria-hidden />Limpiar todos (.CSV)</button>
+          <button type="button" disabled={!canClear} onClick={openConfirm} className="flex items-center gap-1.5 rounded-lg border border-danger/50 bg-danger-soft px-3 py-1.5 font-semibold text-danger transition-colors hover:border-danger disabled:cursor-not-allowed disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" aria-hidden />Limpiar todos (.CSV)</button>
           <button type="button" onClick={() => setManagerOpen(false)} className="rounded-lg bg-accent-solid px-4 py-1.5 font-bold text-accent-fg transition-opacity hover:opacity-90">Listo</button>
         </footer>
       </section>
@@ -130,25 +141,30 @@ export default function LocalCsvAccess() {
       <section role="dialog" aria-modal="true" aria-labelledby="csv-clear-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-border-strong bg-card text-xs text-text-primary shadow-2xl">
         <header className="flex items-start justify-between gap-3 border-b border-border bg-surface px-5 py-4">
           <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 shrink-0 rounded-xl border border-danger/30 bg-danger-soft p-2 text-danger"><Trash2 className="h-4 w-4" aria-hidden /></span>
+            <span className="mt-0.5 shrink-0 rounded-xl border border-danger/30 bg-danger-soft p-2 text-danger"><Lock className="h-4 w-4" aria-hidden /></span>
             <div>
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-danger">Confirmación</span>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-danger">Autenticación de seguridad</span>
               <h2 id="csv-clear-title" className="font-noto text-sm font-bold">Limpiar Reportes Ciudadanos (.CSV)</h2>
             </div>
           </div>
-          <button type="button" onClick={() => setConfirmOpen(false)} aria-label="Cerrar confirmación" className="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"><X className="h-4 w-4" aria-hidden /></button>
+          <button type="button" onClick={() => setConfirmOpen(false)} aria-label="Cerrar diálogo de autenticación" className="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"><X className="h-4 w-4" aria-hidden /></button>
         </header>
-        <div className="space-y-4 p-5">
+        <form onSubmit={submitClear} className="space-y-4 p-5">
           <div className="flex items-start gap-2.5 rounded-xl border border-danger/30 bg-danger-soft p-3 text-[11px] leading-relaxed">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
             <p>Se borrarán de este dispositivo <strong className="tabular-nums">{reportsCount}</strong> reporte(s) ciudadano(s) y <strong className="tabular-nums">{datasets.length}</strong> archivo(s) .CSV con <strong className="tabular-nums">{totalRecords.toLocaleString()}</strong> observaciones locales. Los datos del Backend-API no cambian.</p>
           </div>
+          <div className="space-y-1.5">
+            <label htmlFor="clear-data-pin" className="block font-noto text-[11px] font-semibold">Contraseña numérica de autorización:</label>
+            <input id="clear-data-pin" type="password" inputMode="numeric" autoComplete="off" autoFocus value={pin} onChange={(event) => { setPin(event.target.value); if (pinError) setPinError(null); }} placeholder="Ingresa la contraseña numérica…" aria-invalid={pinError ? true : undefined} aria-describedby={pinError ? 'clear-data-pin-error' : undefined} className="w-full rounded-xl border border-border-strong bg-input-bg px-3.5 py-2.5 font-source tracking-widest text-text-primary transition-colors placeholder:tracking-normal placeholder:text-text-secondary focus:border-danger focus:outline-none" />
+          </div>
+          {pinError && <p id="clear-data-pin-error" role="alert" className="flex items-start gap-2 rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-[11px] text-danger"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{pinError}</p>}
           <p className="text-[11px] leading-5 text-text-secondary">Si necesitas conservar los reportes, usa primero “Descargar Reportes (.CSV)”. Esta acción no se puede deshacer.</p>
           <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
             <button type="button" onClick={() => setConfirmOpen(false)} className="rounded-xl border border-border-strong bg-surface px-4 py-2 font-medium transition-colors hover:bg-surface-hover">Cancelar</button>
-            <button type="button" onClick={() => { clear(); clearReports(); setMessages([]); setConfirmOpen(false); }} className="inline-flex items-center gap-1.5 rounded-xl bg-[#B9200B] px-4 py-2 font-noto font-bold text-white shadow-sm transition-colors hover:bg-[#9C1B09]"><Trash2 className="h-3.5 w-3.5" aria-hidden />Confirmar Limpieza</button>
+            <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-[#B9200B] px-4 py-2 font-noto font-bold text-white shadow-sm transition-colors hover:bg-[#9C1B09]"><Trash2 className="h-3.5 w-3.5" aria-hidden />Confirmar Limpieza</button>
           </div>
-        </div>
+        </form>
       </section>
     </div>}
   </>;
