@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Satellite, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
 import PedagogicalPanel from './PedagogicalPanel';
 import {
   KAIROS_CLOSING,
@@ -10,6 +10,7 @@ import {
   KAIROS_INTRO_PARAGRAPHS,
   KAIROS_INTRO_TITLE,
   KAIROS_SECTIONS,
+  KAIROS_WIDE_SLIDES,
   type KairosSection,
 } from './kairosContent';
 
@@ -49,6 +50,9 @@ export default function KairosClassroom() {
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
   const [headerFailed, setHeaderFailed] = useState(false);
   const [footerFailed, setFooterFailed] = useState(false);
+  const [wideIndex, setWideIndex] = useState(0);
+  const wide = KAIROS_WIDE_SLIDES[wideIndex] ?? null;
+  const hasWide = KAIROS_WIDE_SLIDES.length > 0;
 
   useEffect(() => {
     if (!lightbox) return undefined;
@@ -100,6 +104,27 @@ export default function KairosClassroom() {
           </div>
         </div>
       </div>
+
+      <section aria-label="Infografías panorámicas de prevención" className="w-full rounded-2xl bg-[#EEDFC5] p-4 sm:p-8">
+        <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <h2 className="font-sans text-xl font-bold text-[#5C260E] sm:text-2xl">Infografías panorámicas de prevención</h2>
+          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+            <button type="button" onClick={() => setWideIndex((value) => wrap(value - 1, KAIROS_WIDE_SLIDES.length))} disabled={!hasWide} aria-label="Infografía panorámica anterior" className={`${ROUND_BUTTON} disabled:cursor-not-allowed disabled:opacity-45`}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
+            <span className="min-w-[3rem] text-center font-source text-xs font-semibold text-[#8E431E]">{hasWide ? `${wideIndex + 1} / ${KAIROS_WIDE_SLIDES.length}` : '0 / 0'}</span>
+            <button type="button" onClick={() => setWideIndex((value) => wrap(value + 1, KAIROS_WIDE_SLIDES.length))} disabled={!hasWide} aria-label="Infografía panorámica siguiente" className={`${ROUND_BUTTON} disabled:cursor-not-allowed disabled:opacity-45`}><ChevronRight className="h-4 w-4" aria-hidden /></button>
+          </div>
+        </div>
+        <div className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-[#E4D1B1]/55">
+          {wide
+            ? <img src={wide.imageSrc} alt={wide.title} loading="lazy" className="block h-full w-full object-contain" />
+            : <div className="space-y-2 px-6 text-center">
+              <ImageIcon className="mx-auto h-8 w-8 text-[#B8531E]/70" aria-hidden />
+              <p className="font-source text-sm font-bold tracking-wide text-[#7B3314] sm:text-base">Próximamente</p>
+              <p className="font-noto text-xs text-[#6E3B21] sm:text-sm">Aquí aparecerán las infografías panorámicas de prevención (formato 1920 × 1080 px).</p>
+            </div>}
+        </div>
+        {wide && <p className="mt-3 text-center font-sans text-sm font-bold text-[#5C260E]">{wide.title}</p>}
+      </section>
     </div>
 
     <div className="mt-10 w-full bg-background text-text-primary sm:mt-16">

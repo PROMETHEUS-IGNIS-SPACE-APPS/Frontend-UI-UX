@@ -100,4 +100,10 @@ export const KAIROS_EDUCATION_BLOCK = {
   ],
 };
 
+/**
+ * Infografías panorámicas (1920 × 1080 px). Para publicar una, guarda el archivo
+ * en `public/assets/kairos/` y agrégala aquí con `img('nombre-del-archivo')`.
+ */
+export const KAIROS_WIDE_SLIDES: KairosSlide[] = [];
+
 export const KAIROS_CLOSING = 'Los griegos distinguían dos tiempos: kronos, el que pasa y se cuenta en horas, y kairós, el momento justo en que actuar cambia el destino. Por eso esta página se llama Kairós, porque frente al fuego el momento oportuno no llega por azar: lo construye la prevención.';

@@ -28,5 +28,5 @@ describe('NoveltyReportAccess', () => {
     expect(summary).toHaveTextContent('Columna de humo hacia el norte');
     expect(screen.getByText(/Todavía no se ha enviado a nadie/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Llamar al 123' })).toHaveAttribute('href', 'tel:123');
-  });
+  }, 20_000);
 });

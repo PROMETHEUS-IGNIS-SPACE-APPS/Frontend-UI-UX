@@ -62,7 +62,11 @@ export default function ObservationMap({ observations, selected, onSelect, focus
       const hit = map.getLayer('observation-points') && map.queryRenderedFeatures(event.point, { layers: ['observation-points'] }).length > 0;
       map.getCanvas().style.cursor = hit ? 'pointer' : '';
     });
-    return () => { map.remove(); mapRef.current = null; };
+    // El contenedor cambia de tamaño con el diseño (paneles, rejillas, móvil):
+    // MapLibre solo escucha `window.resize`, así que se observa el propio contenedor.
+    const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(() => map.resize()) : null;
+    resizeObserver?.observe(container.current);
+    return () => { resizeObserver?.disconnect(); map.remove(); mapRef.current = null; };
   }, []);
 
   useEffect(() => {
