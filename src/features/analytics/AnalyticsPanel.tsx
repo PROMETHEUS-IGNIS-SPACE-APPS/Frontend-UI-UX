@@ -52,7 +52,7 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
       <div className="space-y-1"><p className="font-semibold text-warning">Regla metodológica de armonización:</p><p className="text-[11px] leading-relaxed text-text-secondary">MODIS y VIIRS tienen resoluciones y horarios de observación distintos. Se muestran por separado: más detecciones no significa necesariamente más incendios.</p></div>
     </div>
 
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
       <KpiCard label="Sensor VIIRS (~375 m)" tag="Detecciones" value={viirs.length.toLocaleString()} detail="Conteo de observaciones VIIRS" color="text-sensor-viirs" icon={<Satellite className="h-4 w-4" />} />
       <KpiCard label="Sensor MODIS (~1 km)" tag="Detecciones" value={modis.length.toLocaleString()} detail="Conteo de observaciones MODIS" color="text-sensor-modis" icon={<Satellite className="h-4 w-4" />} />
       <KpiCard label="Índice de Recurrencia" tag="Ordinal" value={hasObservations ? `${recurrenceScore} / 100` : 'No disponible'} detail={hasObservations ? recurrenceLevel : 'Sin observaciones para calcularlo'} color="text-info" icon={<Activity className="h-4 w-4" />} />
@@ -115,9 +115,9 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
 }
 
 function KpiCard({ label, tag, value, detail, color, icon }: { label: string; tag: string; value: string; detail: string; color: string; icon: ReactNode }) {
-  return <article className="relative space-y-2 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm">
-    <div className="flex items-center justify-between text-xs text-text-secondary"><span className="font-source">{label}</span><span className={`flex items-center gap-1 font-source text-[10px] font-semibold ${color}`}>{tag}{icon}</span></div>
-    <p className={`font-source text-3xl font-extrabold ${color}`}>{value}</p>
+  return <article className="relative min-w-0 space-y-2 overflow-hidden rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
+    <div className="flex items-start justify-between gap-1 text-[11px] text-text-secondary sm:text-xs"><span className="font-source leading-tight">{label}</span><span className={`flex items-center gap-1 font-source text-[10px] font-semibold ${color}`}>{tag}{icon}</span></div>
+    <p className={`break-words font-source text-xl font-extrabold sm:text-3xl ${color}`}>{value}</p>
     <span className="block text-[11px] text-text-secondary">{detail}</span>
   </article>;
 }

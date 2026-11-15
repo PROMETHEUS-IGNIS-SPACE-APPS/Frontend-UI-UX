@@ -49,12 +49,12 @@ export default function LocalCsvAccess() {
   return <>
     <button type="button" onClick={() => setManagerOpen(true)} className={`${BUTTON} text-accent`} title="Cargar o gestionar archivos .CSV locales (IDEAM / NASA FIRMS)">
       <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      <span>Cargar / Gestionar .CSV</span>
+      <span className="hidden sm:inline">Cargar / Gestionar .CSV</span><span className="sm:hidden">Cargar CSV</span>
       {datasets.length > 0 && <span className="rounded bg-surface-hover px-1.5 py-0.5 font-source text-[10px] font-bold tabular-nums text-accent">+{totalRecords.toLocaleString()} ({datasets.length})</span>}
     </button>
-    <button type="button" onClick={() => setConfirmOpen(true)} disabled={!datasets.length} className={`${BUTTON} text-danger`} title={datasets.length ? 'Quitar los archivos .CSV cargados' : 'No hay archivos .CSV cargados'}>
+    <button type="button" onClick={() => setConfirmOpen(true)} disabled={!datasets.length} aria-label="Limpiar .CSV" className={`${BUTTON} text-danger`} title={datasets.length ? 'Quitar los archivos .CSV cargados' : 'No hay archivos .CSV cargados'}>
       <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      <span>Limpiar .CSV</span>
+      <span className="hidden sm:inline">Limpiar .CSV</span>
     </button>
 
     {managerOpen && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setManagerOpen(false); }}>

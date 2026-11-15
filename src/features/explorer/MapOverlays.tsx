@@ -21,16 +21,17 @@ const PANEL = 'border border-border-strong bg-card shadow-2xl';
 const STYLE_ICONS: Record<MapStylePreset['id'], typeof MapIcon> = { liberty: MapIcon, satellite: Globe, topographic: Mountain, dark: Moon, positron: Sun };
 
 export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, layers, onToggleLayer, pointCount, frpCount, onOpenGuide, sourceLabel }: MapOverlaysProps) {
-  const [layersOpen, setLayersOpen] = useState(true);
+  // En teléfonos los paneles empiezan plegados para dejar ver el mapa.
+  const [layersOpen, setLayersOpen] = useState(() => typeof window === 'undefined' || typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 768px)').matches);
   const [baseOpen, setBaseOpen] = useState(false);
   const activeStyle = MAP_STYLE_PRESETS.find((style) => style.id === styleId) ?? MAP_STYLE_PRESETS[0];
 
   return <>
-    <div className="pointer-events-none absolute left-3 right-14 top-3 z-20 flex flex-col gap-2">
+    <div className="pointer-events-none absolute left-2 right-12 top-2 z-20 flex flex-col gap-2 sm:left-3 sm:right-14 sm:top-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className={`pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl p-1.5 ${PANEL}`}>
+        <div className={`pointer-events-auto flex max-w-full flex-nowrap items-center gap-1 overflow-x-auto rounded-xl p-1.5 [scrollbar-width:none] sm:flex-wrap ${PANEL}`}>
           <span className="flex items-center gap-1 px-1.5 font-noto text-[11px] font-bold text-accent"><Compass className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Zona:</span></span>
-          {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors sm:text-xs ${focusId === preset.id ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'}`}>{preset.label}</button>)}
+          {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors sm:text-xs ${focusId === preset.id ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'}`}>{preset.label}</button>)}
         </div>
         <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
           {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {pointCount.toLocaleString()} pts</span>}
@@ -61,8 +62,8 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
       </div>
     </div>
 
-    <section className={`absolute bottom-6 left-3 z-20 w-60 space-y-2 rounded-2xl p-2.5 text-xs ${PANEL}`}>
-      <button type="button" aria-expanded={layersOpen} onClick={() => setLayersOpen((value) => !value)} className="flex w-full items-center justify-between border-b border-border pb-1 font-noto text-[11px] font-bold text-text-primary">
+    <section className={`absolute bottom-3 left-2 z-20 w-[min(15rem,calc(100%-1rem))] space-y-2 rounded-2xl p-2.5 text-xs sm:bottom-6 sm:left-3 ${PANEL}`}>
+      <button type="button" aria-expanded={layersOpen} onClick={() => setLayersOpen((value) => !value)} className={`flex w-full items-center justify-between font-noto text-[11px] font-bold text-text-primary ${layersOpen ? 'border-b border-border pb-1' : ''}`}>
         <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-accent" aria-hidden />Capas Cartográficas</span>
         {layersOpen ? <ChevronUp className="h-3.5 w-3.5 text-text-secondary" /> : <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />}
       </button>

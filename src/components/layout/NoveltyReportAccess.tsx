@@ -9,7 +9,7 @@ export default function NoveltyReportAccess({ variant = 'header' }: { variant?: 
     {variant === 'header'
       ? <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent-solid px-3 py-1.5 font-noto text-[11px] font-bold text-accent-fg shadow-sm transition-all hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span>Reportar Novedad</span>
+        <span className="hidden sm:inline">Reportar Novedad</span><span className="sm:hidden">Reportar</span>
       </button>
       : <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar en terreno" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-info/70 bg-info px-2.5 py-1.5 font-noto text-[11px] font-bold text-white shadow-lg transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 sm:px-3 sm:text-xs">
         <PlusCircle className="h-3.5 w-3.5" aria-hidden />

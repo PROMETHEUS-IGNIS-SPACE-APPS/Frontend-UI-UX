@@ -24,6 +24,8 @@
 - Módulos usan `components/common/ModuleLayout.tsx` (ModulePage, ModuleHeader, ProvenanceNote) con la estructura del ejemplo. Predictibilidad y Laboratorio IA replican el esqueleto visual del ejemplo con “—”/“Pendiente”, sin cifras, hasta que el AI-Pipeline publique artefactos.
 - Se conserva procedencia y `confidence_raw`; no se usa `confidence_score` provisional. FRP null continúa como no disponible.
 
+- Móvil (< md): barra inferior fija `MobileBottomNav` (Mapa, Calendario, Analítica, Aula + “Más” con los otros 4); encabezado compacto en una fila con acciones desplazables; mapa con alto fijo `max(440px,64dvh)`, panel de capas plegado al inicio y ficha de observación como hoja inferior. Tablet (md–lg) usa pestañas en el encabezado.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.

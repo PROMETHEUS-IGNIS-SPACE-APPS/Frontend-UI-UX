@@ -6,6 +6,7 @@ import ConnectionIndicator from './ConnectionIndicator';
 import EmergencyAccess from './EmergencyAccess';
 import LocalCsvAccess from './LocalCsvAccess';
 import ManualAccess from './ManualAccess';
+import MobileBottomNav from './MobileBottomNav';
 import NoveltyReportAccess from './NoveltyReportAccess';
 import logoPng from '@/assets/PROMETHEUS_IGNIS.png';
 
@@ -62,18 +63,18 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
 
   return (
-    <header className="sticky top-0 z-40 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card text-text-primary shadow-xs">
+    <header className="relative z-40 md:sticky md:top-0 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card text-text-primary shadow-xs">
       <div className="mx-auto w-full max-w-[1440px] px-2.5 sm:px-4">
         {/* Fila superior: marca, navegación y herramientas */}
-        <div className="flex flex-wrap items-center justify-between gap-2 py-2 2xl:flex-nowrap">
-          <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-            <img src={logoPng} alt="" className="h-9 w-9 shrink-0 rounded-xl object-cover shadow-md" />
+        <div className="flex flex-nowrap items-center justify-between gap-2 py-2 lg:flex-wrap 2xl:flex-nowrap">
+          <div className="flex min-w-0 items-center gap-2.5 lg:shrink-0">
+            <img src={logoPng} alt="" className="h-8 w-8 shrink-0 sm:h-9 sm:w-9 rounded-xl object-cover shadow-md" />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="whitespace-nowrap font-noto text-sm font-extrabold tracking-wide text-text-primary sm:text-[15px]">PROMETHEUS IGNIS</span>
-                <span className="whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 font-source text-[10px] font-bold tracking-wide text-accent">MODIS · VIIRS</span>
+                <span className="hidden whitespace-nowrap rounded border border-border bg-card px-1.5 py-0.5 font-source text-[10px] font-bold tracking-wide text-accent sm:inline">MODIS · VIIRS</span>
               </div>
-              <p className="truncate text-[11px] leading-tight text-text-secondary">Plataforma de Inteligencia Territorial · Semillero ITM</p>
+              <p className="hidden truncate text-[11px] leading-tight text-text-secondary sm:block">Plataforma de Inteligencia Territorial · Semillero ITM</p>
             </div>
           </div>
 
@@ -81,7 +82,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             {renderTabs('desktop')}
           </nav>
 
-          <div className="order-2 flex shrink-0 items-center gap-1.5 2xl:order-3">
+          <div className="order-2 flex shrink-0 items-center gap-1 sm:gap-1.5 2xl:order-3">
             <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-accent transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
               {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
             </button>
@@ -93,17 +94,17 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
         </div>
 
         {/* Fila inferior: estado de datos y acciones rápidas */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-1.5">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <div className="flex items-center gap-1 overflow-x-auto lg:hidden">{renderTabs('mobile')}</div>
+        <div className="-mx-2.5 flex flex-nowrap items-center justify-between gap-2 overflow-x-auto border-t border-border px-2.5 py-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+          <div className="flex shrink-0 items-center gap-1.5 sm:min-w-0 sm:shrink sm:flex-wrap">
+            <div className="hidden items-center gap-1 overflow-x-auto md:flex lg:hidden">{renderTabs('mobile')}</div>
             <ConnectionIndicator />
             <LocalCsvAccess />
-            <span className={`${SMALL_BUTTON} bg-card text-text-primary`}>
+            <span className={`${SMALL_BUTTON.replace('inline-flex ', '')} hidden bg-card text-text-primary sm:inline-flex`}>
               <Satellite className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
               <span>Observaciones satelitales (<span className="font-bold tabular-nums">{totalVisibleCount}</span>)</span>
             </span>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:flex-wrap">
             <EmergencyAccess />
             <NoveltyReportAccess />
             <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>
@@ -115,6 +116,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
           </div>
         </div>
       </div>
+      <MobileBottomNav activeModule={activeModule} onModuleChange={onModuleChange} />
     </header>
   );
 
