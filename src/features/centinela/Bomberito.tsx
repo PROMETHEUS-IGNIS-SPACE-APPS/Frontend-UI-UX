@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
+import { AlertTriangle, MapPin, PhoneCall, ShieldAlert, X } from 'lucide-react';
+import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
+import { computeHotspotAlerts, type HotspotAlert } from '@/utils/hotspotAlerts';
+import { nearestReferenceName } from '@/utils/subregions';
 import { cellCenter as centerOf, cellName, pctOrUnknown, productLabel, useCentinelaModel } from './centinelaFormat';
 import { useBackendHealth } from '@/hooks/useBackendHealth';
 import { useUiStore } from '@/stores/uiStore';
@@ -43,7 +46,11 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
   // En el Mapa se eleva para no tapar la línea de tiempo; en los demás módulos queda en la esquina.
   const onMap = useUiStore((state) => state.activeModule) === 'explorer';
   const { outcome } = useBackendHealth();
-  const model = useCentinelaModel(open);
+  // El modelo se carga siempre: los avisos necesitan su historial aunque el panel esté cerrado.
+  const model = useCentinelaModel();
+  const reports = useCitizenReportsStore((state) => state.reports);
+  const alerts = useMemo(() => computeHotspotAlerts(observations, model.data, reports), [observations, model.data, reports]);
+  const topAlert = alerts[0];
 
   useEffect(() => {
     if (!open) return undefined;
@@ -61,10 +68,13 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
 
   return <>
     <div className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex items-center gap-1 md:right-6 ${onMap ? 'md:bottom-28' : 'md:bottom-5'}`}>
-      {!open && <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! ¿Necesitas ayuda?</span>}
-      {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen ? 'bomberito-point--calm' : ''}`}>👉</span>}
-      <button type="button" onClick={toggle} aria-expanded={open} aria-label="Abrir Bomberito Centinela" title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
-        {!open && <span aria-hidden className={`bomberito-ring absolute inset-0 rounded-full border-4 border-[#facc15] ${seen ? 'bomberito-ring--calm' : ''}`} />}
+      {!open && (topAlert
+        ? <span role="status" className="bomberito-bubble max-w-[15rem] select-none rounded-2xl rounded-r-sm border-2 border-white bg-[#B9200B] px-3 py-1.5 font-noto text-[11px] font-extrabold leading-snug text-white shadow-lg sm:max-w-xs">¡Atención! {alertHeadline(topAlert)}</span>
+        : <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! ¿Necesitas ayuda?</span>)}
+      {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen && !topAlert ? 'bomberito-point--calm' : ''}`}>👉</span>}
+      <button type="button" onClick={toggle} aria-expanded={open} aria-label={alerts.length ? `Abrir Bomberito Centinela: ${alerts.length} aviso(s) de focos` : 'Abrir Bomberito Centinela'} title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
+        {!open && <span aria-hidden className={`bomberito-ring absolute inset-0 rounded-full border-4 ${topAlert ? 'border-[#ef4444]' : 'border-[#facc15]'} ${seen && !topAlert ? 'bomberito-ring--calm' : ''}`} />}
+        {alerts.length > 0 && <span aria-hidden className="absolute -right-1 -top-1 z-10 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-[#ef4444] px-1 font-source text-xs font-extrabold text-white shadow">{alerts.length}</span>}
         <span className="absolute inset-0 overflow-hidden rounded-full border-[3px] border-[#facc15] bg-[#7B1A0C] shadow-[0_6px_16px_rgba(0,0,0,0.45)] transition-transform group-hover:scale-105 group-active:scale-95">
           {/* Asoma la cabeza desde el borde inferior del círculo. */}
           <img src={BOMBERITO_IMAGE} alt="" width={96} height={96} className={`bomberito-head absolute left-1/2 top-[6%] h-auto w-[150%] max-w-none [image-rendering:pixelated] ${open ? '' : 'bomberito-peek'}`} />
@@ -86,6 +96,16 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
 
         {model.isPending && <p role="status" className="text-text-secondary">Cargando el modelo…</p>}
         {model.isError && <p role="alert" className="rounded-lg border border-danger/40 bg-danger-soft p-2 text-danger">{model.error.message}</p>}
+
+        {alerts.length > 0 && <section aria-label="Avisos de focos" className="space-y-2 rounded-xl border-2 border-[#ef4444]/60 bg-danger-soft p-3">
+          <h3 className="flex items-center gap-1.5 font-noto text-xs font-extrabold text-danger"><AlertTriangle className="h-4 w-4" aria-hidden />Avisos de focos ({alerts.length})</h3>
+          <ul className="space-y-1.5">{alerts.slice(0, 6).map((alert) => <li key={alert.cellId} className="rounded-lg border border-border bg-card p-2">
+            <p className="font-semibold">{alertHeadline(alert)}</p>
+            <p className="text-[10px] leading-snug text-text-secondary">{alertDetail(alert)}</p>
+            {onShowCell && <button type="button" onClick={() => { onShowCell(alert.center); setOpen(false); }} className="mt-1 inline-flex items-center gap-1 rounded-lg border border-border px-2 py-0.5 text-[10px] font-semibold text-accent hover:bg-surface-hover"><MapPin className="h-3 w-3" aria-hidden />Ver en mapa</button>}
+          </li>)}</ul>
+          <p className="text-[10px] leading-snug text-text-secondary">Aviso informativo calculado con las detecciones de las últimas 24 h, el historial de CENTINELA y los reportes ciudadanos guardados en este dispositivo. No es una alerta oficial: si ves fuego, llama al 123.</p>
+        </section>}
 
         {model.data && <>
           <section className="space-y-1.5">
@@ -139,4 +159,29 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
       </div>
     </section>}
   </>;
+}
+
+function placeOf(alert: HotspotAlert) {
+  const near = nearestReferenceName(alert.center[1], alert.center[0]);
+  return near ? `cerca de ${near}` : `en la celda (${alert.center[1].toFixed(2)}, ${alert.center[0].toFixed(2)})`;
+}
+
+function countsText(alert: HotspotAlert) {
+  const parts = [alert.viirs ? `${alert.viirs} VIIRS` : '', alert.modis ? `${alert.modis} MODIS` : ''].filter(Boolean);
+  return parts.join(' y ');
+}
+
+/** Frase corta del aviso (globo y lista). */
+function alertHeadline(alert: HotspotAlert) {
+  if (alert.kind === 'satellite-and-citizen') return `Focos satelitales (${countsText(alert)}) y ${alert.citizenReports} reporte(s) ciudadano(s) ${placeOf(alert)}.`;
+  if (alert.kind === 'unusual-satellite') return `Actividad inusual ${placeOf(alert)}: ${countsText(alert)} en 24 h.`;
+  return `${alert.citizenReports} reporte(s) ciudadano(s) ${placeOf(alert)} sin detección satelital.`;
+}
+
+function alertDetail(alert: HotspotAlert) {
+  const history = alert.historicalFrequency !== null ? ` Normalmente tiene actividad solo ${(alert.historicalFrequency * 100).toFixed(0)} % de los meses.` : '';
+  const frp = alert.highFrp ? ` ${alert.highFrp} con FRP ≥ 30 MW.` : '';
+  if (alert.kind === 'satellite-and-citizen') return `Dos fuentes independientes coinciden en la misma celda.${frp}${history}`;
+  if (alert.kind === 'unusual-satellite') return `Detecciones recientes donde CENTINELA espera poca actividad.${frp}${history}`;
+  return 'Las nubes o el horario orbital pueden ocultar el fuego al satélite; el reporte no está verificado.';
 }

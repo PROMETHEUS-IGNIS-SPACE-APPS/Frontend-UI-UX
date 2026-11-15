@@ -39,6 +39,8 @@
 
 - 2026-11-15: BOMBERITO CENTINELA (`features/centinela/Bomberito.tsx`), botón flotante global. Lee el artefacto publicado del modelo CENTINELA v0.1.0 (`public/models/centinela-v1.json`, extracto de `Downloads/centinela-entrenado-real/resultados/modelo-real.json`: 153 pronósticos, evaluación; sin historial de 14 MB). El paquete original usa endpoints `/centinela/*` que nuestro Backend-API no tiene: no se tocó el backend. Pronóstico nov-2026 = datos insuficientes (cobertura); Markov no supera la frecuencia estacional.
 
+- 2026-11-15: avisos del Bomberito (`utils/hotspotAlerts.ts`): actividad satelital de las últimas 24 h (desde la detección más reciente) inusual frente al historial CENTINELA (frecuencia < 20 %, ≥ 12 meses), cruzada con reportes ciudadanos de 24 h. Tipos: satélite+ciudadano > inusual > solo ciudadano. VIIRS no tiene frecuencia en CENTINELA → solo MODIS puede ser "inusual". Globo rojo + contador; no abre el panel solo. Capa Markov del Mapa principal en morado (como el ejemplo); Mapa de Calor sigue amarillo-rojo. Alarmita CENTINELA en Predictibilidad y ficha CENTINELA en Laboratorio IA.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.
