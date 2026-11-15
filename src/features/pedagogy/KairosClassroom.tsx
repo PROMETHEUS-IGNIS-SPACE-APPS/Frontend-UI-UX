@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Satellite, X } from 'lucide-react';
 import {
   KAIROS_CLOSING,
@@ -12,6 +12,7 @@ import {
   KAIROS_WIDE_SLIDES,
   type KairosSection,
 } from './kairosContent';
+import PodcastPlayer from './PodcastPlayer';
 import RiskDetectorGame from './RiskDetectorGame';
 
 interface LightboxState { section: KairosSection; index: number }
@@ -20,7 +21,15 @@ const ROUND_BUTTON = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-
 
 const wrap = (index: number, length: number) => (index + length) % length;
 
-function InfographicCard({ section, onExpand }: { section: KairosSection; onExpand: (index: number) => void }) {
+interface InfographicCardProps {
+  section: KairosSection;
+  onExpand: (index: number) => void;
+  audioActive: boolean;
+  onToggleAudio: () => void;
+  onAudioEnded: () => void;
+}
+
+function InfographicCard({ section, onExpand, audioActive, onToggleAudio, onAudioEnded }: InfographicCardProps) {
   const [index, setIndex] = useState(0);
   const slide = section.slides[index];
   return <article className="flex h-full flex-col rounded-2xl bg-[#EEDFC5] p-4 sm:p-6">
@@ -42,6 +51,7 @@ function InfographicCard({ section, onExpand }: { section: KairosSection; onExpa
       </div>
     </div>
     <p className="mt-1 flex-1 font-noto text-sm leading-relaxed text-[#4A2E1B] sm:text-justify">{section.description}</p>
+    {section.audioSrc && <PodcastPlayer src={section.audioSrc} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
   </article>;
 }
 
@@ -51,6 +61,8 @@ export default function KairosClassroom() {
   const [headerFailed, setHeaderFailed] = useState(false);
   const [footerFailed, setFooterFailed] = useState(false);
   const [wideIndex, setWideIndex] = useState(0);
+  const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const releaseAudio = useCallback(() => setActiveAudioId(null), []);
   const wide = KAIROS_WIDE_SLIDES[wideIndex] ?? null;
   const hasWide = KAIROS_WIDE_SLIDES.length > 0;
 
@@ -87,7 +99,14 @@ export default function KairosClassroom() {
 
     <div className="mx-auto mt-10 w-full max-w-7xl space-y-10 px-4 sm:mt-16 sm:space-y-16 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7">
-        {KAIROS_SECTIONS.map((section) => <InfographicCard key={section.id} section={section} onExpand={(index) => setLightbox({ section, index })} />)}
+        {KAIROS_SECTIONS.map((section) => <InfographicCard
+          key={section.id}
+          section={section}
+          onExpand={(index) => setLightbox({ section, index })}
+          audioActive={activeAudioId === section.id}
+          onToggleAudio={() => setActiveAudioId((current) => (current === section.id ? null : section.id))}
+          onAudioEnded={releaseAudio}
+        />)}
       </div>
 
       <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-10">
@@ -107,9 +126,9 @@ export default function KairosClassroom() {
 
       <RiskDetectorGame />
 
-      <section aria-label="Infografías panorámicas de prevención" className="w-full rounded-2xl bg-[#EEDFC5] p-4 sm:p-8">
+      <section aria-label="Aprendizaje Basado en Problemas" className="w-full rounded-2xl bg-[#EEDFC5] p-4 sm:p-8">
         <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <h2 className="font-sans text-xl font-bold text-[#5C260E] sm:text-2xl">Infografías panorámicas de prevención</h2>
+          <h2 className="font-sans text-xl font-bold text-[#5C260E] sm:text-2xl">Aprendizaje Basado en Problemas (ABP)</h2>
           <div className="flex items-center gap-2.5 self-end sm:self-auto">
             <button type="button" onClick={() => setWideIndex((value) => wrap(value - 1, KAIROS_WIDE_SLIDES.length))} disabled={!hasWide} aria-label="Infografía panorámica anterior" className={`${ROUND_BUTTON} disabled:cursor-not-allowed disabled:opacity-45`}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
             <span className="min-w-[3rem] text-center font-source text-xs font-semibold text-[#8E431E]">{hasWide ? `${wideIndex + 1} / ${KAIROS_WIDE_SLIDES.length}` : '0 / 0'}</span>

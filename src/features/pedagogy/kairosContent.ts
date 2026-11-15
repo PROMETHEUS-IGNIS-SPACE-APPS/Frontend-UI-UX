@@ -19,10 +19,13 @@ export interface KairosSection {
   id: string;
   title: string;
   description: string;
+  /** Podcast of the section (from the `ejemplo` folder; audio-only MP4). */
+  audioSrc?: string;
   slides: KairosSlide[];
 }
 
 const img = (name: string) => `/assets/kairos/${name}.webp`;
+const podcast = (name: string) => `/assets/kairos/podcasts/podcast-${name}.mp4`;
 
 export const KAIROS_HEADER_IMAGE = img('encabezado');
 export const KAIROS_FOOTER_IMAGE = img('pie');
@@ -39,6 +42,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'hogar',
     title: '1. Prevención en el hogar',
     description: 'La mayoría de las emergencias residenciales comienzan con gestos cotidianos que podemos corregir hoy: evitar conexiones en cascada y cargar baterías de ion-litio sobre superficies ventiladas, instalar y probar detectores de humo cada mes, limpiar el filtro de pelusa de la secadora, almacenar inflamables lejos de fuentes de calor, alejar velas e inciensos de cortinas y construir en familia un plan de evacuación con dos rutas de salida por habitación.',
+    audioSrc: podcast('hogar'),
     slides: [
       { id: 'hogar-1', title: 'Seguridad eléctrica y baterías de ion-litio', imageSrc: img('hogar-seguridad-electrica') },
       { id: 'hogar-2', title: 'Uso de extintores y evacuación en edificios', imageSrc: img('hogar-extintores-evacuacion') },
@@ -53,6 +57,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'ecosistema',
     title: '2. Prevención por ecosistema',
     description: 'En Colombia, la mayoría de los incendios de cobertura vegetal se relacionan con actividades humanas y se agravan durante sequías y eventos de El Niño. Proteger nuestras veredas y montañas exige sostener un espacio defendible alrededor de las viviendas rurales, sustituir las quemas agrícolas por compostaje o abono verde, cuidar la vegetación de páramos y bosques secos, apagar por completo toda fogata con agua y reportar de inmediato columnas de humo al 123.',
+    audioSrc: podcast('ecosistema'),
     slides: [
       { id: 'eco-1', title: 'Incendios de cobertura vegetal y espacio defendible', imageSrc: img('eco-espacio-defendible') },
       { id: 'eco-2', title: 'Protección de páramos y bosques secos tropicales', imageSrc: img('eco-paramos-bosques') },
@@ -66,6 +71,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'salud',
     title: '3. Prevención médica y primeros auxilios',
     description: 'Frente a una emergencia térmica o a una nube densa de humo, actuar con serenidad protege vidas. El material particulado y el monóxido de carbono exigen sellar ventanas, usar respiradores N95 bien ajustados y desplazarse a ras del suelo si hay humo; el golpe de calor requiere sombra y enfriamiento inmediato; y tanto las mascotas como el bienestar emocional de las personas afectadas necesitan atención oportuna, escucha sin juicios y un retorno seguro autorizado por bomberos.',
+    audioSrc: podcast('salud'),
     slides: [
       { id: 'salud-1', title: 'Protección respiratoria ante humo de incendios forestales', imageSrc: img('salud-proteccion-respiratoria') },
       { id: 'salud-2', title: 'Primeros auxilios en mascotas y animales afectados', imageSrc: img('salud-mascotas') },
@@ -101,9 +107,51 @@ export const KAIROS_EDUCATION_BLOCK = {
 };
 
 /**
- * Infografías panorámicas (1920 × 1080 px). Para publicar una, guarda el archivo
- * en `public/assets/kairos/` y agrégala aquí con `img('nombre-del-archivo')`.
+ * Presentación «Aprendizaje Basado en Problemas» (36 diapositivas 1920 × 1080 en
+ * `public/assets/kairos/abp/`), en el orden de la presentación del equipo.
  */
-export const KAIROS_WIDE_SLIDES: KairosSlide[] = [];
+const ABP_TITLES = [
+  'Aprendizaje Basado en Problemas',
+  'Aprendizaje Basado en Problemas (ABP)',
+  '¿Con quién realizarla?',
+  '¿Cómo se desarrolla?',
+  '¿Para qué sirve?',
+  'Caso 1',
+  'Caso 1 · Una chispa en casa: ¿estamos preparados?',
+  'Caso 1 · Desafíos y producto final',
+  'Caso 1 · Cuatro situaciones de riesgo en casa',
+  'Caso 1 · Cómo prevenirlo y plan familiar',
+  'Caso 1 · Cinco cosas para recordar',
+  'Caso 2',
+  'Caso 2 · Cuando el humo llega a la comunidad',
+  'Caso 2 · Desafíos y producto final',
+  'Caso 2 · Cuatro riesgos del humo',
+  'Caso 2 · Cómo protegerse y plan familiar',
+  'Caso 2 · Cinco cosas para recordar',
+  'Caso 3',
+  'Caso 3 · Los datos también pueden salvar bosques',
+  'Caso 3 · Desafíos y producto final',
+  'Caso 3 · Cuatro errores frente a las alertas',
+  'Caso 3 · Cómo consultar las alertas',
+  'Caso 3 · Para recordar',
+  'Caso 4',
+  'Caso 4 · Situación problema',
+  'Caso 4 · Desafíos y producto final',
+  'Caso 4 · Cinco errores frente a un incendio',
+  'Caso 4 · Qué hacer y plan comunitario',
+  'Caso 5',
+  'Caso 5 · Animales en peligro: ¿quién los protege?',
+  'Caso 5 · Desafíos y producto final',
+  'Caso 5 · Cinco errores al encontrar un animal afectado',
+  'Caso 5 · Qué hacer y plan comunitario',
+  'Conclusión',
+  'Conclusión · La solución es común a todos',
+  'Gracias',
+];
+
+export const KAIROS_WIDE_SLIDES: KairosSlide[] = ABP_TITLES.map((title, index) => {
+  const num = String(index + 1).padStart(2, '0');
+  return { id: `abp-${num}`, title, imageSrc: img(`abp/abp-${num}`) };
+});
 
 export const KAIROS_CLOSING = 'Los griegos distinguían dos tiempos: kronos, el que pasa y se cuenta en horas, y kairós, el momento justo en que actuar cambia el destino. Por eso esta página se llama Kairós, porque frente al fuego el momento oportuno no llega por azar: lo construye la prevención.';
