@@ -36,7 +36,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         ['Conocer el estado de los modelos de probabilidad', 'Pestañas Predictibilidad y Mapa de Calor (apartados 4.2 y 4.4)'],
         ['Revisar estadísticas, meses y épocas del año', 'Pestañas Analítica y Calendario (apartados 4.3 y 4.5)'],
         ['Entender una palabra técnica', 'Glosario Científico (apartado 5.1)'],
-        ['Descargar información', 'Descargar observaciones (.CSV) (3.3) y Exportar consulta CSV (4.3)'],
+        ['Descargar información', 'Descargar Reportes (.CSV) y Descargar observaciones (.CSV) (3.3), y Exportar consulta CSV (4.3)'],
         ['Conocer los modelos, las fuentes y las conexiones', 'Pestaña Información del Proyecto (apartado 4.7)'],
       ] },
       { kind: 'p', text: 'A lo largo del documento encontrará dos tipos de recuadros:' },
@@ -76,7 +76,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'barra', level: 1, title: '3. Barra superior: funciones globales y herramientas rápidas', blocks: [
-      { kind: 'p', text: 'La barra superior está disponible en todas las pestañas. Se compone de la identidad, los controles superiores derechos y una fila inferior con dos grupos: a la izquierda los datos (estado del Backend, archivos .CSV y descarga de observaciones) y a la derecha las emergencias (123 SOS y Reportar Novedad).' },
+      { kind: 'p', text: 'La barra superior está disponible en todas las pestañas. Se compone de la identidad, los controles superiores derechos y una fila inferior con dos grupos: a la izquierda los datos satelitales (estado del Backend, archivos .CSV y descarga de observaciones) y a la derecha la ciudadanía (123 SOS, Reportar Novedad y Descargar Reportes).' },
     ],
   },
   {
@@ -109,11 +109,14 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       ] },
       { kind: 'warn', text: 'Importante: los archivos se leen solo en su navegador. No se envían al servidor y se pierden al recargar la página. Como no traen municipio ni departamento, no aparecen en los filtros por ubicación ni en el agrupamiento por subregión.' },
       { kind: 'h', text: 'Limpiar .CSV' },
-      { kind: 'list', items: ['Abre una confirmación que indica cuántos archivos y observaciones locales se quitarán. Los datos del Backend-API no cambian.'] },
+      { kind: 'list', items: ['Abre la confirmación Limpiar Reportes Ciudadanos (.CSV): borra de este dispositivo los reportes ciudadanos guardados y los archivos .CSV cargados. Los datos del Backend-API no cambian.'] },
+      { kind: 'warn', text: 'Importante: la acción no se puede deshacer. Si necesita conservar los reportes, use primero Descargar Reportes (.CSV).' },
       { kind: 'h', text: 'Botón 123 SOS' },
       { kind: 'list', items: ['Abre las líneas de emergencia con marcación directa (apartado 5.2).'] },
       { kind: 'h', text: 'Botón Reportar Novedad' },
-      { kind: 'list', items: ['Abre el formulario de 5 secciones para preparar un reporte de lo que usted ve en el territorio y compartirlo (apartado 5.3). No descarga ni guarda nada.'] },
+      { kind: 'list', items: ['Abre el formulario de 5 secciones para preparar un reporte de lo que usted ve en el territorio y compartirlo (apartado 5.3).'] },
+      { kind: 'h', text: 'Descargar Reportes (.CSV)' },
+      { kind: 'list', items: ['El contador azul indica cuántos reportes ciudadanos se han preparado en este dispositivo.', 'Descarga un archivo .CSV con todos sus campos: fecha, coordenadas, sector, intensidad observada, observaciones, quién reporta y contacto.'] },
       { kind: 'h', text: 'Descargar observaciones (.CSV)' },
       { kind: 'list', items: ['El contador indica cuántas observaciones están visibles con los filtros actuales.', 'Descarga esas observaciones en un archivo .CSV, con su procedencia, confianza original y FRP (vacía cuando no está disponible).'] },
     ],
@@ -264,14 +267,14 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         'Observaciones y daños conocidos: personas o viviendas cercanas, cultivos, agua, vegetación y dirección del humo.',
       ] },
       { kind: 'p', text: 'Al pulsar Preparar reporte se genera un resumen con fecha, coordenadas y enlace al mapa. Puede copiarlo, enviarlo por WhatsApp o correo, compartirlo o llamar al 123.' },
-      { kind: 'warn', text: 'Importante: la plataforma todavía no recibe ni guarda reportes ciudadanos. El reporte solo llega a quien usted lo envíe; sus datos no se almacenan.' },
+      { kind: 'warn', text: 'Importante / Rigor científico: un reporte ciudadano es información declarada, no un hecho confirmado. La plataforma todavía no recibe reportes: cada reporte se guarda solo en el dispositivo donde se preparó (para Descargar Reportes) y llega únicamente a quien usted lo envíe.' },
     ],
   },
   {
     id: 'csv', level: 2, title: '5.4 Gestor de archivos .CSV', blocks: [
       { kind: 'list', items: [
         'Gestor: arrastre o seleccione archivos, vea la lista cargada (formato, observaciones y hora) y quite archivos uno por uno.',
-        'Limpiar todos (.CSV): pide confirmación en pantalla antes de quitar los archivos locales.',
+        'Limpiar todos (.CSV): pide confirmación en pantalla antes de borrar los archivos locales y los reportes ciudadanos guardados en el dispositivo.',
       ] },
     ],
   },

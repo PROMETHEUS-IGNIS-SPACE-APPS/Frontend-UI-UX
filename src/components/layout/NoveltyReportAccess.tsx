@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useCitizenReportsStore } from '@/stores/citizenReportsStore';
 import { AlertTriangle, CheckCircle2, ClipboardCopy, Crosshair, Flame, Mail, MapPin, MessageCircle, PhoneCall, Send, Share2, UserCheck, Users, X } from 'lucide-react';
 
 /**
  * “Reportar Novedad”: formulario de la carpeta `ejemplo`. El Backend-API no
- * tiene endpoint para recibir reportes, así que nada se envía ni se guarda: al
- * terminar se arma un resumen que la persona copia o comparte con el 123, los
- * bomberos o el Consejo Municipal de Gestión del Riesgo.
+ * tiene endpoint para recibir reportes: el reporte se guarda solo en este
+ * navegador (para “Descargar Reportes (.CSV)”) y se arma un resumen que la
+ * persona copia o comparte con el 123, los bomberos o el CMGRD.
  */
 
 interface Sector { id: string; label: string; municipality: string; lat: number; lon: number }
@@ -60,6 +61,7 @@ export default function NoveltyReportAccess() {
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const addReport = useCitizenReportsStore((state) => state.addReport);
 
   const close = () => { setIsOpen(false); setSummary(null); setError(null); setCopied(false); };
 
@@ -102,6 +104,20 @@ export default function NoveltyReportAccess() {
       `Observaciones: ${note.trim()}`,
       `Quien reporta: ${hasExperience ? `con experiencia (${experience.trim()})` : 'habitante o testigo'}${name.trim() ? ` · ${name.trim()}` : ''}${contact.trim() ? ` · ${contact.trim()}` : ''}`,
     ];
+    const now = new Date();
+    addReport({
+      id: `reporte-${now.getTime()}`,
+      createdAt: now.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }),
+      latitude: Number(lat.toFixed(5)),
+      longitude: Number(lon.toFixed(5)),
+      sector: sector?.label ?? null,
+      intensity: level ? level.title : 'No sabe / no responde',
+      note: note.trim(),
+      role: hasExperience ? 'con experiencia' : 'habitante o testigo',
+      experience: hasExperience ? experience.trim() : null,
+      name: name.trim() || null,
+      contact: contact.trim() || null,
+    });
     setSummary(lines.join('\n'));
     setCopied(false);
   };
@@ -139,7 +155,7 @@ export default function NoveltyReportAccess() {
         {summary === null ? <form onSubmit={submit} className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-5" noValidate>
           <div className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger-soft p-3 text-[11px] leading-5">
             <PhoneCall className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
-            <p><strong>¿Hay fuego activo cerca de personas o viviendas?</strong> Llama primero al <a href="tel:123" className="font-bold text-danger underline">123</a> o a Bomberos <a href="tel:119" className="font-bold text-danger underline">119</a>. Este formulario no envía nada a la plataforma: al final podrás copiar o compartir el reporte.</p>
+            <p><strong>¿Hay fuego activo cerca de personas o viviendas?</strong> Llama primero al <a href="tel:123" className="font-bold text-danger underline">123</a> o a Bomberos <a href="tel:119" className="font-bold text-danger underline">119</a>. Este formulario no envía nada a la plataforma: el reporte se guarda solo en este dispositivo y al final podrás copiarlo o compartirlo.</p>
           </div>
 
           <Step n={1} title="Experiencia en Gestión del Riesgo">
@@ -168,7 +184,7 @@ export default function NoveltyReportAccess() {
               <label className="space-y-1"><span className="block text-[11px] font-medium text-text-secondary">Nombre:</span><input value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre de quien reporta" autoComplete="name" className={INPUT} /></label>
               <label className="space-y-1"><span className="block text-[11px] font-medium text-text-secondary">Teléfono o correo:</span><input value={contact} onChange={(event) => setContact(event.target.value)} placeholder="Para que puedan contactarte" autoComplete="tel" className={INPUT} /></label>
             </div>
-            <p className="text-[10px] text-text-secondary">Estos datos solo aparecen en el resumen que tú decides compartir; la plataforma no los guarda.</p>
+            <p className="text-[10px] text-text-secondary">Estos datos quedan solo en este dispositivo (para “Descargar Reportes”) y en el resumen que tú decidas compartir; la plataforma no los recibe.</p>
           </Step>
 
           <Step n={4} title="Intensidad del Incendio (opcional)" aside={<span className="text-[11px] italic text-text-secondary">Estimación visual del fuego</span>}>
@@ -191,7 +207,7 @@ export default function NoveltyReportAccess() {
         </form>
 
         : <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
-          <p className="flex items-start gap-2 rounded-xl border border-success/40 bg-success-soft p-3 text-[11px] leading-5"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden /><span>Tu reporte está listo. <strong>Todavía no se ha enviado a nadie:</strong> cópialo o compártelo con el 123, los bomberos o el Consejo Municipal de Gestión del Riesgo de tu municipio.</span></p>
+          <p className="flex items-start gap-2 rounded-xl border border-success/40 bg-success-soft p-3 text-[11px] leading-5"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden /><span>Tu reporte quedó guardado en este dispositivo (puedes bajarlo con “Descargar Reportes”). <strong>Todavía no se ha enviado a nadie:</strong> cópialo o compártelo con el 123, los bomberos o el Consejo Municipal de Gestión del Riesgo de tu municipio.</span></p>
           <pre aria-label="Resumen del reporte" className="whitespace-pre-wrap break-words rounded-xl border border-border bg-surface p-3 font-source text-[11px] leading-5 text-text-primary">{summary}</pre>
           {error && <p role="alert" className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-[11px] text-danger">{error}</p>}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
