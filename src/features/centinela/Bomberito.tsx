@@ -17,6 +17,10 @@ interface BomberitoProps {
 
 const BOMBERITO_IMAGE = `${import.meta.env.BASE_URL}assets/centinela/bomberito.webp`;
 const SEEN_KEY = 'prometheus-ignis-bomberito-visto';
+const ACK_KEY = 'prometheus-ignis-bomberito-avisos-vistos';
+/** Huella del aviso: si cambian las cifras (más focos o reportes) vuelve a avisar. */
+const alertKey = (alert: HotspotAlert) => `${alert.cellId}|${alert.kind}|${alert.viirs}|${alert.modis}|${alert.citizenReports}`;
+const readAcknowledged = (): string[] => { try { const raw = globalThis.localStorage?.getItem(ACK_KEY); const parsed: unknown = raw ? JSON.parse(raw) : []; return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []; } catch { return []; } };
 const readSeen = () => { try { return globalThis.localStorage?.getItem(SEEN_KEY) === '1'; } catch { return false; } };
 
 const pct = pctOrUnknown;
@@ -50,7 +54,17 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
   const model = useCentinelaModel();
   const reports = useCitizenReportsStore((state) => state.reports);
   const alerts = useMemo(() => computeHotspotAlerts(observations, model.data, reports), [observations, model.data, reports]);
-  const topAlert = alerts[0];
+  /** Avisos ya vistos al abrir el panel: dejan de anunciarse en el globo, el anillo y el contador. */
+  const [acknowledged, setAcknowledged] = useState<string[]>(readAcknowledged);
+  const pending = useMemo(() => alerts.filter((alert) => !acknowledged.includes(alertKey(alert))), [alerts, acknowledged]);
+  const topAlert = pending[0];
+  useEffect(() => {
+    if (!open || pending.length === 0) return;
+    // Solo se guardan las huellas vigentes, así la lista no crece sin límite.
+    const next = alerts.map(alertKey);
+    setAcknowledged(next);
+    try { globalThis.localStorage?.setItem(ACK_KEY, JSON.stringify(next)); } catch { /* sin almacenamiento */ }
+  }, [open, pending.length, alerts]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -72,9 +86,9 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
         ? <span role="status" className="bomberito-bubble max-w-[15rem] select-none rounded-2xl rounded-r-sm border-2 border-white bg-[#B9200B] px-3 py-1.5 font-noto text-[11px] font-extrabold leading-snug text-white shadow-lg sm:max-w-xs">¡Atención! {alertHeadline(topAlert)}</span>
         : <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! ¿Necesitas ayuda?</span>)}
       {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen && !topAlert ? 'bomberito-point--calm' : ''}`}>👉</span>}
-      <button type="button" onClick={toggle} aria-expanded={open} aria-label={alerts.length ? `Abrir Bomberito Centinela: ${alerts.length} aviso(s) de focos` : 'Abrir Bomberito Centinela'} title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
+      <button type="button" onClick={toggle} aria-expanded={open} aria-label={pending.length ? `Abrir Bomberito Centinela: ${pending.length} aviso(s) nuevo(s) de focos` : 'Abrir Bomberito Centinela'} title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
         {!open && <span aria-hidden className={`bomberito-ring absolute inset-0 rounded-full border-4 ${topAlert ? 'border-[#ef4444]' : 'border-[#facc15]'} ${seen && !topAlert ? 'bomberito-ring--calm' : ''}`} />}
-        {alerts.length > 0 && <span aria-hidden className="absolute -right-1 -top-1 z-10 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-[#ef4444] px-1 font-source text-xs font-extrabold text-white shadow">{alerts.length}</span>}
+        {!open && pending.length > 0 && <span aria-hidden className="absolute -right-1 -top-1 z-10 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-[#ef4444] px-1 font-source text-xs font-extrabold text-white shadow">{pending.length}</span>}
         <span className="absolute inset-0 overflow-hidden rounded-full border-[3px] border-[#facc15] bg-[#7B1A0C] shadow-[0_6px_16px_rgba(0,0,0,0.45)] transition-transform group-hover:scale-105 group-active:scale-95">
           {/* Asoma la cabeza desde el borde inferior del círculo. */}
           <img src={BOMBERITO_IMAGE} alt="" width={96} height={96} className={`bomberito-head absolute left-1/2 top-[6%] h-auto w-[150%] max-w-none [image-rendering:pixelated] ${open ? '' : 'bomberito-peek'}`} />
