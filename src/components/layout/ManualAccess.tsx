@@ -39,8 +39,7 @@ const SECTIONS = [
       'Calendario: actividad por día, por mes y por subregión de Antioquia (subregión aproximada a partir del municipio de referencia del Backend-API).',
       'Aula Pedagógica: lecciones, preguntas de repaso y matriz ordinal de riesgo 5×5 (ejercicio educativo, no evaluación de una zona real).',
       'Analítica: indicadores descriptivos del conjunto consultado.',
-      'Modelos IA: fichas de modelos publicados por el AI-Pipeline.',
-      'Fuentes/API: estado del Backend-API, endpoints y límites de cada fuente.',
+      'Información del Proyecto: fichas de modelos publicados por el AI-Pipeline, estado del Backend-API, endpoints y límites de cada fuente.',
     ],
   },
   {

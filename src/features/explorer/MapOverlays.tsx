@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react';
 import { Activity, ChevronDown, ChevronUp, Compass, Flame, Globe, HelpCircle, Layers, Map as MapIcon, Moon, Mountain, Sparkles, Sun } from 'lucide-react';
-import NoveltyReportAccess from '@/components/layout/NoveltyReportAccess';
 import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
@@ -35,7 +34,6 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
         </div>
         <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
           {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {pointCount.toLocaleString()} pts</span>}
-          <NoveltyReportAccess variant="map" />
           {onOpenGuide && <button type="button" onClick={onOpenGuide} className="flex items-center gap-1 rounded-lg bg-card px-2 py-1.5 text-xs font-semibold text-info shadow-sm hover:underline" aria-label="Abrir guía y glosario"><HelpCircle className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Guía</span></button>}
         </div>
       </div>

@@ -1,6 +1,6 @@
 /**
  * Identificadores de módulos navegables de la interfaz.
- * El orden define la jerarquía visual de pestañas en Header.
+ * El orden define la jerarquía visual de pestañas en Header (mismo orden que la carpeta `ejemplo`).
  */
 export const APP_MODULES = [
   {
@@ -15,6 +15,11 @@ export const APP_MODULES = [
     description: 'Estado de publicación de modelos predictivos y sus validaciones.',
   },
   {
+    id: 'analytics',
+    label: 'Analítica',
+    description: 'Indicadores descriptivos del conjunto consultado según definiciones oficiales v1.0.',
+  },
+  {
     id: 'markov-heatmap',
     label: 'Mapa de Calor Markov',
     description: 'Predictibilidad espacial por subregiones de Antioquia cuando exista un modelo publicado.',
@@ -27,22 +32,12 @@ export const APP_MODULES = [
   {
     id: 'comparison',
     label: 'Aula Pedagógica',
-    description: 'Lecciones interactivas y matriz ordinal para aprender a leer el riesgo territorial.',
+    description: 'KAIRÓS: infografías de prevención, lecciones interactivas y matriz ordinal de riesgo.',
   },
   {
-    id: 'analytics',
-    label: 'Analítica',
-    description: 'Indicadores descriptivos del conjunto consultado según definiciones oficiales v1.0.',
-  },
-  {
-    id: 'laboratory',
-    label: 'Laboratorio IA',
-    description: 'Fichas de los modelos publicados por el AI-Pipeline.',
-  },
-  {
-    id: 'sources',
-    label: 'Fuentes/API',
-    description: 'Estado del Backend-API, endpoints consultados y límites de cada fuente de datos.',
+    id: 'project-info',
+    label: 'Información del Proyecto',
+    description: 'Modelos del AI-Pipeline, estado del Backend-API, endpoints y límites de cada fuente de datos.',
   },
 ] as const;
 

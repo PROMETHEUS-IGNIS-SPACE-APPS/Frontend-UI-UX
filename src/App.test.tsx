@@ -75,13 +75,13 @@ describe('App shell de pestañas', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Laboratorio IA' }));
+    await user.click(screen.getByRole('tab', { name: 'Información del Proyecto' }));
 
-    expect(screen.getByRole('tab', { name: 'Laboratorio IA' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'Información del Proyecto' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
   it('abre Predictibilidad con una explicación clara de su estado pendiente', async () => {
@@ -125,21 +125,19 @@ describe('App shell de pestañas', () => {
     await user.click(screen.getByRole('button', { name: 'Cerrar instructivo' }));
   });
 
-  it('muestra la pestaña Fuentes/API con los endpoints consultados', async () => {
+  it('reúne modelos IA y fuentes en Información del Proyecto', async () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Fuentes/API' }));
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Fuentes/API');
+    await user.click(screen.getByRole('tab', { name: 'Información del Proyecto' }));
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
+    expect(screen.getByRole('heading', { name: 'Laboratorio IA' })).toBeInTheDocument();
     expect(screen.getByText('/api/fusion/historical-all?region')).toBeInTheDocument();
   });
 
-  it('ofrece Guía y Reportar en Terreno sobre el mapa', async () => {
-    const user = userEvent.setup();
+  it('ya no muestra Reportar en Terreno sobre el mapa', () => {
     renderApp();
-
-    await user.click(await screen.findByRole('button', { name: 'Reportar en terreno' }));
-    expect(screen.getByRole('dialog', { name: 'Reporte de novedad' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reportar en terreno' })).not.toBeInTheDocument();
   });
 
   it('abre el módulo Calendario desde la navegación', async () => {
@@ -167,9 +165,9 @@ describe('App shell de pestañas', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('tab', { name: 'Modelos IA' }));
+    await user.click(screen.getByRole('tab', { name: 'Proyecto' }));
 
-    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Laboratorio IA');
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
   it('muestra el Aula Pedagógica con lecciones y matriz interactiva', async () => {

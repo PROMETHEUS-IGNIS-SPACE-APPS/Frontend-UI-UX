@@ -1,20 +1,15 @@
 import { useState } from 'react';
-import { AlertTriangle, MapPin, PhoneCall, PlusCircle, X } from 'lucide-react';
+import { AlertTriangle, MapPin, PhoneCall, X } from 'lucide-react';
 
-/** `header`: botón de la barra superior. `map`: botón “Reportar en Terreno” sobre el mapa. */
-export default function NoveltyReportAccess({ variant = 'header' }: { variant?: 'header' | 'map' }) {
+/** Botón “Reportar Novedad” de la barra superior. */
+export default function NoveltyReportAccess() {
   const [isOpen, setIsOpen] = useState(false);
 
   return <>
-    {variant === 'header'
-      ? <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent-solid px-3 py-1.5 font-noto text-[11px] font-bold text-accent-fg shadow-sm transition-all hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
-        <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span className="hidden sm:inline">Reportar Novedad</span><span className="sm:hidden">Reportar</span>
-      </button>
-      : <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar en terreno" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-info/70 bg-info px-2.5 py-1.5 font-noto text-[11px] font-bold text-white shadow-lg transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 sm:px-3 sm:text-xs">
-        <PlusCircle className="h-3.5 w-3.5" aria-hidden />
-        <span>Reportar en Terreno</span>
-      </button>}
+    <button type="button" onClick={() => setIsOpen(true)} aria-label="Reportar una novedad territorial" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent-solid px-3 py-1.5 font-noto text-[11px] font-bold text-accent-fg shadow-sm transition-all hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      <span className="hidden sm:inline">Reportar Novedad</span><span className="sm:hidden">Reportar</span>
+    </button>
 
     {isOpen && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}>
       <section role="dialog" aria-modal="true" aria-labelledby="novelty-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-orange-500/50 bg-card text-text-primary shadow-2xl shadow-black/50">

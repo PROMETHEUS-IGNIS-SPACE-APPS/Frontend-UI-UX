@@ -1,4 +1,4 @@
-import { Activity, BookOpen, CalendarDays, Cpu, Download, HeartHandshake, Layers, Moon, Radar, Satellite, Server, Sun, TrendingUp } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Download, HeartHandshake, Info, Layers, Moon, Radar, Satellite, Sun, TrendingUp } from 'lucide-react';
 import { useUiStore } from '@/stores/uiStore';
 import type { AppModuleId } from '@/types/domain/module';
 import { APP_MODULES } from '@/types/domain/module';
@@ -25,20 +25,18 @@ const MODULE_ICONS: Record<AppModuleId, typeof Layers> = {
   calendar: CalendarDays,
   analytics: Activity,
   comparison: HeartHandshake,
-  laboratory: Cpu,
-  sources: Server,
+  'project-info': Info,
 };
 
 /** Etiquetas visibles cortas, como en la barra del ejemplo. */
 const DESKTOP_MODULE_LABELS: Record<AppModuleId, string> = {
   explorer: 'Mapa',
   predictability: 'Predictibilidad',
-  'markov-heatmap': 'Mapa de Calor Markov',
+  'markov-heatmap': 'Mapa de Calor',
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula Pedagógica',
-  laboratory: 'Modelos IA',
-  sources: 'Fuentes/API',
+  'project-info': 'Información del Proyecto',
 };
 
 const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
@@ -48,8 +46,7 @@ const MOBILE_MODULE_LABELS: Record<AppModuleId, string> = {
   calendar: 'Calendario',
   analytics: 'Analítica',
   comparison: 'Aula',
-  laboratory: 'Modelos IA',
-  sources: 'Fuentes',
+  'project-info': 'Proyecto',
 };
 
 const SMALL_BUTTON = 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-[11px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400';
