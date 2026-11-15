@@ -2,7 +2,7 @@
  * Instructivo oficial de uso. Sigue el documento del equipo
  * "PROMETHEUS IGNIS — Instructivo Oficial de Uso" (noviembre 2026, 14 páginas),
  * adaptado a las funciones que esta interfaz tiene realmente. Omitimos lo que no
- * existe aquí: Gemini, Open-Meteo / "+ Clima", DAGRAN,
+ * existe aquí: Open-Meteo / "+ Clima", DAGRAN,
  * Matriz de Riesgo 5 × 5, Diccionario Sin Enredos y el modal FastAPI. Tampoco
  * usamos la cifra "más del 95 %", que no tiene fuente.
  */
@@ -36,6 +36,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         ['Conocer la probabilidad de actividad térmica', 'Pestañas Predictibilidad y Mapa de Calor (apartados 4.2 y 4.4)'],
         ['Revisar estadísticas, meses y épocas del año', 'Pestañas Analítica y Calendario (apartados 4.3 y 4.5)'],
         ['Entender una palabra técnica', 'Glosario Científico (apartado 5.1)'],
+        ['Leer las cifras en lenguaje claro', 'Botón Interpretar con IA en Predictibilidad y Calendario (apartados 4.2 y 4.5)'],
         ['Descargar información', 'Barra superior (apartado 3.3) y Exportar Consulta CSV (apartado 4.3)'],
         ['Conocer los modelos, las fuentes y las conexiones', 'Pestaña Información del Proyecto (apartado 4.7)'],
       ] },
@@ -174,6 +175,8 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'list', items: ['Probabilidades de transición diaria entre estados, con suavizado de Laplace (α = 0,5), y los conteos reales N(i,j).'] },
       { kind: 'h', text: 'Validación retrospectiva (out-of-sample)' },
       { kind: 'list', items: ['Se estima con el 70 % inicial de los días y se evalúa con el 30 % final, sin mirar el futuro.', 'Métricas: Brier Markov, Brier Skill Score frente a climatología, ROC-AUC, Brier de persistencia y climatología, precisión / recall y log-loss.'] },
+      { kind: 'h', text: 'Interpretar con IA' },
+      { kind: 'list', items: ['Botón del encabezado que envía las cifras de esta pestaña (pronóstico, matriz, validación y ranking) al Backend-API, que pide a Gemini una lectura en lenguaje claro: resumen, hallazgos, sensores, estimación Markov, limitaciones y recomendaciones.', 'La IA solo interpreta las cifras que recibe; no calcula ni cambia probabilidades. Si el Backend-API no tiene configurada la clave de Gemini, aparece un aviso y el resto de la pestaña funciona igual.'] },
       { kind: 'h', text: 'Informe PDF con Mapa' },
       { kind: 'list', items: ['Botón del encabezado que abre un informe imprimible: pronóstico regional, mapa de celdas P(+24 h) sobre Antioquia, validación retrospectiva y ranking. Use Guardar como PDF.'] },
       { kind: 'h', text: 'Ranking territorial' },
@@ -216,6 +219,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         'Filtros: un botón por cada una de las 6 subregiones de Antioquia y el botón Todas.',
         'Gráfica Frecuencia de observaciones por zona y mes, y gráfica Intensidad térmica promedio por zona (FRP, MW). Pase el cursor sobre los puntos para ver el detalle.',
         'Interpretación del conjunto cargado: qué subregión y qué mes reúnen más observaciones.',
+        'Botón Interpretar con IA: envía las matrices mensuales por subregión (frecuencia y FRP promedio) y el cruce con la estimación Markov para obtener una lectura en lenguaje claro generada por Gemini desde el Backend-API.',
         'Frecuencia mensual por instrumento y tarjetas por día con conteos VIIRS/MODIS, FRP ≥ 30 MW, FRP promedio y máxima. El botón Ver mapa lleva a ese día en la pestaña Mapa.',
       ] },
       { kind: 'warn', text: 'Importante / Rigor científico: el calendario resume únicamente registros recibidos. Un día sin observaciones no prueba ausencia de incendios.' },

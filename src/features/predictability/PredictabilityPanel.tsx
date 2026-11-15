@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, BarChart3, FileDown, FlaskConical, Info, MapPin, ShieldCheck, TrendingUp } from 'lucide-react';
 import PredictabilityReport from './PredictabilityReport';
+import { AiInterpretButton, AiInterpretationPanel } from '@/components/common/AiInterpretation';
+import { useAiInterpretation } from '@/hooks/useAiInterpretation';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
 import type { Observation } from '@/types/api/observations';
 import { HIGH_COUNT, HIGH_FRP_MW, MIN_DAYS_VALIDATED, SMOOTHING_ALPHA, STATE_CODES, runMarkovEngine, type MarkovResult } from '@/utils/markovEngine';
@@ -36,6 +38,23 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
   const ready = result.status !== 'insufficient';
   const validation = result.validation;
   const pKey = (['p24', 'p48', 'p72'] as const)[horizon];
+  const ai = useAiInterpretation('predictability');
+  const round = (value: number) => Math.round(value * 10_000) / 10_000;
+  const buildAiPayload = () => ({
+    procedencia: provenance,
+    estado: result.status,
+    mensaje: result.message,
+    ventana: result.window,
+    celdaGrados: result.gridDeg,
+    observacionesUsadas: result.observationsUsed,
+    transiciones: result.transitions,
+    definicionEstados: { S0: 'sin detección', S1: `actividad baja (FRP < ${HIGH_FRP_MW} MW y < ${HIGH_COUNT} detecciones)`, S2: `intensidad alta (FRP ≥ ${HIGH_FRP_MW} MW o ≥ ${HIGH_COUNT} detecciones)` },
+    matrizTransicion: result.matrix.map((row) => row.map(round)),
+    conteosTransicion: result.counts,
+    pronosticoRegional: result.horizons.map((item) => ({ horas: item.hours, S0: round(item.vector[0]), S1: round(item.vector[1]), S2: round(item.vector[2]), actividadS1oS2: round(item.activity) })),
+    validacion: validation,
+    rankingTop10: [...result.cells].sort((a, b) => b.p24 - a.p24).slice(0, 10).map((cell) => ({ municipio: cell.municipality, departamento: cell.department, lat: cell.centerLat, lon: cell.centerLon, estado: STATE_CODES[cell.state], vecinosActivos: cell.activeNeighbors, p24: round(cell.p24), p48: round(cell.p48), p72: round(cell.p72), detecciones: cell.detections })),
+  });
 
   return <ModulePage>
     <ModuleHeader
@@ -44,8 +63,12 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
       icon={TrendingUp}
       title="Motor Predictivo de Cadenas de Markov 3×3 (S0 · S1 · S2)"
       description="Estima la probabilidad estadística de registrar detecciones térmicas satelitales en celdas geográficas en los próximos días. No equivale a predicción de ignición ni de propagación física."
-      actions={<button type="button" onClick={() => setReportOpen(true)} disabled={!ready} className="ignis-action ignis-action-primary disabled:cursor-not-allowed disabled:opacity-50"><FileDown className="h-3.5 w-3.5" aria-hidden />Informe PDF con Mapa</button>}
+      actions={<>
+        <AiInterpretButton ai={ai} buildPayload={buildAiPayload} disabled={!ready} />
+        <button type="button" onClick={() => setReportOpen(true)} disabled={!ready} className="ignis-action ignis-action-primary disabled:cursor-not-allowed disabled:opacity-50"><FileDown className="h-3.5 w-3.5" aria-hidden />Informe PDF con Mapa</button>
+      </>}
     />
+    <AiInterpretationPanel ai={ai} />
     {reportOpen && <PredictabilityReport result={result} provenance={provenance} onClose={() => setReportOpen(false)} />}
 
     <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning-soft p-4 text-text-primary">

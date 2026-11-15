@@ -5,6 +5,8 @@ import { MONTHS_FULL, SUBREGIONS, computeSubregionMatrix, resolveSubregion, type
 import { runMarkovEngine } from '@/utils/markovEngine';
 import type { Observation } from '@/types/api/observations';
 import { ModuleHeader, ModulePage } from '@/components/common/ModuleLayout';
+import { AiInterpretButton, AiInterpretationPanel } from '@/components/common/AiInterpretation';
+import { useAiInterpretation } from '@/hooks/useAiInterpretation';
 
 interface ActivityCalendarPanelProps {
   observations: Observation[];
@@ -78,14 +80,38 @@ export default function ActivityCalendarPanel({ observations, totalMatching, pro
     return { regional: result.horizons[0].activity, topCell, validated: result.validation !== null, beatsClimatology: (result.validation?.brierSkillPct ?? -1) > 0 };
   }, [observations, selectedSubregions]);
 
+  const ai = useAiInterpretation('calendar');
+  const buildAiPayload = () => ({
+    procedencia: provenance,
+    registrosCargados: observations.length,
+    registrosQueCoincidenEnLaFuente: totalMatching,
+    registrosClasificadosEnSubregiones: matrix.classifiedCount,
+    meses: MONTHS_FULL,
+    calendarMatrices: visibleSubregions.map((sub) => ({
+      subregion: sub.label,
+      frecuenciaPorMes: matrix.counts[sub.id],
+      frpPromedioMwPorMes: matrix.avgFrp[sub.id].map((value) => (value === null ? null : Math.round(value * 10) / 10)),
+      total: matrix.totals[sub.id],
+      frpPromedioMwGeneral: matrix.overallAvgFrp[sub.id] === null ? null : Math.round((matrix.overallAvgFrp[sub.id] as number) * 10) / 10,
+    })),
+    subregionCrossRisk: markov ? {
+      markovPActividad24hRegional: Math.round(markov.regional * 10_000) / 10_000,
+      validado: markov.validated,
+      superaClimatologia: markov.beatsClimatology,
+      celdaMayorP24h: markov.topCell ? { subregion: markov.topCell.sub?.label ?? null, municipio: markov.topCell.cell.municipality, p24: Math.round(markov.topCell.cell.p24 * 10_000) / 10_000 } : null,
+    } : 'historial insuficiente para la estimación Markov',
+  });
+
   return <ModulePage>
     <ModuleHeader
+      actions={<AiInterpretButton ai={ai} buildPayload={buildAiPayload} disabled={matrix.classifiedCount === 0} />}
       badge={{ label: 'Calendario real (IDEAM / FIRMS)', tone: 'success' }}
       meta={`${matrix.classifiedCount.toLocaleString()} registros clasificados en Antioquia`}
       icon={CalendarDays}
       title="Calendario Estacional y Dinámica Térmica Subregional"
       description="Observaciones agregadas por mes del año y por subregión de Antioquia, sin combinar con predicciones."
     />
+    <AiInterpretationPanel ai={ai} />
 
     <div className="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
