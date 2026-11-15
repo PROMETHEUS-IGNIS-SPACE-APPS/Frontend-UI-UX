@@ -84,15 +84,16 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Información del Proyecto');
   });
 
-  it('abre Predictibilidad con una explicación clara de su estado pendiente', async () => {
+  it('abre Predictibilidad como estimación exploratoria claramente rotulada', async () => {
     const user = userEvent.setup();
     renderApp();
 
     await user.click(screen.getByRole('tab', { name: 'Predictibilidad' }));
 
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Predictibilidad');
-    expect(screen.getByRole('heading', { name: 'Predictibilidad' })).toBeInTheDocument();
-    expect(screen.getByText('Sin modelo publicado')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Motor Predictivo de Cadenas de Markov/ })).toBeInTheDocument();
+    expect(screen.getByText('Estimación exploratoria')).toBeInTheDocument();
+    expect(screen.getByText('No es un modelo publicado')).toBeInTheDocument();
   });
 
   it('abre el Mapa de Calor Markov sin probabilidades inventadas', async () => {

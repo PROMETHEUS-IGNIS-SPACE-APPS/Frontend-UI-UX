@@ -28,6 +28,11 @@
 
 - Aula = KAIRÓS (`features/pedagogy/KairosClassroom.tsx`, `kairosContent.ts`), portado del ejemplo: 19 infografías de prevención (hogar, ecosistema, salud) en `public/assets/kairos/*.webp` (11,6 MB → 1,9 MB), visor ampliado, bloque de reglas de lectura propio y debajo “Actividades interactivas” (PedagogicalPanel). No se portan las 7 infografías de datos del ejemplo (Markov en vivo, reportes ciudadanos, “detección nocturna confirma combustión”) ni el “95 %” ni el espacio vacío 1920×1080.
 
+- Predictibilidad (2026-11-14, decisión del usuario): estimación EXPLORATORIA Markov 3×3 en el navegador (`utils/markovEngine.ts`): celdas 0,10°/0,14°, Laplace α=0,5, P(24h) condicionada a vecinos activos con contracción (peso 10), 48/72 h por propagación, validación cronológica 70/30 (Brier, BSS vs climatología, ROC-AUC, log-loss, umbral calibrado en train). Sin clima, sin sintéticos, sin Gemini. Mapa de Calor sigue sin probabilidades (podría reutilizar el motor si el equipo lo pide). Requiere aprobación formal del equipo científico.
+- Reportes ciudadanos: se guardan solo en el navegador (`stores/citizenReportsStore.ts`, localStorage) para “Descargar Reportes (.CSV)”; Limpiar .CSV borra reportes + CSV con confirmación (sin contraseña). Header: grupo datos (CSV, Descargar observaciones) y grupo emergencias (123 SOS, Reportar Novedad, Descargar Reportes), sin etiqueta de grupo.
+- Información del Proyecto = Laboratorio IA + Fuentes/API (pestañas 'laboratory' y 'sources' fusionadas en 'project-info'). Aula KAIRÓS sin “Actividades interactivas” (PedagogicalPanel y RiskMatrixPanel eliminados).
+- Instructivo (.PDF): `components/layout/manualContent.ts`, estructura del “Instructivo Oficial v2” del equipo adaptada a funciones reales.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.

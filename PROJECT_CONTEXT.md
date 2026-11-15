@@ -63,8 +63,9 @@ La navegación actual organiza seis pestañas: Mapa Territorial, Predictibilidad
    - Sin capas de límites administrativos (excluidas por decisión del equipo).
 
 2. **Predictibilidad** (`PredictabilityPanel.tsx`)
-   - Comunica que no hay modelos predictivos publicados y explica qué validación falta.
-   - No calcula probabilidades a partir de conteos históricos ni copia los resultados sintéticos de `Ejemplo`.
+   - Muestra una **estimación exploratoria** de Cadenas de Markov 3×3 (S0/S1/S2) calculada en el navegador con las observaciones reales cargadas (`src/utils/markovEngine.ts`), por decisión del equipo del 2026-11-14 (pendiente de aprobación formal del equipo científico).
+   - Siempre rotulada «Estimación exploratoria · no es un modelo publicado»; exige ≥ 3 días para estimar y ≥ 5 para validar (partición cronológica 70/30, Brier, BSS frente a climatología, ROC-AUC, log-loss).
+   - No usa datos sintéticos, clima ni factores inventados, ni copia resultados del `Ejemplo`. El modelo oficial sigue siendo el que publique el AI-Pipeline.
 
 3. **Calendario** (`ActivityCalendarPanel.tsx`)
    - Agrega actividad diaria y mensual por fecha UTC, separando VIIRS y MODIS y conservando FRP nula como no disponible.

@@ -237,6 +237,7 @@ Cuando una decisión requiera aprobación, explica necesidad, alternativas e imp
 
 - Presentar datos sintéticos como observaciones reales de NASA.
 - Inventar resultados, métricas científicas, detecciones o validaciones.
+- Mostrar probabilidades sin su rótulo «estimación exploratoria» y su validación retrospectiva. La única excepción aprobada es el motor Markov 3×3 de `src/utils/markovEngine.ts` (decisión 2026-11-14), que usa solo observaciones reales cargadas, sin clima ni factores ad hoc.
 - Alterar valores originales de confianza o unidades para hacerlos comparables sin método aprobado.
 - Tratar una detección como un incendio independiente sin regla validada.
 - Cambiar contratos del backend silenciosamente o simular que endpoints pendientes existen.

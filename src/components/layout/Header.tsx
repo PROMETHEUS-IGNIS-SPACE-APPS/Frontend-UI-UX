@@ -105,8 +105,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
               <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-solid px-1.5 font-source text-[10px] font-extrabold tabular-nums text-accent-fg">{totalVisibleCount.toLocaleString()}</span>
             </button>
           </div>
-          <div role="group" aria-label="Emergencias y reportes ciudadanos" className="order-first flex shrink-0 items-center gap-1.5 sm:order-none sm:flex-wrap sm:border-l sm:border-border sm:pl-2">
-            <span className="hidden font-source text-[10px] font-bold uppercase tracking-wider text-text-secondary xl:inline">Ciudadanía</span>
+          <div role="group" aria-label="Emergencias y reportes ciudadanos" className="order-first flex shrink-0 items-center gap-1.5 sm:order-none sm:flex-wrap">
             <EmergencyAccess />
             <NoveltyReportAccess />
             <button type="button" onClick={() => downloadCitizenReportsCsv(citizenReports)} disabled={!citizenReports.length} title={citizenReports.length ? `Descargar los ${citizenReports.length} reportes ciudadanos guardados en este dispositivo` : 'Aún no hay reportes ciudadanos guardados en este dispositivo'} aria-label="Descargar Reportes (.CSV)" className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>

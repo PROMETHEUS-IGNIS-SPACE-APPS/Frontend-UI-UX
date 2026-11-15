@@ -220,8 +220,11 @@ export default function App() {
             hasData
               ? <MarkovHeatmapPanel observations={allObservations} provenance={provenance} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
-          ) : activeModule === 'predictability' ? <PredictabilityPanel />
-            : activeModule === 'comparison' ? <KairosClassroom />
+          ) : activeModule === 'predictability' ? (
+            hasData
+              ? <PredictabilityPanel observations={allObservations} provenance={provenance} onShowCell={(center) => { setFocusTarget({ id: `celda-${center.join(',')}`, label: 'Celda Markov', center, zoom: 10 }); setSelected(null); setActiveModule('explorer'); }} />
+              : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
+          ) : activeModule === 'comparison' ? <KairosClassroom />
             : activeModule === 'project-info' ? <div className="flex flex-col"><LaboratoryPanel provenance={provenance} /><SourcesPanel sourceMode={sourceMode} provenance={provenance} loadedCount={allObservations.length} totalMatching={totalMatching} warning={observationsQuery.data?.warning} degradedMode={observationsQuery.data?.degradedMode} /></div>
               : <div className="mx-auto w-full max-w-7xl p-6"><ModulePlaceholder title={active.label} description={active.description} /></div>}
         </div>
