@@ -100,6 +100,9 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'fila-inferior', level: 2, title: '3.3 Fila inferior de controles de datos y emergencias', blocks: [
+      { kind: 'h', text: 'Selector de fuente de datos (Demostración / Lab Real)' },
+      { kind: 'list', items: ['Demostración: conjunto de calibración sintético (2024–2025), útil para practicar y explorar la interfaz. Aparece una franja de aviso y la procedencia dice «Datos sintéticos de demostración».', 'Lab Real: datos satelitales reales del Backend-API (IDEAM SMByC + NASA FIRMS). Es el modo con el que siempre arranca la página.'] },
+      { kind: 'tip', text: 'Consejo práctico: use Demostración para capacitación y Lab Real para análisis. Verifique siempre qué modo está activo antes de citar cifras.' },
       { kind: 'h', text: 'Estado del Backend' },
       { kind: 'list', items: ['Indica si el Backend-API responde (Backend Conectado) o no (Backend No disponible). Al hacer clic se vuelve a comprobar.'] },
       { kind: 'h', text: 'Cargar / Gestionar .CSV' },

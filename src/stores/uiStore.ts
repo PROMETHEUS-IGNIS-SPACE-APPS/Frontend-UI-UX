@@ -28,6 +28,9 @@ interface UiState {
   toggleTheme: () => void;
   /** Formulario “Reportar Novedad” (se abre desde la barra y desde 123 SOS). */
   noveltyOpen: boolean;
+  /** Fuente de datos: `real` (Backend-API) o `demo` (conjunto sintético rotulado). No se guarda: al recargar vuelve a `real`. */
+  dataMode: 'real' | 'demo';
+  setDataMode: (mode: 'real' | 'demo') => void;
   setNoveltyOpen: (open: boolean) => void;
 }
 
@@ -35,6 +38,8 @@ export const useUiStore = create<UiState>()((set) => ({
   activeModule: 'explorer',
   setActiveModule: (moduleId) => set({ activeModule: moduleId }),
   noveltyOpen: false,
+  dataMode: 'real',
+  setDataMode: (dataMode) => set({ dataMode }),
   setNoveltyOpen: (noveltyOpen) => set({ noveltyOpen }),
   theme: readStoredTheme(),
   toggleTheme: () => set((state) => {

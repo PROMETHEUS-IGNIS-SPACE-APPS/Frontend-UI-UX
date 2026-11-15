@@ -235,7 +235,7 @@ Cuando una decisión requiera aprobación, explica necesidad, alternativas e imp
 
 ### 🚫 Nunca
 
-- Presentar datos sintéticos como observaciones reales de NASA.
+- Presentar datos sintéticos como observaciones reales de NASA. El modo Demostración (`src/data/syntheticDemo.ts`, decisión del usuario 2026-11-15, pendiente de aprobación del equipo) solo es aceptable mientras conserve la franja de aviso, la procedencia `synthetic_demo` rotulada y el arranque por defecto en Lab Real.
 - Inventar resultados, métricas científicas, detecciones o validaciones.
 - Mostrar probabilidades sin su rótulo «estimación exploratoria» y su validación retrospectiva. La única excepción aprobada es el motor Markov 3×3 de `src/utils/markovEngine.ts` (decisión 2026-11-14), que usa solo observaciones reales cargadas, sin clima ni factores ad hoc.
 - Alterar valores originales de confianza o unidades para hacerlos comparables sin método aprobado.

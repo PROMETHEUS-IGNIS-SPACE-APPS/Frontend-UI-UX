@@ -28,7 +28,7 @@ La respuesta de observaciones contiene `data`, `count`, `total_matching`, `data_
 
 **Sin paginación en v0.1.0:** si `count < total_matching`, la interfaz lo comunica explícitamente como conjunto truncado. El cliente consulta como máximo el `limit` permitido por el contrato; nunca intenta «paginar» contra un endpoint inexistente.
 
-**Excluido por decisión del equipo:** pestaña y modal «FastAPI Lab»; capas de límites administrativos; interruptor «Demostración / Lab Real»; dataset sintético de producto. Las fixtures solo existen en el entorno de pruebas y están etiquetadas.
+**Excluido por decisión del equipo:** pestaña y modal «FastAPI Lab»; capas de límites administrativos. (El interruptor «Demostración / Lab Real» y su dataset sintético rotulado se reincorporaron el 2026-11-15 por decisión del usuario; pendiente de aprobación del equipo.) Las fixtures solo existen en el entorno de pruebas y están etiquetadas.
 
 Los filtros avanzados operan **en cliente** sobre el conjunto descargado; migrar filtros a servidor únicamente cuando exista contrato.
 

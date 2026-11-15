@@ -57,6 +57,8 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
   const toggleTheme = useUiStore((state) => state.toggleTheme);
   const canExport = totalVisibleCount > 0;
   const citizenReports = useCitizenReportsStore((state) => state.reports);
+  const dataMode = useUiStore((state) => state.dataMode);
+  const setDataMode = useUiStore((state) => state.setDataMode);
   const exportTitle = canExport
     ? `Descargar las ${totalVisibleCount} observaciones satelitales visibles en un archivo .CSV`
     : 'Sin registros visibles para exportar (requiere conexión con el backend)';
@@ -96,6 +98,10 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
         <div className="-mx-2.5 flex flex-nowrap items-center justify-between gap-2 overflow-x-auto border-t border-border px-2.5 py-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           <div className="flex shrink-0 items-center gap-1.5 sm:min-w-0 sm:shrink sm:flex-wrap">
             <div className="hidden items-center gap-1 overflow-x-auto md:flex lg:hidden">{renderTabs('mobile')}</div>
+            <div role="group" aria-label="Selector de fuente de datos" className="inline-flex shrink-0 items-center rounded-lg border border-border bg-surface p-0.5">
+              <button type="button" aria-pressed={dataMode === 'demo'} onClick={() => setDataMode('demo')} title="Conjunto sintético de demostración (2024–2025), rotulado en toda la plataforma" className={`whitespace-nowrap rounded-md px-2.5 py-1 font-noto text-[11px] transition-colors ${dataMode === 'demo' ? 'bg-accent-solid font-bold text-accent-fg shadow-xs' : 'font-medium text-text-secondary hover:text-text-primary'}`}>Demostración</button>
+              <button type="button" aria-pressed={dataMode === 'real'} onClick={() => setDataMode('real')} title="Datos reales del Backend-API (IDEAM SMByC + NASA FIRMS)" className={`whitespace-nowrap rounded-md px-2.5 py-1 font-noto text-[11px] transition-colors ${dataMode === 'real' ? 'bg-emerald-500 font-bold text-slate-950 shadow-xs' : 'font-medium text-text-secondary hover:text-text-primary'}`}>Lab Real</button>
+            </div>
             <ConnectionIndicator />
             <LocalCsvAccess />
             <button type="button" onClick={onExportCsv} disabled={!canExport} title={exportTitle} aria-label={exportTitle} className={`${SMALL_BUTTON} gap-2 border border-border bg-card text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50`}>

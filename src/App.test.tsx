@@ -35,7 +35,7 @@ describe('App shell de pestañas', () => {
   });
 
   beforeEach(() => {
-    useUiStore.setState({ activeModule: 'explorer', noveltyOpen: false });
+    useUiStore.setState({ activeModule: 'explorer', noveltyOpen: false, dataMode: 'real' });
     vi.mocked(fetchIngestedObservations).mockResolvedValue({
       data: appObservations, count: 2, total_matching: 2, data_provenance: 'IDEAM + NASA FIRMS',
     });
@@ -191,6 +191,17 @@ describe('App shell de pestañas', () => {
     });
     expect(exportButton).toBeDisabled();
     expect(exportButton).toHaveAttribute('title', expect.stringMatching(/Sin registros visibles/));
+  });
+
+  it('cambia a modo Demostración con datos sintéticos rotulados y vuelve a Lab Real', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Demostración' }));
+    expect((await screen.findAllByText(/Modo Demostración activo/)).length).toBeGreaterThan(0);
+    expect(useUiStore.getState().dataMode).toBe('demo');
+    await user.click(screen.getByRole('button', { name: 'Lab Real' }));
+    await waitFor(() => expect(screen.queryAllByText(/Modo Demostración activo/)).toHaveLength(0));
   });
 
   it('abre y cierra el glosario científico desde el header', async () => {

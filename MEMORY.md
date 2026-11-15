@@ -35,6 +35,8 @@
 
 - 2026-11-15: capa Markov en el Mapa (manchas difuminadas por celda con color de SU probabilidad; no heatmap de densidad, que exageraba) y Mapa de Calor con probabilidades del mismo motor; reportes ciudadanos en el mapa (azul, estado Verificado/Pendiente local); 123 SOS con 123/119/144/132 + “Ir a Reportar Novedad” (uiStore.noveltyOpen); Convención Cartográfica (botón Guía); ficha con hora Colombia y temperatura de brillo; buscador por municipio/fuente/ID; “Probar todas las APIs” con latencia y “Copiar enlace”; “Informe PDF con Mapa” imprimible con mapa SVG propio. Calendario: interpretación al final con procedencia en la etiqueta.
 
+- 2026-11-15: selector Demostración / Lab Real (uiStore.dataMode, por defecto real, no persistido) con conjunto sintético del ejemplo (`data/syntheticDemo.ts`); franja de aviso y procedencia “DATOS SINTÉTICOS DE DEMOSTRACIÓN”. Revierte exclusión documentada; pendiente de aprobación del equipo. Siguen fuera: Gemini, factor de clima, contraseña, DAGRAN y “95 %”.
+
 ## Decisiones y dependencias
 - Histórico usa `GET /api/fusion/historical-all?region=...`; fechas desde 2024-01-01 hasta hoy, cortes semimensuales más datos recientes.
 - El OpenAPI v0.2 no incluye endpoint de reportes ciudadanos. El botón Reportar Novedad no simula ni envía reportes.

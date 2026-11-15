@@ -6,6 +6,7 @@ import ModulePlaceholder from '@/components/common/ModulePlaceholder';
 import Header from '@/components/layout/Header';
 import ObservationMap from '@/features/explorer/ObservationMap';
 import { fetchIngestedObservations } from '@/services/api/ingestionService';
+import { demoCollection } from '@/data/syntheticDemo';
 import { useUiStore } from '@/stores/uiStore';
 import { selectLocalObservations, useLocalCsvStore } from '@/stores/localCsvStore';
 import type { Observation, ObservationSourceMode, Sensor } from '@/types/api/observations';
@@ -79,9 +80,11 @@ export default function App() {
   const mapReports = useMemo(() => citizenReports.map((report) => ({ id: report.id, center: [report.longitude, report.latitude] as [number, number], verified: report.status === 'verificado' })), [citizenReports]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const dataMode = useUiStore((state) => state.dataMode);
   const observationsQuery = useQuery({
-    queryKey: ['observations', sourceMode, dateFrom, dateTo, region],
-    queryFn: ({ signal }) => fetchIngestedObservations({
+    queryKey: ['observations', dataMode, sourceMode, dateFrom, dateTo, region],
+    // Modo Demostración: conjunto sintético rotulado (ver data/syntheticDemo.ts); nunca se mezcla con datos reales.
+    queryFn: ({ signal }) => dataMode === 'demo' ? Promise.resolve(demoCollection(region)) : fetchIngestedObservations({
       sourceMode,
       from: dateFrom,
       to: dateTo,
@@ -96,7 +99,7 @@ export default function App() {
   const allObservations = useMemo(() => localObservations.length ? [...backendObservations, ...localObservations] : backendObservations, [backendObservations, localObservations]);
   const hasData = observationsQuery.isSuccess || localObservations.length > 0;
   const totalMatching = (observationsQuery.data?.total_matching ?? 0) + localObservations.length;
-  const provenance = [observationsQuery.data?.data_provenance, localObservations.length ? `CSV local (${localObservations.length.toLocaleString()} observaciones)` : null].filter(Boolean).join(' + ') || (observationsQuery.isPending ? 'Cargando fuente…' : 'No disponible');
+  const provenance = [observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'DATOS SINTÉTICOS DE DEMOSTRACIÓN (no son observaciones reales de NASA ni del IDEAM)' : observationsQuery.data?.data_provenance, localObservations.length ? `CSV local (${localObservations.length.toLocaleString()} observaciones)` : null].filter(Boolean).join(' + ') || (observationsQuery.isPending ? 'Cargando fuente…' : 'No disponible');
   /** Estimación exploratoria Markov para la capa del mapa (solo se calcula si la capa está activa). */
   const markovResult = useMemo(() => (mapLayers.markov ? runMarkovEngine(allObservations) : null), [mapLayers.markov, allObservations]);
   const markovKey = (['p24', 'p48', 'p72'] as const)[markovHorizon];
@@ -166,6 +169,7 @@ export default function App() {
   return (
     <div className="flex min-h-dvh w-full max-w-full flex-col overflow-x-hidden lg:h-dvh bg-background font-sans text-text-primary">
       <Header activeModule={activeModule} onModuleChange={setActiveModule} totalVisibleCount={visible.length} onExportCsv={handleExport} onOpenGlossary={() => setIsGlossaryOpen(true)} />
+      {dataMode === 'demo' && <div role="status" className="flex items-center gap-2 border-b border-warning/40 bg-warning-soft px-4 py-1.5 font-noto text-[11px] font-semibold text-warning"><AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />Modo Demostración activo: los focos mostrados son sintéticos (2024–2025) para pruebas y capacitación; no son observaciones reales. Cambia a «Lab Real» para ver datos del Backend-API.</div>}
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <div key={active.id} id={`panel-${active.id}`} role="tabpanel" aria-labelledby={`tab-${active.id}-desktop`} tabIndex={0} className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {activeModule === 'explorer' ? (
