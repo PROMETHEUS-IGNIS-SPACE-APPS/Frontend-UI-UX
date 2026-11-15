@@ -179,6 +179,7 @@ describe('App shell de pestañas', () => {
     await user.click(within(desktopTablist).getByRole('tab', { name: 'Aula Pedagógica' }));
 
     expect(screen.getByRole('heading', { name: 'KAIRÓS, Aula Pedagógica' })).toBeInTheDocument();
+    expect(screen.getByText('¡Explora el Aula!')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '1. Prevención en el hogar' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^Reproducir podcast de/ })).toHaveLength(4);
     expect(screen.getByRole('heading', { name: '4. Interpretación de los datos de PROMETHEUS IGNIS' })).toBeInTheDocument();

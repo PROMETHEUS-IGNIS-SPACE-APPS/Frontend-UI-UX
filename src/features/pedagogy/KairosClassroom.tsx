@@ -14,6 +14,7 @@ import {
   KAIROS_WIDE_SLIDES,
   type KairosSection,
 } from './kairosContent';
+import ExploreHint from './ExploreHint';
 import PodcastPlayer from './PodcastPlayer';
 import RiskDetectorGame from './RiskDetectorGame';
 
@@ -106,6 +107,7 @@ export default function KairosClassroom() {
   const current = lightbox ? lightbox.section.slides[lightbox.index] : null;
 
   return <section aria-label="KAIRÓS, Aula Pedagógica" className="flex w-full flex-col overflow-x-hidden bg-[#FDECCD] text-[#4A2E1B]">
+    <ExploreHint />
     <header className="relative w-full select-none leading-none">
       {headerFailed
         ? <div aria-hidden className="aspect-[16/6] w-full bg-[#F6C88A]/40" />
