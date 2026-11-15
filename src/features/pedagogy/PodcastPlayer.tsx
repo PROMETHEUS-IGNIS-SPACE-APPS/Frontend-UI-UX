@@ -8,6 +8,8 @@ interface PodcastPlayerProps {
   active: boolean;
   onToggle: () => void;
   onEnded: () => void;
+  /** Duración conocida (s) para mostrarla aunque el navegador aún no lea los metadatos del audio. */
+  knownDuration?: number;
 }
 
 const formatTime = (seconds: number) => {
@@ -16,10 +18,11 @@ const formatTime = (seconds: number) => {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
 };
 
-export default function PodcastPlayer({ src, title, active, onToggle, onEnded }: PodcastPlayerProps) {
+export default function PodcastPlayer({ src, title, active, onToggle, onEnded, knownDuration = 0 }: PodcastPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [loadedDuration, setDuration] = useState(0);
+  const duration = loadedDuration || knownDuration;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -35,7 +38,7 @@ export default function PodcastPlayer({ src, title, active, onToggle, onEnded }:
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   return <div className="mt-4 border-t border-[#5C260E]/10 pt-3">
-    <p className="mb-2 flex items-center gap-1.5 font-sans text-[11px] font-bold uppercase tracking-wider text-[#8E431E]"><Headphones className="h-3.5 w-3.5" aria-hidden />Podcast</p>
+    <p className="mb-2 flex items-center gap-1.5 font-sans text-[11px] font-bold uppercase tracking-wider text-[#8E431E]"><Headphones className="h-3.5 w-3.5" aria-hidden />Podcast{duration > 0 && <span className="font-source normal-case tracking-normal text-[#8E431E]/80">· {formatTime(duration)} min</span>}</p>
     <audio
       ref={audioRef}
       src={src}

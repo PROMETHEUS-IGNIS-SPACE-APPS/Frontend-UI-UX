@@ -21,6 +21,8 @@ export interface KairosSection {
   description: string;
   /** Podcast of the section (from the `ejemplo` folder; audio-only MP4). */
   audioSrc?: string;
+  /** Duración real del podcast en segundos (leída del archivo MP4) para mostrarla antes de cargar el audio. */
+  audioDurationSec?: number;
   slides: KairosSlide[];
 }
 
@@ -42,7 +44,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'hogar',
     title: '1. Prevención en el hogar',
     description: 'La mayoría de las emergencias residenciales comienzan con gestos cotidianos que podemos corregir hoy: evitar conexiones en cascada y cargar baterías de ion-litio sobre superficies ventiladas, instalar y probar detectores de humo cada mes, limpiar el filtro de pelusa de la secadora, almacenar inflamables lejos de fuentes de calor, alejar velas e inciensos de cortinas y construir en familia un plan de evacuación con dos rutas de salida por habitación.',
-    audioSrc: podcast('hogar'),
+    audioSrc: podcast('hogar'), audioDurationSec: 224,
     slides: [
       { id: 'hogar-1', title: 'Seguridad eléctrica y baterías de ion-litio', imageSrc: img('hogar-seguridad-electrica') },
       { id: 'hogar-2', title: 'Uso de extintores y evacuación en edificios', imageSrc: img('hogar-extintores-evacuacion') },
@@ -57,7 +59,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'ecosistema',
     title: '2. Prevención por ecosistema',
     description: 'En Colombia, la mayoría de los incendios de cobertura vegetal se relacionan con actividades humanas y se agravan durante sequías y eventos de El Niño. Proteger nuestras veredas y montañas exige sostener un espacio defendible alrededor de las viviendas rurales, sustituir las quemas agrícolas por compostaje o abono verde, cuidar la vegetación de páramos y bosques secos, apagar por completo toda fogata con agua y reportar de inmediato columnas de humo al 123.',
-    audioSrc: podcast('ecosistema'),
+    audioSrc: podcast('ecosistema'), audioDurationSec: 176,
     slides: [
       { id: 'eco-1', title: 'Incendios de cobertura vegetal y espacio defendible', imageSrc: img('eco-espacio-defendible') },
       { id: 'eco-2', title: 'Protección de páramos y bosques secos tropicales', imageSrc: img('eco-paramos-bosques') },
@@ -71,7 +73,7 @@ export const KAIROS_SECTIONS: KairosSection[] = [
     id: 'salud',
     title: '3. Prevención médica y primeros auxilios',
     description: 'Frente a una emergencia térmica o a una nube densa de humo, actuar con serenidad protege vidas. El material particulado y el monóxido de carbono exigen sellar ventanas, usar respiradores N95 bien ajustados y desplazarse a ras del suelo si hay humo; el golpe de calor requiere sombra y enfriamiento inmediato; y tanto las mascotas como el bienestar emocional de las personas afectadas necesitan atención oportuna, escucha sin juicios y un retorno seguro autorizado por bomberos.',
-    audioSrc: podcast('salud'),
+    audioSrc: podcast('salud'), audioDurationSec: 179,
     slides: [
       { id: 'salud-1', title: 'Protección respiratoria ante humo de incendios forestales', imageSrc: img('salud-proteccion-respiratoria') },
       { id: 'salud-2', title: 'Primeros auxilios en mascotas y animales afectados', imageSrc: img('salud-mascotas') },
@@ -87,7 +89,7 @@ export const KAIROS_DATA_INFOGRAPHICS: KairosSection = {
   id: 'datos',
   title: '4. Interpretación de los datos de PROMETHEUS IGNIS',
   description: 'Leer un visor satelital con rigor significa distinguir qué mide cada sensor y qué limitaciones tiene. VIIRS (~375 m) y MODIS (~1 km) detectan anomalías térmicas según sus pasos orbitales diurnos y nocturnos y la presencia de nubes; la Potencia Radiativa del Fuego (FRP, en MW) diferencia eventos moderados (S1) de focos intensos (S2 ≥ 30 MW); el motor Markov 3×3 estima probabilidades que se auditan con Brier Skill Score y ROC-AUC; y el reporte ciudadano complementa la vigilancia sin reemplazar jamás la llamada inmediata al 123.',
-  audioSrc: podcast('datos'),
+  audioSrc: podcast('datos'), audioDurationSec: 171,
   slides: [
     { id: 'datos-1', title: 'Lectura de puntos de calor satelitales', imageSrc: img('datos-puntos-calor') },
     { id: 'datos-2', title: 'Motor predictivo Markov', imageSrc: img('datos-motor-markov') },
