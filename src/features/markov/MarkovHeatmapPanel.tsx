@@ -5,7 +5,7 @@ import { MAP_STYLE_PRESETS, PROBABILITY_SCALE, probabilityColor, type MapFocusPr
 import { useUiStore } from '@/stores/uiStore';
 import type { Observation } from '@/types/api/observations';
 import { STATE_CODES, runMarkovEngine, type MarkovCell } from '@/utils/markovEngine';
-import { ANTIOQUIA_VIEWPORT, SUBREGIONS, computeSubregionMatrix, resolveSubregion, type SubregionConfig, type SubregionId } from '@/utils/subregions';
+import { ANTIOQUIA_VIEWPORT, SUBREGIONS, computeSubregionMatrix, locationLabel, resolveSubregion, type SubregionConfig, type SubregionId } from '@/utils/subregions';
 
 const DARK_STYLE = MAP_STYLE_PRESETS.find((style) => style.id === 'dark') ?? MAP_STYLE_PRESETS[0];
 const LIGHT_STYLE = MAP_STYLE_PRESETS.find((style) => style.id === 'positron') ?? MAP_STYLE_PRESETS[0];
@@ -134,7 +134,7 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
 
         {selected && <div className="absolute inset-x-3 top-3 z-20 space-y-2.5 rounded-2xl border border-border-strong bg-card p-3.5 text-xs shadow-2xl sm:inset-x-auto sm:right-12 sm:w-80">
           <div className="flex items-start justify-between gap-2 border-b border-border pb-2">
-            <div className="min-w-0"><h3 className="truncate font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h3><p className="truncate font-source text-[10px] font-semibold text-predictive">{SUBREGIONS.find((sub) => sub.id === resolveSubregion(selected))?.label ?? 'Sin subregión'} · {selected.sensor}</p></div>
+            <div className="min-w-0"><h3 className="truncate font-noto text-sm font-bold text-text-primary">{selected.municipality ? locationLabel(selected) : 'Observación seleccionada'}</h3><p className="truncate font-source text-[10px] font-semibold text-predictive">{SUBREGIONS.find((sub) => sub.id === resolveSubregion(selected))?.label ?? 'Sin subregión'} · {selected.sensor}</p></div>
             <button type="button" onClick={() => setSelected(null)} aria-label="Cerrar inspector" className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary"><X className="h-3.5 w-3.5" /></button>
           </div>
           <dl className="grid grid-cols-2 gap-2 font-source text-[11px] tabular-nums">

@@ -1,4 +1,5 @@
 import type { Observation } from '@/types/api/observations';
+import { isNearReference } from './subregions';
 
 /**
  * Estimación EXPLORATORIA de Cadenas de Markov 3×3 calculada en el navegador
@@ -234,11 +235,15 @@ export function runMarkovEngine(observations: Observation[]): MarkovResult {
     const row = Math.floor(item.latitude / gridDeg);
     const col = Math.floor(item.longitude / gridDeg);
     const id = `${row}:${col}`;
-    if (!meta.has(id)) { meta.set(id, { lat: round((row + 0.5) * gridDeg), lon: round((col + 0.5) * gridDeg), detections: 0, municipality: item.municipality ?? null, department: item.department ?? null }); histories.set(id, new Map()); }
+    // El municipio del backend solo se acepta si la referencia está a ≤ 50 km (ver utils/subregions).
+    const near = isNearReference(item);
+    const municipality = near ? item.municipality ?? null : null;
+    const department = near ? item.department ?? null : null;
+    if (!meta.has(id)) { meta.set(id, { lat: round((row + 0.5) * gridDeg), lon: round((col + 0.5) * gridDeg), detections: 0, municipality, department }); histories.set(id, new Map()); }
     const cell = meta.get(id)!;
     cell.detections += 1;
-    cell.municipality ??= item.municipality ?? null;
-    cell.department ??= item.department ?? null;
+    cell.municipality ??= municipality;
+    cell.department ??= department;
     const key = `${id}|${date}`;
     cellDay.set(key, [...(cellDay.get(key) ?? []), item]);
   }

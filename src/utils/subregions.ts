@@ -40,10 +40,57 @@ const MUNICIPALITY_SUBREGION: Record<string, SubregionId> = {
   'medellín': 'valle_aburra', bello: 'valle_aburra',
 };
 
-export function resolveSubregion(observation: Pick<Observation, 'municipality' | 'department'>): SubregionId | null {
+/**
+ * Coordenadas de los municipios de referencia del Backend-API (app/utils/geo.py).
+ * El backend asigna a cada punto el MÁS CERCANO de esta lista corta, aunque
+ * esté a cientos de kilómetros; aquí se usa para detectar esas asignaciones.
+ */
+const REFERENCE_COORDS: Record<string, [number, number]> = {
+  caucasia: [7.985, -75.195], 'el bagre': [7.601, -74.808], 'tarazá': [7.585, -75.402], zaragoza: [7.491, -74.869],
+  segovia: [7.079, -74.701], remedios: [7.027, -74.698], amalfi: [6.911, -75.078],
+  'puerto berrío': [6.491, -74.404], 'yondó': [7.045, -74.354],
+  turbo: [8.093, -76.728], 'apartadó': [7.883, -76.634], 'necoclí': [8.424, -76.784], 'mutatá': [7.245, -76.435],
+  yarumal: [6.963, -75.417], 'santa rosa de osos': [6.647, -75.461], ituango: [7.172, -75.764],
+  dabeiba: [7.001, -76.262], frontino: [6.779, -76.131], 'medellín': [6.244, -75.581], bello: [6.337, -75.558],
+  rionegro: [6.155, -75.374], 'sonsón': [5.711, -75.311],
+  'puerto gaitán': [4.313, -72.081], cumaribo: [4.445, -69.801], 'san vicente del caguán': [2.115, -74.771],
+  yopal: [5.337, -72.395], 'san josé del guaviare': [2.572, -72.646], aracataca: [10.591, -74.189],
+};
+
+/** Distancia máxima (km) para aceptar el municipio de referencia como ubicación aproximada. */
+export const MAX_REFERENCE_DISTANCE_KM = 50;
+
+const municipalityKey = (name: string | null | undefined) => (name ?? '').replace(/^(Sector|Ref\.)\s+/i, '').trim().toLocaleLowerCase('es');
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const rad = Math.PI / 180;
+  const a = Math.sin(((lat2 - lat1) * rad) / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(((lon2 - lon1) * rad) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(a));
+}
+
+/** Kilómetros entre el punto y su municipio de referencia; null si no se conoce. */
+export function referenceDistanceKm(item: { municipality?: string | null; latitude?: number; longitude?: number }): number | null {
+  const coords = REFERENCE_COORDS[municipalityKey(item.municipality)];
+  if (!coords || item.latitude === undefined || item.longitude === undefined) return null;
+  return haversineKm(item.latitude, item.longitude, coords[0], coords[1]);
+}
+
+/** El municipio del backend solo se acepta si el punto está a ≤ 50 km de su referencia. */
+export function isNearReference(item: { municipality?: string | null; latitude?: number; longitude?: number }) {
+  const distance = referenceDistanceKm(item);
+  return distance === null || distance <= MAX_REFERENCE_DISTANCE_KM;
+}
+
+/** Nombre a mostrar: el municipio de referencia, o «Sin municipio cercano» si el backend lo asignó a más de 50 km. */
+export function locationLabel(item: { municipality?: string | null; latitude?: number; longitude?: number }) {
+  if (!item.municipality) return 'Sin municipio';
+  return isNearReference(item) ? item.municipality : 'Sin municipio cercano';
+}
+
+export function resolveSubregion(observation: Pick<Observation, 'municipality' | 'department'> & { latitude?: number; longitude?: number }): SubregionId | null {
   if (observation.department && observation.department !== 'Antioquia') return null;
-  const key = (observation.municipality ?? '').replace(/^(Sector|Ref\.)\s+/i, '').trim().toLocaleLowerCase('es');
-  return MUNICIPALITY_SUBREGION[key] ?? null;
+  if (!isNearReference(observation)) return null;
+  return MUNICIPALITY_SUBREGION[municipalityKey(observation.municipality)] ?? null;
 }
 
 export interface SubregionMonthlyMatrix {

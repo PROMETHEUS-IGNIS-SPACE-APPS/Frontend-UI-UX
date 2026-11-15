@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Observation } from '@/types/api/observations';
-import { computeSubregionMatrix, resolveSubregion } from './subregions';
+import { computeSubregionMatrix, locationLabel, resolveSubregion } from './subregions';
 
-const base = { latitude: 7, longitude: -75, confidence_raw: 'n', source: 'test_fixture', sensor: 'VIIRS' as const };
+const base = { latitude: 7.9, longitude: -75.2, confidence_raw: 'n', source: 'test_fixture', sensor: 'VIIRS' as const };
 const observations: Observation[] = [
   { ...base, observation_id: 'a', acquired_at: '2025-01-10T00:00:00Z', frp_mw: 10, department: 'Antioquia', municipality: 'Caucasia' },
   { ...base, observation_id: 'b', acquired_at: '2026-01-02T00:00:00Z', frp_mw: 30, department: 'Antioquia', municipality: 'Caucasia' },
   { ...base, observation_id: 'c', acquired_at: '2026-03-02T00:00:00Z', frp_mw: null, department: 'Antioquia', municipality: 'Caucasia' },
-  { ...base, observation_id: 'd', acquired_at: '2026-03-02T00:00:00Z', frp_mw: 5, department: 'Antioquia', municipality: 'Rionegro' },
-  { ...base, observation_id: 'e', acquired_at: '2026-03-02T00:00:00Z', frp_mw: 5, department: 'Meta', municipality: 'Puerto Gaitán' },
+  { ...base, observation_id: 'd', acquired_at: '2026-03-02T00:00:00Z', frp_mw: 5, department: 'Antioquia', municipality: 'Rionegro', latitude: 6.15, longitude: -75.37 },
+  { ...base, observation_id: 'e', acquired_at: '2026-03-02T00:00:00Z', frp_mw: 5, department: 'Meta', municipality: 'Puerto Gaitán', latitude: 4.3, longitude: -72.1 },
 ];
 
 describe('subregions', () => {
@@ -16,6 +16,11 @@ describe('subregions', () => {
     expect(resolveSubregion({ department: 'Antioquia', municipality: 'Medellín' })).toBe('valle_aburra');
     expect(resolveSubregion({ department: 'Antioquia', municipality: 'Ituango' })).toBe('norte_occidente');
     expect(resolveSubregion({ department: 'Meta', municipality: 'Puerto Gaitán' })).toBeNull();
+    // El backend etiqueta con el municipio de referencia más cercano aunque esté lejos:
+    // un punto en Santander marcado «Ref. Yondó» no debe contarse en Magdalena Medio.
+    expect(resolveSubregion({ department: 'Antioquia', municipality: 'Ref. Yondó', latitude: 7.05, longitude: -74.4 })).toBe('magdalena_medio');
+    expect(resolveSubregion({ department: 'Antioquia', municipality: 'Ref. Yondó', latitude: 8.35, longitude: -72.65 })).toBeNull();
+    expect(locationLabel({ municipality: 'Ref. Yondó', latitude: 8.35, longitude: -72.65 })).toBe('Sin municipio cercano');
   });
 
   it('aggregates by calendar month and keeps missing FRP as null', () => {

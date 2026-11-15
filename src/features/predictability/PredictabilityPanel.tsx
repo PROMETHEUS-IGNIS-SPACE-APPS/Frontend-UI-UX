@@ -122,7 +122,7 @@ export default function PredictabilityPanel({ observations, provenance, onShowCe
       {result.cells.length ? <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left font-source text-xs">
         <thead><tr className="border-b border-border text-[11px] text-text-secondary"><th className="py-2">Municipio / celda</th><th className="py-2">Estado hoy</th><th className="py-2">Vecinos activos</th><th className="py-2">P(24h)</th><th className="py-2">P(48h)</th><th className="py-2">P(72h)</th><th className="py-2">Detecciones</th><th className="py-2" /></tr></thead>
         <tbody className="divide-y divide-border">{[...result.cells].sort((a, b) => b[pKey] - a[pKey]).slice(0, 10).map((cell) => <tr key={cell.id}>
-          <td className="py-2"><strong className="text-text-primary">{cell.municipality ?? 'Sin municipio'}</strong><span className="block text-[10px] text-text-secondary">{cell.centerLat.toFixed(2)}, {cell.centerLon.toFixed(2)}</span></td>
+          <td className="py-2"><strong className="text-text-primary">{cell.municipality ?? 'Sin municipio cercano'}</strong><span className="block text-[10px] text-text-secondary">{cell.centerLat.toFixed(2)}, {cell.centerLon.toFixed(2)}</span></td>
           <td className={`py-2 font-bold ${['text-success', 'text-warning', 'text-danger'][cell.state]}`}>{STATE_CODES[cell.state]}</td>
           <td className="py-2 tabular-nums">{cell.activeNeighbors}/8</td>
           {(['p24', 'p48', 'p72'] as const).map((key) => <td key={key} className={`py-2 tabular-nums ${key === pKey ? 'font-bold text-predictive' : 'text-text-primary'}`}>{pct(cell[key])}</td>)}
