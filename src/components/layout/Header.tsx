@@ -65,7 +65,7 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
     <header className="sticky top-0 z-40 w-full max-w-full shrink-0 select-none overflow-x-hidden border-b border-border bg-card text-text-primary shadow-xs">
       <div className="mx-auto w-full max-w-[1440px] px-2.5 sm:px-4">
         {/* Fila superior: marca, navegación y herramientas */}
-        <div className="flex flex-wrap items-center justify-between gap-2 py-2 xl:flex-nowrap">
+        <div className="flex flex-wrap items-center justify-between gap-2 py-2 2xl:flex-nowrap">
           <div className="flex min-w-0 shrink-0 items-center gap-2.5">
             <img src={logoPng} alt="" className="h-9 w-9 shrink-0 rounded-xl object-cover shadow-md" />
             <div className="min-w-0">
@@ -77,11 +77,11 @@ export default function Header({ activeModule, onModuleChange, totalVisibleCount
             </div>
           </div>
 
-          <nav aria-label="Módulos" role="tablist" className="order-3 hidden w-full max-w-full items-center justify-center gap-0.5 rounded-xl border border-border bg-card p-1 lg:flex xl:order-2 xl:w-auto">
+          <nav aria-label="Módulos" role="tablist" className="order-3 hidden w-full max-w-full flex-wrap items-center justify-center gap-0.5 rounded-xl border border-border bg-card p-1 lg:flex 2xl:order-2 2xl:w-auto 2xl:flex-nowrap">
             {renderTabs('desktop')}
           </nav>
 
-          <div className="order-2 flex shrink-0 items-center gap-1.5 xl:order-3">
+          <div className="order-2 flex shrink-0 items-center gap-1.5 2xl:order-3">
             <button type="button" onClick={toggleTheme} aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-accent transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
               {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden /> : <Sun className="h-4 w-4" aria-hidden />}
             </button>

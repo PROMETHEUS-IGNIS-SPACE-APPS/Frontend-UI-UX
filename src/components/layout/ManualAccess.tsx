@@ -65,7 +65,7 @@ export default function ManualAccess() {
   }, [isOpen]);
 
   return <>
-    <button type="button" onClick={() => setIsOpen(true)} aria-label="Abrir Instructivo metodológico" title="Instructivo metodológico (guardar como .PDF)" className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-noto text-xs font-semibold text-text-primary transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
+    <button type="button" onClick={() => setIsOpen(true)} aria-label="Abrir Instructivo metodológico" title="Instructivo metodológico (guardar como .PDF)" className="flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border bg-card px-2.5 font-noto text-xs font-semibold text-text-primary transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
       <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span className="hidden sm:inline">Instructivo (.PDF)</span>
     </button>
