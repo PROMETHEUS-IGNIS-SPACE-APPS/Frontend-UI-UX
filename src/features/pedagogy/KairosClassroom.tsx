@@ -124,8 +124,6 @@ export default function KairosClassroom() {
         </div>
       </div>
 
-      <RiskDetectorGame />
-
       <section aria-label="Aprendizaje Basado en Problemas" className="w-full rounded-2xl bg-[#EEDFC5] p-4 sm:p-8">
         <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <h2 className="font-sans text-xl font-bold text-[#5C260E] sm:text-2xl">Aprendizaje Basado en Problemas (ABP)</h2>
@@ -146,6 +144,8 @@ export default function KairosClassroom() {
         </div>
         {wide && <p className="mt-3 text-center font-sans text-sm font-bold text-[#5C260E]">{wide.title}</p>}
       </section>
+
+      <RiskDetectorGame />
     </div>
 
     <p className="mx-auto mb-8 mt-10 w-full max-w-3xl px-6 text-center font-noto text-xs font-medium leading-relaxed text-[#B8531E] sm:mb-12 sm:mt-16 sm:text-sm">{KAIROS_CLOSING}</p>

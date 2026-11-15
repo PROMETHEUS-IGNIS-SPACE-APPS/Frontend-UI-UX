@@ -1,10 +1,11 @@
 /**
- * Instructivo oficial de uso. Sigue la estructura del documento
- * "PROMETHEUS_IGNIS_Instructivo_Oficial_v2" (noviembre 2026), adaptado a las
- * funciones que esta interfaz tiene realmente. Omitimos lo que no existe aquí:
- * selector Demostración/Lab Real, Gemini, contraseña de limpieza, probabilidades
- * Markov en vivo, reportes ciudadanos en el mapa, DAGRAN y modal FastAPI.
- * Tampoco usamos la cifra "más del 95 %", que no tiene fuente.
+ * Instructivo oficial de uso. Sigue el documento del equipo
+ * "PROMETHEUS IGNIS — Instructivo Oficial de Uso" (noviembre 2026, 14 páginas),
+ * adaptado a las funciones que esta interfaz tiene realmente. Omitimos lo que no
+ * existe aquí: Gemini, Open-Meteo / "+ Clima", contraseña de limpieza, DAGRAN,
+ * Matriz de Riesgo 5 × 5, Diccionario Sin Enredos, modal FastAPI y las
+ * infografías y el podcast de "Interpretación de los datos". Tampoco usamos la
+ * cifra "más del 95 %", que no tiene fuente.
  */
 
 export type ManualBlock =
@@ -30,16 +31,16 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'p', text: 'Este instructivo explica, paso a paso, cómo recorrer la plataforma PROMETHEUS IGNIS. Puede leerlo completo o ir directamente al apartado que necesite.' },
       { kind: 'table', head: ['Si usted quiere…', 'Vaya a…'], rows: [
         ['Pedir ayuda o avisar de un incendio', 'Botón 123 SOS (apartados 3.3 y 5.2)'],
-        ['Preparar un reporte desde el territorio', 'Botón Reportar Novedad (apartados 3.3 y 5.3)'],
-        ['Aprender a prevenir incendios en casa, en el campo y frente al humo', 'Pestaña Aula (apartado 4.6)'],
+        ['Registrar una novedad desde el territorio', 'Botón Reportar Novedad (apartados 3.3 y 5.3)'],
+        ['Aprender a prevenir incendios en casa, en el campo y frente al humo (infografías, podcasts, ABP y juego de simulación)', 'Pestaña Aula — KAIRÓS, Aula Pedagógica (apartado 4.6)'],
         ['Ver dónde hay focos de calor', 'Pestaña Mapa (apartado 4.1)'],
         ['Conocer la probabilidad de actividad térmica', 'Pestañas Predictibilidad y Mapa de Calor (apartados 4.2 y 4.4)'],
         ['Revisar estadísticas, meses y épocas del año', 'Pestañas Analítica y Calendario (apartados 4.3 y 4.5)'],
         ['Entender una palabra técnica', 'Glosario Científico (apartado 5.1)'],
-        ['Descargar información', 'Descargar Reportes (.CSV) y Descargar observaciones (.CSV) (3.3), y Exportar consulta CSV (4.3)'],
+        ['Descargar información', 'Barra superior (apartado 3.3) y Exportar Consulta CSV (apartado 4.3)'],
         ['Conocer los modelos, las fuentes y las conexiones', 'Pestaña Información del Proyecto (apartado 4.7)'],
       ] },
-      { kind: 'p', text: 'A lo largo del documento encontrará dos tipos de recuadros:' },
+      { kind: 'p', text: 'A lo largo del documento encontrará dos tipos de notas destacadas:' },
       { kind: 'tip', text: 'Consejo práctico: una sugerencia para aprovechar mejor la herramienta.' },
       { kind: 'warn', text: 'Importante / Rigor científico: una advertencia sobre cómo interpretar bien la información.' },
     ],
@@ -55,7 +56,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         'Observar la distribución espacial y temporal de focos de calor satelitales.',
         'Analizar su recurrencia, estacionalidad e intensidad (potencia radiativa, FRP).',
         'Estimar probabilidades de actividad térmica a 24, 48 y 72 horas con un motor de Cadenas de Markov 3×3 exploratorio, validado con los propios datos cargados.',
-        'Educar a la comunidad mediante KAIRÓS, Aula Pedagógica.',
+        'Educar a la comunidad mediante KAIRÓS, Aula Pedagógica (infografías con podcasts, Aprendizaje Basado en Problemas y juego de simulación interactivo).',
         'Documentar de forma transparente los modelos, las fuentes y sus límites.',
       ] },
     ],
@@ -69,7 +70,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         ['3. Analítica', 'Indicadores y estadísticas del conjunto consultado.', '4.3'],
         ['4. Mapa de Calor', 'Observaciones por subregión de Antioquia; capa de probabilidad P(S1 ∪ S2) pendiente.', '4.4'],
         ['5. Calendario', 'Calendario estacional y dinámica térmica subregional.', '4.5'],
-        ['6. Aula', 'KAIRÓS: guías visuales de prevención en el hogar, por ecosistema y en salud.', '4.6'],
+        ['6. Aula', 'KAIRÓS, Aula Pedagógica: tres actividades complementarias (Actividad 1: 19 infografías en tres guías, cada una con su podcast; Actividad 2: Aprendizaje Basado en Problemas – ABP; Actividad 3: juego de simulación Detector de Riesgos Cotidianos).', '4.6'],
         ['7. Información del Proyecto', 'Laboratorio IA (modelos) y estado de las fuentes y del Backend-API.', '4.7'],
       ] },
     ],
@@ -222,25 +223,58 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     ],
   },
   {
-    id: 'aula', level: 2, title: '4.6 Pestaña Aula', blocks: [
-      { kind: 'p', text: 'KAIRÓS, Aula Pedagógica reúne guías visuales para prevenir el fuego en el hogar, cuidar bosques, páramos y cultivos, proteger la salud humana y animal frente al humo e interpretar con criterio los datos de la plataforma.' },
-      { kind: 'h', text: 'Qué verá al entrar' },
+    id: 'aula', level: 2, title: '4.6 Pestaña Aula (KAIRÓS, Aula Pedagógica)', blocks: [
+      { kind: 'p', text: 'KAIRÓS, Aula Pedagógica es el espacio educativo de PROMETHEUS IGNIS. Parte de una idea sencilla: la mejor forma de enfrentar un incendio es estar preparados antes de que ocurra, pues detrás de cada emergencia casi siempre hay una señal temprana del fuego que podemos aprender a leer a tiempo. Para ello articula tres actividades pedagógicas complementarias: infografías con podcasts, Aprendizaje Basado en Problemas (ABP) y un juego de simulación interactivo.' },
+      { kind: 'h', text: 'Qué verá al entrar y cómo está organizado el apartado' },
+      { kind: 'p', text: 'Al abrir la pestaña aparece una portada con el título KAIRÓS, Aula Pedagógica sobre un fondo ilustrado con humo en tonos naranja y café. Desplácese hacia abajo; encontrará en orden:' },
       { kind: 'steps', items: [
-        'La portada KAIRÓS, Aula Pedagógica y el texto Te invitamos a leer.',
-        'Tres guías con infografías: Prevención en el hogar (7), Prevención por ecosistema (6) y Prevención médica y primeros auxilios (6).',
-        'Interpretación de los datos de PROMETHEUS IGNIS (reglas de lectura) junto al texto La educación como primera forma de prevención.',
-        'El visor Infografías panorámicas de prevención (formato 1920 × 1080 px; mostrará “Próximamente” hasta que se publiquen).',
+        'El texto introductorio Te invitamos a leer.',
+        'Actividad 1. Infografías y podcasts: saber qué hacer antes, durante y después. Tres guías con carruseles, cada una con su podcast, las reglas de lectura de los datos de PROMETHEUS IGNIS y el texto La educación como primera forma de prevención.',
+        'Actividad 2. Aprendizaje Basado en Problemas (ABP): situaciones de la vida real presentadas en diapositivas, con desafíos para analizar, tomar decisiones y comparar soluciones.',
+        'Actividad 3. Juego de simulación: Detector de Riesgos Cotidianos, pensado especialmente para niños y familias, en tres escenarios.',
         'El cierre: kronos y kairós, el momento oportuno que construye la prevención.',
+      ] },
+      { kind: 'h', text: 'Te invitamos a leer' },
+      { kind: 'p', text: 'Un texto breve que recuerda que casi todos conocemos a alguien que ha vivido un incendio de cerca: una vela olvidada en la sala, un cortocircuito silencioso detrás de un mueble, una quema de rastrojo que parecía inofensiva hasta que cambió el viento o una tarde seca en la montaña. Detrás de cada emergencia rara vez hay un evento inevitable; casi siempre hubo una señal temprana que no supimos leer a tiempo.' },
+      { kind: 'h', text: 'Actividad 1. Infografías: saber qué hacer antes, durante y después (con podcasts)' },
+      { kind: 'p', text: 'Reúne 19 infografías que explican de forma clara y visual qué hacer y qué no hacer ante situaciones de riesgo de la vida cotidiana.' },
+      { kind: 'p', text: 'Podcasts (aprendizaje visual o auditivo): cada guía tiene su propio podcast con la misma información de sus infografías. Así el contenido se puede consultar leyendo o escuchando, lo que lo hace más accesible para quienes tienen dificultades de lectura o de visión, o para quienes prefieren escuchar mientras hacen otras actividades. El reproductor tiene botón de reproducir / pausar, barra de avance y tiempo; al iniciar un podcast se detiene el que estuviera sonando.' },
+      { kind: 'list', items: [
+        'Guía 1 — Prevención en el hogar (7 infografías + podcast): cómo evitar incendios en la cocina, con las conexiones eléctricas o con las baterías, y cómo preparar un plan familiar de emergencia. La primera, Seguridad eléctrica y baterías de ion-litio, recomienda conectar directo a la pared los electrodomésticos de alto consumo, cargar baterías sobre superficies rígidas y ventiladas, y nunca usar multitomas en cascada ni cables pelados (Fuentes: NFPA; USFA).',
+        'Guía 2 — Prevención por ecosistema (6 infografías + podcast): cómo proteger bosques, páramos y zonas rurales, qué alternativas hay a las quemas y cómo influyen el clima y el terreno. La primera, Incendios de cobertura vegetal y espacio defendible, recuerda que la mayoría de los incendios de la cobertura vegetal en Colombia se relacionan con actividades humanas y recomienda un espacio defendible alrededor de las viviendas rurales y reportar columnas de humo al 123 (Fuentes: IDEAM; UNGRD; DAGRD Medellín; Ministerio de Ambiente).',
+        'Guía 3 — Prevención médica y primeros auxilios (6 infografías + podcast): cómo protegerse del humo, atender el golpe de calor y cuidar a las personas más vulnerables y a los animales. La primera, Protección respiratoria ante humo de incendios forestales, explica que las partículas finas (PM2.5) llegan a los pulmones y recomienda cerrar puertas y ventanas y usar mascarillas N95 o KN95 bien ajustadas; los tapabocas de tela no filtran el humo (Fuentes: OPS/OMS; CDC; SIATA).',
+        'Interpretación de los datos de PROMETHEUS IGNIS: siete reglas de lectura propias de la plataforma (qué significan los colores del mapa, por qué un punto de calor no es un incendio confirmado, por qué MODIS y VIIRS se leen por separado y por qué la FRP ausente es “No disponible”).',
       ] },
       { kind: 'h', text: 'Cómo se manejan las guías con infografías' },
       { kind: 'steps', items: [
         'Lea la infografía del marco; debajo verá su título.',
         'Use la flecha naranja › para la siguiente o ‹ para la anterior. El contador (por ejemplo 1 / 7) indica en cuál va.',
-        'Toque la infografía o el botón circular café para ampliarla. En computador puede pasar de una a otra con las flechas del teclado.',
-        'Bajo el carrusel, un párrafo resume el tema de la guía.',
+        'Toque la infografía o el botón circular café de la esquina superior derecha para ampliarla. En computador puede pasar de una a otra con las flechas del teclado.',
+        'Bajo el carrusel, un párrafo resume el tema de la guía y, debajo, está el podcast.',
       ] },
-      { kind: 'p', text: 'Cada infografía sigue la misma estructura: Título y Dato clave; Qué sí hacer (círculos verdes); Qué nunca hacer / Advertencias (círculos rojos); y Fuentes al pie junto a Emergencias Colombia: 123.' },
-      { kind: 'tip', text: 'Consejo práctico: el Aula es ideal para talleres comunitarios: proyecte las infografías ampliadas y conversen sobre el “Qué sí hacer” y el “Qué nunca hacer”.' },
+      { kind: 'p', text: 'Todas las infografías siguen la misma estructura: Título y Dato clave (por qué importa el tema), Qué sí hacer (acciones numeradas en círculos verdes), Qué nunca hacer / Advertencias (círculos rojos con una equis) y Fuentes al pie junto a la etiqueta Emergencias Colombia: 123.' },
+      { kind: 'p', text: 'Junto a las reglas de lectura aparece el texto La educación como primera forma de prevención: ningún satélite ni modelo matemático reemplaza a una comunidad informada. La observación espacial detecta el calor cuando la combustión ya comenzó; la educación actúa mucho antes, al no quemar rastrojos en temporada seca, revisar un cable deteriorado o enseñar a evacuar sin pánico.' },
+      { kind: 'h', text: 'Actividad 2. Aprendizaje Basado en Problemas (ABP)' },
+      { kind: 'p', text: 'Una presentación de 36 diapositivas (1920 × 1080 px) con cinco casos de la vida real, cada uno con su situación problema, desafíos, producto final y respuestas de ejemplo: Caso 1, Una chispa en casa: ¿estamos preparados?; Caso 2, Cuando el humo llega a la comunidad; Caso 3, Los datos también pueden salvar bosques: ¿cómo interpretamos las alertas?; Caso 4, rutas de evacuación e instituciones de emergencia; y Caso 5, Animales en peligro: ¿quién los protege durante un incendio? Cierra con una conclusión y un agradecimiento.' },
+      { kind: 'list', items: [
+        'Use las flechas naranjas ‹ › para avanzar o retroceder; el contador (por ejemplo 1 / 36) indica en qué diapositiva va y debajo aparece su título.',
+        'Abierto a toda la comunidad: pueden hacerla estudiantes, docentes, familias o comunidades. Se recomienda en grupo, porque discutir enriquece las respuestas, aunque también puede hacerse de forma individual.',
+        'Cómo se desarrolla: lean la situación; respondan las preguntas en equipo; comparen sus respuestas con las de ejemplo, que están en la diapositiva que sigue a la de las preguntas; y observen en qué coinciden, qué no tuvieron en cuenta y qué podrían mejorar.',
+        'Comparación formativa: más que evaluar, el propósito es prepararse para actuar con criterio ante una emergencia real.',
+      ] },
+      { kind: 'h', text: 'Actividad 3. Juego de simulación: Detector de Riesgos Cotidianos' },
+      { kind: 'p', text: 'Un juego interactivo pensado especialmente para niños, que enseña a reconocer las situaciones de la vida cotidiana que pueden causar un incendio. El jugador hace de inspector de seguridad y recorre tres escenarios ilustrados: Cocina del Hogar, Espacio de Trabajo / Oficina y Sala de Estar.' },
+      { kind: 'list', items: [
+        'Exploración de objetos y fichas preventivas: toque los objetos de la ilustración o las tarjetas de abajo para descubrir cuáles son peligrosos (por ejemplo, una sartén con aceite sin vigilancia, regletas en cascada, una vela encendida cerca de libros o una salida bloqueada) y cuáles son buenas prácticas. Cada hallazgo abre una ficha que explica el riesgo, su fundamento normativo y la acción recomendada; los químicos muestran además su rombo NFPA 704.',
+        'Puntaje y avance: cada peligro suma 100 puntos y cada elemento seguro 25. Hay 5 peligros por escenario (15 en total); los filtros Todos, Sin revisar, Peligros y Seguros ordenan las tarjetas.',
+        'Resumen y respaldo NFPA: al encontrar los cinco peligros de un escenario aparece un resumen con las claves de prevención y el paso al siguiente escenario. Los contenidos se basan en las normas NFPA 101 (seguridad humana) y NFPA 704 (materiales peligrosos), consultables en el botón Guía NFPA 101 / 704.',
+        'Botones ¿Cómo jugar? (explicación y justificación del juego) y Reiniciar progreso (pide confirmar). El avance se guarda solo en este navegador.',
+      ] },
+      { kind: 'p', text: 'Más que memorizar reglas, el propósito es que los niños aprendan a observar su entorno con ojos de prevención y compartan lo aprendido con su familia.' },
+      { kind: 'h', text: 'Conclusión pedagógica de KAIRÓS, Aula Pedagógica' },
+      { kind: 'p', text: 'Las tres actividades se complementan. Las infografías y los podcasts dan la información básica para saber qué hacer antes, durante y después de una emergencia. El Aprendizaje Basado en Problemas lleva ese conocimiento a situaciones reales, en las que hay que analizar y tomar decisiones. El juego de simulación acerca la prevención a los niños de una manera activa y divertida. Cada persona puede aprender a su manera: leyendo, escuchando, discutiendo en grupo o jugando.' },
+      { kind: 'p', text: 'Como afirma Paulo Freire en Pedagogía del oprimido: «Nadie educa a nadie —nadie se educa a sí mismo—, los hombres se educan entre sí con la mediación del mundo». Esa es la apuesta de este espacio: que la prevención de incendios se construya en comunidad y que cada persona que aprende se convierta en un agente de cuidado para quienes la rodean.' },
+      { kind: 'tip', text: 'Consejo práctico: el Aula es ideal para talleres comunitarios y escolares: reproduzca los podcasts en espacios grupales o radiales, proyecte los casos de ABP para debatir soluciones en equipo y use el juego Detector de Riesgos Cotidianos como actividad participativa.' },
     ],
   },
   {
@@ -306,6 +340,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       { kind: 'list', items: [
         'Un foco de calor satelital es una anomalía térmica, no un incendio confirmado.',
         'El análisis preventivo no reemplaza la respuesta operativa; ante una emergencia, use 123 SOS.',
+        'Verifique el modo de datos (Demostración o Lab Real) antes de citar cifras.',
         'Los conteos MODIS y VIIRS se leen por separado, y la FRP ausente se muestra como “No disponible”, nunca como 0.',
         'Interprete las probabilidades Markov junto con la validación retrospectiva: son una estimación exploratoria, no un modelo publicado.',
       ] },
