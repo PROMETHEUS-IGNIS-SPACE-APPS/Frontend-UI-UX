@@ -156,8 +156,7 @@ export default function App() {
                 provenance={observationsQuery.data?.data_provenance ?? 'Cargando fuente…'}
                 warning={observationsQuery.data?.warning}
                 degradedMode={observationsQuery.data?.degradedMode}
-                sampling={observationsQuery.data?.sampling}
-                isTruncated={sourceMode === 'historical' || Boolean(observationsQuery.data && observationsQuery.data.count < observationsQuery.data.total_matching)}
+                isTruncated={Boolean(observationsQuery.data && observationsQuery.data.count < observationsQuery.data.total_matching)}
                 onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
               />}
 

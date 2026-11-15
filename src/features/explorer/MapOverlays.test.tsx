@@ -19,7 +19,7 @@ describe('MapOverlays', () => {
     await user.click(screen.getByRole('button', { name: 'Colombia' }));
     expect(onFocusChange).toHaveBeenCalledWith(MAP_FOCUS_PRESETS[1]);
     await user.selectOptions(screen.getByRole('combobox', { name: 'Estilo del mapa base' }), 'dark');
-    expect(onStyleChange).toHaveBeenCalledWith(MAP_STYLE_PRESETS[3]);
+    expect(onStyleChange).toHaveBeenCalledWith(MAP_STYLE_PRESETS.find((style) => style.id === 'dark'));
     await user.click(screen.getByRole('checkbox', { name: 'Puntos rojos' }));
     expect(onToggleViirs).toHaveBeenCalledOnce();
     await user.click(screen.getByRole('checkbox', { name: 'Puntos amarillos' }));

@@ -52,22 +52,23 @@ describe('ingestionService', () => {
     await expect(fetchIngestedObservations({ sourceMode: 'ideam', from: '2026-11-08', to: '2026-11-14', region: 'colombia' })).rejects.toThrow('no coincide con el contrato API v0.2');
   });
 
-  it('requests the bounded historical endpoint and exposes its sampling metadata', async () => {
+  it('requests FIRMS public NRT without a date range', async () => {
     vi.stubEnv('VITE_API_BASE_URL', 'http://backend.test');
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       ok: true,
-      warning: 'Histórico condensado a los 9.000 registros más recientes.',
-      metadata: { source: 'Histórico IDEAM + FIRMS', from: '2024-01-01', to: '2026-11-14', rawCount: 11539, deduplicatedCount: 9000, filesLoaded: ['day-1.csv', 'firms-7d'] },
+      publicNrtMode: true,
+      hasMapKey: false,
+      source: 'NASA FIRMS Earthdata Public NRT 7d',
+      count: 1,
+      warning: 'Usando feeds CSV públicos.',
       observations: [liveObservation],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await fetchIngestedObservations({ sourceMode: 'historical', from: 'ignored', to: 'ignored', region: 'antioquia_ideam' });
+    const result = await fetchIngestedObservations({ sourceMode: 'firms', from: 'ignored', to: 'ignored', region: 'colombia' });
 
-    expect(String(fetchMock.mock.calls[0][0])).toBe('http://backend.test/api/fusion/historical-all?region=antioquia_ideam');
+    expect(String(fetchMock.mock.calls[0][0])).toBe('http://backend.test/api/firms/observations?region=colombia');
+    expect(result.data_provenance).toBe('NASA FIRMS Earthdata Public NRT 7d');
     expect(result.count).toBe(1);
-    expect(result.total_matching).toBe(9000);
-    expect(result.sampling).toEqual({ from: '2024-01-01', to: '2026-11-14', rawCount: 11539, deduplicatedCount: 9000, filesLoaded: ['day-1.csv', 'firms-7d'], attribution: undefined });
-    expect(result.warning).toContain('9.000');
   });
 });

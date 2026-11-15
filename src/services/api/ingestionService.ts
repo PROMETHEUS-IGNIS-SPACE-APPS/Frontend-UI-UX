@@ -45,8 +45,6 @@ export async function fetchIngestedObservations(query: IngestionQuery): Promise<
   let path: string;
   if (query.sourceMode === 'firms') {
     path = `/firms/observations?${params}`;
-  } else if (query.sourceMode === 'historical') {
-    path = `/fusion/historical-all?${params}`;
   } else {
     params.set('from', query.from);
     params.set('to', query.to);
@@ -67,15 +65,5 @@ export async function fetchIngestedObservations(query: IngestionQuery): Promise<
     warning: response.warning ?? null,
     degradedMode: response.degradedMode ?? false,
     sourceMode: query.sourceMode,
-    ...(query.sourceMode === 'historical' ? {
-      sampling: {
-        from: response.metadata?.from,
-        to: response.metadata?.to,
-        rawCount: response.metadata?.rawCount,
-        deduplicatedCount: response.metadata?.deduplicatedCount,
-        filesLoaded: response.metadata?.filesLoaded,
-        attribution: response.metadata?.attribution,
-      },
-    } : {}),
   };
 }

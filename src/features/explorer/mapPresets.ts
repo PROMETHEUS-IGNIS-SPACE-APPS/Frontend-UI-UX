@@ -12,10 +12,10 @@ export interface MapStylePreset {
 }
 
 export const MAP_STYLE_PRESETS: MapStylePreset[] = [
+  { id: 'dark', label: 'Oscuro', url: 'https://tiles.openfreemap.org/styles/dark' },
   { id: 'liberty', label: 'Liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
   { id: 'bright', label: 'Claro', url: 'https://tiles.openfreemap.org/styles/bright' },
   { id: 'positron', label: 'Positron', url: 'https://tiles.openfreemap.org/styles/positron' },
-  { id: 'dark', label: 'Oscuro', url: 'https://tiles.openfreemap.org/styles/dark' },
 ];
 
 export const MAP_FOCUS_PRESETS: MapFocusPreset[] = [
