@@ -49,3 +49,5 @@
 - Evaluar división del bundle de producción (advertencia de chunk JS >500 kB).
 - Integrar artefactos AI-Pipeline revisados cuando estén publicados.
 - La carpeta `Ejemplo` sirve como referencia visual, pero no se portan sus datos sintéticos, FastAPI Lab ni el selector Demo/Lab Real porque están excluidos por el contrato del frontend.
+
+- 2026-11-15: Aula KAIRÓS incluye el juego “Detector de Riesgos Cotidianos” (`features/pedagogy/RiskDetectorGame.tsx`, contenido en `riskDetectorContent.ts`, escenas SVG en `riskDetectorScenes.tsx`), portado del HTML del equipo: 3 escenarios (cocina, oficina, sala), 15 peligros, NFPA 101/704, progreso solo en localStorage. Se quitó la cifra “53 %” (NFPA reporta cocina como principal causa, no ese porcentaje exacto).

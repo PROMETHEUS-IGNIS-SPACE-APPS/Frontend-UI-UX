@@ -12,6 +12,7 @@ import {
   KAIROS_WIDE_SLIDES,
   type KairosSection,
 } from './kairosContent';
+import RiskDetectorGame from './RiskDetectorGame';
 
 interface LightboxState { section: KairosSection; index: number }
 
@@ -103,6 +104,8 @@ export default function KairosClassroom() {
           </div>
         </div>
       </div>
+
+      <RiskDetectorGame />
 
       <section aria-label="Infografías panorámicas de prevención" className="w-full rounded-2xl bg-[#EEDFC5] p-4 sm:p-8">
         <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">

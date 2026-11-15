@@ -286,3 +286,85 @@
     background: #ffffff !important;
   }
 }
+
+/* Detector de Riesgos Cotidianos (Aula KAIRÓS): paleta fija crema como el resto del Aula. */
+.risk-detector {
+  --rd-ink: #4A2E1B;
+  --rd-red: #C62828;
+  --rd-yellow: #EAB308;
+  --rd-green: #2E7D32;
+  --rd-blue: #1B5FA8;
+  --rd-rust: #A93E08;
+  --vec-wall: #F7EBD6;
+  --vec-floor: #E2CFAE;
+  --vec-floor-line: #CDB48C;
+  --vec-wood: #C99E72;
+  --vec-wood-dark: #9D7349;
+  --vec-metal: #CBD5E1;
+  --vec-metal-dark: #64748B;
+  --vec-glass: #DCEBF8;
+  --vec-fabric: #8E5A3A;
+  --vec-fabric-light: #B98563;
+  --vec-white: #FFFDF8;
+  --vec-safe-soft: #EAF5EB;
+}
+
+.risk-detector .rd-item {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 120ms ease-out, filter 120ms ease-out;
+}
+
+.risk-detector .rd-item:hover {
+  filter: drop-shadow(0 4px 8px rgba(74, 46, 27, 0.2));
+  transform: translateY(-2px);
+}
+
+.risk-detector .rd-item:focus-visible {
+  outline: none;
+}
+
+.risk-detector .rd-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 3;
+  transition: stroke 220ms ease-out;
+}
+
+.risk-detector .rd-item:hover .rd-hit,
+.risk-detector .rd-item:focus-visible .rd-hit {
+  stroke: #D9692B;
+  stroke-dasharray: 6 4;
+}
+
+.risk-detector .rd-item.is-safe .rd-hit {
+  stroke: var(--rd-green);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+.risk-detector .rd-item.is-hazard .rd-hit {
+  stroke: var(--rd-red);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+.risk-detector .rd-item.is-hazard .rd-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rd-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rd-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-detector .rd-item,
+  .risk-detector .rd-item.is-hazard .rd-badge {
+    animation: none;
+    transition: none;
+  }
+}
