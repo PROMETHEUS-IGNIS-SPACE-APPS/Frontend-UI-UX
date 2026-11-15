@@ -14,8 +14,9 @@ function renderSidebar(sourceMode: 'fusion' | 'historical' = 'fusion') {
     onDateFromChange: vi.fn(), onDateToChange: vi.fn(), onDepartmentChange: vi.fn(),
     onMunicipalityChange: vi.fn(), onMunicipalitySearchChange: vi.fn(), onDaynightChange: vi.fn(),
     onMinimumFrpChange: vi.fn(), onConfidenceRawChange: vi.fn(), onReset: vi.fn(),
+    onToggleCategory: vi.fn(), onApplySourcePreset: vi.fn(),
   };
-  render(<ExplorerSidebar {...callbacks} sensor="ALL" sourceMode={sourceMode} region="antioquia_ideam" dateFrom="2026-11-08" dateTo="2026-11-14" department="ALL" municipality="ALL" municipalitySearch="" daynight="ALL" minimumFrp="" confidenceRaw="ALL" observations={observations} visibleCount={4} recordCount={1} totalMatching={1} provenance="IDEAM + NASA FIRMS" sampling={sourceMode === 'historical' ? { from: '2024-01-01', to: '2026-11-14', rawCount: 11539, filesLoaded: ['day.csv'] } : undefined} isTruncated onReset={callbacks.onReset} />);
+  render(<ExplorerSidebar {...callbacks} categories={{ viirs: true, modis: true, highIntensity: true }} categoryCounts={{ viirs: 1, modis: 0, highIntensity: 0 }} sensor="ALL" sourceMode={sourceMode} region="antioquia_ideam" dateFrom="2026-11-08" dateTo="2026-11-14" department="ALL" municipality="ALL" municipalitySearch="" daynight="ALL" minimumFrp="" confidenceRaw="ALL" observations={observations} visibleCount={4} recordCount={1} totalMatching={1} provenance="IDEAM + NASA FIRMS" sampling={sourceMode === 'historical' ? { from: '2024-01-01', to: '2026-11-14', rawCount: 11539, filesLoaded: ['day.csv'] } : undefined} isTruncated onReset={callbacks.onReset} />);
   return callbacks;
 }
 
@@ -67,5 +68,17 @@ describe('ExplorerSidebar', () => {
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('button', { name: 'Modo Fácil' })).toBeVisible();
+  });
+
+  it('toggles visual categories and applies source presets', async () => {
+    const user = userEvent.setup();
+    const callbacks = renderSidebar();
+
+    await user.click(screen.getByRole('checkbox', { name: 'Mostrar Alta (≥30MW)' }));
+    expect(callbacks.onToggleCategory).toHaveBeenCalledWith('highIntensity');
+    await user.click(screen.getByRole('button', { name: /IDEAM 45 días Antioquia/ }));
+    expect(callbacks.onApplySourcePreset).toHaveBeenCalledWith({ sourceMode: 'ideam', region: 'antioquia_ideam', days: 45 });
+    await user.click(screen.getByRole('button', { name: 'NASA FIRMS 7d' }));
+    expect(callbacks.onApplySourcePreset).toHaveBeenCalledWith({ sourceMode: 'firms', region: 'antioquia_ideam' });
   });
 });

@@ -20,7 +20,8 @@ import SourcesPanel from '@/features/sources/SourcesPanel';
 import ExplorerSidebar from '@/features/explorer/ExplorerSidebar';
 import MapOverlays from '@/features/explorer/MapOverlays';
 import TimelineControls from '@/features/explorer/TimelineControls';
-import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from '@/features/explorer/mapPresets';
+import { DEFAULT_MAP_LAYERS, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, observationCategory, type MapFocusPreset, type MapLayerState, type MapStylePreset } from '@/features/explorer/mapPresets';
+import type { SourcePreset } from '@/features/explorer/ExplorerSidebar';
 
 const EMPTY_OBSERVATIONS: Observation[] = [];
 
@@ -62,9 +63,8 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [focusTarget, setFocusTarget] = useState<MapFocusPreset>(MAP_FOCUS_PRESETS[0]);
   const [mapStyle, setMapStyle] = useState<MapStylePreset>(MAP_STYLE_PRESETS[0]);
-  const [showViirs, setShowViirs] = useState(true);
-  const [showModis, setShowModis] = useState(true);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [mapLayers, setMapLayers] = useState<MapLayerState>(DEFAULT_MAP_LAYERS);
+  const toggleMapLayer = (key: keyof MapLayerState) => setMapLayers((current) => ({ ...current, [key]: !current[key] }));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const observationsQuery = useQuery({
@@ -98,7 +98,20 @@ export default function App() {
   }, [allObservations, sensor, department, municipality, municipalitySearch, daynight, confidenceRaw, minimumFrp]);
   const dates = useMemo(() => [...new Set(matchingObservations.map((item) => item.acquired_at.slice(0, 10)))].sort(), [matchingObservations]);
   const countsByDate = useMemo(() => matchingObservations.reduce<Record<string, number>>((counts, item) => { const date = item.acquired_at.slice(0, 10); counts[date] = (counts[date] ?? 0) + 1; return counts; }, {}), [matchingObservations]);
-  const visible = useMemo(() => matchingObservations.filter((item) => !activeDate || item.acquired_at.startsWith(activeDate)), [matchingObservations, activeDate]);
+  const dateFiltered = useMemo(() => matchingObservations.filter((item) => !activeDate || item.acquired_at.startsWith(activeDate)), [matchingObservations, activeDate]);
+  const categoryCounts = useMemo(() => {
+    const counts = { viirs: 0, modis: 0, highIntensity: 0 };
+    for (const item of dateFiltered) counts[observationCategory(item)] += 1;
+    return counts;
+  }, [dateFiltered]);
+  const visible = useMemo(() => dateFiltered.filter((item) => mapLayers[observationCategory(item)]), [dateFiltered, mapLayers]);
+  const applySourcePreset = (preset: SourcePreset) => {
+    const today = new Date().toISOString().slice(0, 10);
+    setSourceMode(preset.sourceMode);
+    setRegion(preset.region);
+    if (preset.days) { setDateTo(today); setDateFrom(shiftDate(today, -(preset.days - 1))); }
+    setActiveDate(null); setSelected(null); setIsPlaying(false);
+  };
   const active = APP_MODULES.find((module) => module.id === activeModule) ?? APP_MODULES[0];
 
   const activeDateIndex = activeDate ? dates.indexOf(activeDate) : -1;
@@ -170,6 +183,10 @@ export default function App() {
                 degradedMode={observationsQuery.data?.degradedMode}
                 sampling={observationsQuery.data?.sampling}
                 isTruncated={sourceMode === 'historical' || Boolean(observationsQuery.data && observationsQuery.data.count < observationsQuery.data.total_matching)}
+                categories={mapLayers}
+                categoryCounts={categoryCounts}
+                onToggleCategory={toggleMapLayer}
+                onApplySourcePreset={applySourcePreset}
                 onReset={() => { setSensor('ALL'); setActiveDate(null); setSelected(null); setIsPlaying(false); setDepartment('ALL'); setMunicipality('ALL'); setMunicipalitySearch(''); setDaynight('ALL'); setMinimumFrp(''); setConfidenceRaw('ALL'); }}
               />}
 
@@ -178,9 +195,9 @@ export default function App() {
                 {observationsQuery.isPending && <div className="m-3 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-text-primary"><LoaderCircle className="h-4 w-4 animate-spin text-info" />Consultando observaciones…</div>}
                 {observationsQuery.isError && <div role="alert" className="m-3 flex items-start gap-3 rounded-xl border border-danger/40 bg-danger-soft p-4 text-sm text-danger"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">No se pudieron cargar las observaciones</p><p className="mt-1 text-danger">{observationsQuery.error.message}</p><button type="button" className="mt-3 rounded-lg border border-danger/40 px-3 py-1.5 font-noto text-[11px] font-bold hover:bg-danger-soft" onClick={() => void observationsQuery.refetch()}>Reintentar</button></div></div>}
                 <div className="relative min-h-[360px] flex-1 overflow-hidden bg-background lg:min-h-0">
-                  {hasData && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} />}
+                  {hasData && <ObservationMap observations={visible} selected={selected} onSelect={setSelected} focusTarget={focusTarget} mapStyle={mapStyle} layers={mapLayers} />}
                   {hasData && visible.length === 0 && <div className="absolute inset-0 z-10 grid place-items-center bg-background/80 text-center backdrop-blur-[1px]"><div className="rounded-xl border border-border-strong bg-card p-5"><Flame className="mx-auto h-7 w-7 text-text-secondary" /><p className="mt-2 font-medium text-text-primary">No hay observaciones para este filtro</p><p className="mt-1 text-xs text-text-secondary">La consulta respondió correctamente con una colección vacía.</p></div></div>}
-                  {hasData && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} observationCounts={{ VIIRS: visible.filter((item) => item.sensor === 'VIIRS').length, MODIS: visible.filter((item) => item.sensor === 'MODIS').length }} frpCount={visible.filter((item) => item.frp_mw !== null).length} showViirs={showViirs} showModis={showModis} showHeatmap={showHeatmap} onToggleViirs={() => setShowViirs((value) => !value)} onToggleModis={() => setShowModis((value) => !value)} onToggleHeatmap={() => setShowHeatmap((value) => !value)} onOpenGuide={() => setIsGlossaryOpen(true)} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />}
+                  {hasData && <MapOverlays focusId={focusTarget.id} styleId={mapStyle.id} onStyleChange={setMapStyle} onFocusChange={setFocusTarget} layers={mapLayers} onToggleLayer={toggleMapLayer} pointCount={visible.length} frpCount={visible.filter((item) => item.frp_mw !== null).length} onOpenGuide={() => setIsGlossaryOpen(true)} sourceLabel={`${observationsQuery.data?.data_provenance === 'synthetic_demo' ? 'Datos de demostración' : 'Datos reales'}${localObservations.length ? ' + CSV local' : ''}`} />}
                   {selected && <aside aria-label="Observación seleccionada" className="absolute right-4 top-16 z-30 max-h-[calc(100%-5rem)] w-80 space-y-3 overflow-y-auto rounded-2xl border border-accent/60 bg-card p-4 text-xs shadow-2xl sm:w-96">
                     <div className="flex items-center justify-between border-b border-border pb-2"><div className="flex items-center gap-2"><span className={`rounded-xl border p-2 ${selected.sensor === 'VIIRS' ? 'border-red-500/50 bg-red-500/10 text-sensor-viirs' : 'border-yellow-400/50 bg-yellow-400/10 text-sensor-modis'}`}><Flame className="h-4 w-4" /></span><div><h2 className="font-noto text-sm font-bold text-text-primary">{selected.municipality ?? 'Observación seleccionada'}</h2><span className="text-[10px] text-text-secondary">{selected.department ?? 'Sin departamento'} · {selected.sensor}</span></div></div><button type="button" onClick={() => setSelected(null)} aria-label="Limpiar selección" className="rounded-lg p-1 text-text-secondary transition-colors hover:bg-surface-hover/70 hover:text-text-primary"><X className="h-4 w-4" /></button></div>
                     <dl className="grid grid-cols-2 gap-2 font-source text-[11px]">{[['ID', selected.observation_id], ['Sensor', selected.sensor], ['Satélite', selected.satellite ?? 'No disponible'], ['Adquisición UTC', selected.acquired_at], ['FRP', selected.frp_mw === null ? 'No disponible' : `${selected.frp_mw} MW`], ['Confianza original', String(selected.confidence_raw)], ['Día/Noche', selected.daynight ?? 'No disponible'], ['Concordancia', selected.concordance ?? 'Sin clasificar'], ['Coordenadas', `${selected.latitude}, ${selected.longitude}`], ['Origen', selected.source_origin ?? selected.source]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-surface p-2"><dt className="text-[10px] text-text-secondary">{label}</dt><dd className="mt-0.5 break-words font-semibold text-text-primary">{value}</dd></div>)}</dl>
@@ -193,7 +210,7 @@ export default function App() {
             </section>
           ) : activeModule === 'analytics' ? (
             hasData
-              ? <AnalyticsPanel observations={visible} totalMatching={totalMatching} provenance={provenance} />
+              ? <AnalyticsPanel observations={visible} totalMatching={totalMatching} provenance={provenance} onExportCsv={handleExport} />
               : <div className="mx-auto w-full max-w-7xl p-6"><QueryState isLoading={observationsQuery.isPending} error={observationsQuery.error?.message} onRetry={() => void observationsQuery.refetch()} /></div>
           ) : activeModule === 'calendar' ? (
             hasData

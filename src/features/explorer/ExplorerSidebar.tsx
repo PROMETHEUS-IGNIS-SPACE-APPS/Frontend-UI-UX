@@ -1,4 +1,6 @@
-import { RotateCcw, Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Database, RotateCcw, Satellite, Search, SlidersHorizontal, Sparkles, Upload } from 'lucide-react';
+import { useLocalCsvStore } from '@/stores/localCsvStore';
+import { HIGH_INTENSITY_FRP_MW, type MapLayerState } from './mapPresets';
 import { useState } from 'react';
 import type { Observation, ObservationSamplingInfo, ObservationSourceMode, Sensor } from '@/types/api/observations';
 
@@ -35,11 +37,36 @@ interface ExplorerSidebarProps {
   sampling?: ObservationSamplingInfo;
   isTruncated: boolean;
   onReset: () => void;
+  categories: Pick<MapLayerState, 'viirs' | 'modis' | 'highIntensity'>;
+  categoryCounts: Record<'viirs' | 'modis' | 'highIntensity', number>;
+  onToggleCategory: (key: 'viirs' | 'modis' | 'highIntensity') => void;
+  onApplySourcePreset: (preset: SourcePreset) => void;
 }
+
+export interface SourcePreset {
+  sourceMode: ObservationSourceMode;
+  region: 'antioquia_ideam' | 'colombia';
+  /** Días hacia atrás desde hoy (rango inclusivo); se ignora en FIRMS e histórico. */
+  days?: number;
+}
+
+const SOURCE_PRESETS: Array<{ label: string; detail: string; tone: string; preset: SourcePreset }> = [
+  { label: 'IDEAM últimos 2 días (Antioquia)', detail: 'Consulta reciente y corta (2 días)', tone: 'text-success', preset: { sourceMode: 'ideam', region: 'antioquia_ideam', days: 2 } },
+  { label: 'IDEAM 45 días Antioquia', detail: 'Serie diaria más larga para revisar la dinámica', tone: 'text-info', preset: { sourceMode: 'ideam', region: 'antioquia_ideam', days: 45 } },
+  { label: 'Fusión IDEAM (30 d) + NASA FIRMS (7 d)', detail: 'Toda Colombia · deduplicación multi-satélite del backend', tone: 'text-predictive', preset: { sourceMode: 'fusion', region: 'colombia', days: 30 } },
+];
+
+const CATEGORY_ITEMS = [
+  { key: 'viirs' as const, label: 'VIIRS', color: 'bg-[#ef4444]' },
+  { key: 'modis' as const, label: 'MODIS', color: 'bg-[#facc15]' },
+  { key: 'highIntensity' as const, label: `Alta (≥${HIGH_INTENSITY_FRP_MW}MW)`, color: 'bg-[#f97316]' },
+];
 
 export default function ExplorerSidebar(props: ExplorerSidebarProps) {
   const [advanced, setAdvanced] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(true);
+  const openCsvManager = useLocalCsvStore((state) => state.setManagerOpen);
   const departments = [...new Set(props.observations.map((item) => item.department).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'es'));
   const municipalities = [...new Set(props.observations.filter((item) => props.department === 'ALL' || item.department === props.department).map((item) => item.municipality).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'es'));
   const confidenceValues = [...new Set(props.observations.map((item) => String(item.confidence_raw)))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
@@ -56,6 +83,37 @@ export default function ExplorerSidebar(props: ExplorerSidebarProps) {
       <button type="button" aria-pressed={!advanced} onClick={() => setAdvanced(false)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${!advanced ? 'bg-accent-solid text-accent-fg shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}><Sparkles className="h-3.5 w-3.5" />Modo Fácil</button>
       <button type="button" aria-pressed={advanced} onClick={() => setAdvanced(true)} className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 font-semibold transition ${advanced ? 'bg-accent-solid text-accent-fg shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}><SlidersHorizontal className="h-3.5 w-3.5" />Filtros Pro</button>
     </div>
+
+    <section className="space-y-1.5">
+      <h2 className="font-noto text-xs font-bold text-text-primary">Categorías Visuales (PROMETHEUS):</h2>
+      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+        {CATEGORY_ITEMS.map((item) => <label key={item.key} className="flex cursor-pointer items-center gap-2 py-1">
+          <input type="checkbox" checked={props.categories[item.key]} onChange={() => props.onToggleCategory(item.key)} aria-label={`Mostrar ${item.label}`} className="accent-accent" />
+          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-border-strong ${item.color}`} aria-hidden />
+          <span className="font-medium text-text-primary">{item.label}</span>
+          <span className="ml-auto font-source text-[10px] text-text-secondary">{props.categoryCounts[item.key].toLocaleString()}</span>
+        </label>)}
+      </div>
+      <p className="text-[10px] leading-tight text-text-secondary">Alta intensidad tiene prioridad: un punto con FRP ≥ {HIGH_INTENSITY_FRP_MW} MW se muestra naranja sea VIIRS o MODIS.</p>
+    </section>
+
+    <section className="overflow-hidden rounded-xl border border-border bg-surface">
+      <button type="button" aria-expanded={sourcesOpen} onClick={() => setSourcesOpen((value) => !value)} className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left">
+        <span className="flex items-center gap-1.5 font-noto text-[11px] font-bold text-success"><Database className="h-3.5 w-3.5" aria-hidden />FUENTES REALES (IDEAM / FIRMS)</span>
+        {sourcesOpen ? <ChevronUp className="h-3.5 w-3.5 text-text-secondary" /> : <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />}
+      </button>
+      {sourcesOpen && <div className="space-y-2 border-t border-border p-2.5">
+        <p className="text-[11px] font-medium leading-snug text-text-primary">{props.provenance} · {props.recordCount.toLocaleString()} cargadas</p>
+        {SOURCE_PRESETS.map((item) => <button key={item.label} type="button" onClick={() => props.onApplySourcePreset(item.preset)} className="block w-full rounded-lg border border-border bg-card p-2.5 text-left transition-colors hover:bg-surface-hover">
+          <span className={`block font-bold ${item.tone}`}>{item.label}</span>
+          <span className="text-[11px] text-text-secondary">{item.detail}</span>
+        </button>)}
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => openCsvManager(true)} className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-2 py-2 font-semibold text-accent hover:bg-surface-hover"><Upload className="h-3.5 w-3.5" aria-hidden />Subir CSV</button>
+          <button type="button" onClick={() => props.onApplySourcePreset({ sourceMode: 'firms', region: props.region })} className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-2 py-2 font-semibold text-accent hover:bg-surface-hover"><Satellite className="h-3.5 w-3.5" aria-hidden />NASA FIRMS 7d</button>
+        </div>
+      </div>}
+    </section>
 
     <section className="space-y-2 rounded-xl border border-border bg-surface p-3">
       <div className="flex items-center justify-between text-[11px] text-text-secondary"><span>Fuente de observaciones</span>{props.degradedMode && <span className="rounded border border-warning/40 px-1.5 py-0.5 text-[10px] uppercase text-warning">Caché</span>}</div>

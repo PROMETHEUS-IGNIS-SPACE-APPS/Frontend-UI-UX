@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Calendar, Flame, Info, Moon, Satellite, Sun } from 'lucide-react';
+import { Activity, AlertTriangle, Calendar, Download, Flame, Info, Moon, Satellite, Sun } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Observation } from '@/types/api/observations';
 import { ModuleHeader, ModulePage, ProvenanceNote } from '@/components/common/ModuleLayout';
@@ -7,9 +7,10 @@ interface AnalyticsPanelProps {
   observations: Observation[];
   totalMatching: number;
   provenance: string;
+  onExportCsv?: () => void;
 }
 
-export default function AnalyticsPanel({ observations, totalMatching, provenance }: AnalyticsPanelProps) {
+export default function AnalyticsPanel({ observations, totalMatching, provenance, onExportCsv }: AnalyticsPanelProps) {
   const viirs = observations.filter((item) => item.sensor === 'VIIRS');
   const modis = observations.filter((item) => item.sensor === 'MODIS');
   const hasObservations = observations.length > 0;
@@ -43,6 +44,7 @@ export default function AnalyticsPanel({ observations, totalMatching, provenance
       icon={Activity}
       title="Analítica Territorial"
       description="Indicadores descriptivos de los registros recibidos del Backend-API, separados por instrumento."
+      actions={onExportCsv && <button type="button" onClick={onExportCsv} disabled={!observations.length} className="ignis-action ignis-action-primary"><Download className="h-4 w-4" aria-hidden />Exportar consulta CSV (<span className="font-source">{observations.length.toLocaleString()}</span>)</button>}
     />
 
     <div className="flex items-start gap-3 rounded-2xl bg-warning-soft p-4 text-xs text-text-primary">

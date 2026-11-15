@@ -16,7 +16,11 @@
 - CSV locales (IDEAM `;`/UTC-5 o NASA FIRMS UTC) se leen en el navegador (`services/csv/localCsvParser.ts`, `stores/localCsvStore.ts`), se suman al mapa y módulos con procedencia “CSV local”, no se envían al backend y no traen municipio/departamento. Limpiar pide confirmación en pantalla (sin contraseña).
 - Instructivo (.PDF): manual en ventana imprimible; “Guardar como PDF” usa el diálogo de impresión del navegador (sin jspdf).
 - Mapa: botones “Reportar en Terreno” (mismo aviso sin endpoint) y “Guía” (glosario).
-- No se replican Gemini ni Demostración/Lab Real del ejemplo.
+- Capas del mapa (`features/explorer/mapPresets.ts`): bases Liberty, Satélite y Topográfico (Esri), Oscuro y Claro (OpenFreeMap); categorías VIIRS (rojo), MODIS (amarillo) y Alta FRP ≥ 30 MW (naranja, prioridad sobre sensor); marcadores con halo, mapa de calor FRP, límites de Colombia y subregiones de Antioquia (`data/schematicBoundaries.ts`, contornos ESQUEMÁTICOS del ejemplo, no oficiales). Capa Predictiva Markov visible pero desactivada.
+- Panel lateral: “Categorías Visuales” con conteos y “Fuentes reales” con accesos rápidos de fechas relativas a hoy (IDEAM 2 d, IDEAM 45 d, Fusión 30 d Colombia, FIRMS 7 d, Subir CSV).
+- Glosario: 65 términos en 9 secciones con buscador (`components/common/glossaryTerms.ts`); los 7 canónicos de PROJECT_CONTEXT §3.5 conservan texto exacto. Se corrigieron definiciones del ejemplo que describían funciones inexistentes aquí.
+- Aula: simulador con 2 escenarios comunitarios, directorio de líneas nacionales (119, 123, 144, 132; sin número de DAGRAN no verificado) y “Diccionario sin enredos”.
+- No se replican Gemini, Demostración/Lab Real ni los perfiles por zona de la Matriz 5×5 del ejemplo (asignan valores A×C sin fuente).
 - Módulos usan `components/common/ModuleLayout.tsx` (ModulePage, ModuleHeader, ProvenanceNote) con la estructura del ejemplo. Predictibilidad y Laboratorio IA replican el esqueleto visual del ejemplo con “—”/“Pendiente”, sin cifras, hasta que el AI-Pipeline publique artefactos.
 - Se conserva procedencia y `confidence_raw`; no se usa `confidence_score` provisional. FRP null continúa como no disponible.
 

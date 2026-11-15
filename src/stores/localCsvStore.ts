@@ -20,6 +20,9 @@ interface LocalCsvState {
   addDataset: (dataset: LocalCsvDataset) => void;
   removeDataset: (id: string) => void;
   clear: () => void;
+  /** Ventana “Cargar / Gestionar .CSV”, abrible desde el encabezado o el panel lateral. */
+  managerOpen: boolean;
+  setManagerOpen: (open: boolean) => void;
 }
 
 export const useLocalCsvStore = create<LocalCsvState>()((set) => ({
@@ -27,6 +30,8 @@ export const useLocalCsvStore = create<LocalCsvState>()((set) => ({
   addDataset: (dataset) => set((state) => ({ datasets: [...state.datasets.filter((item) => item.fileName !== dataset.fileName), dataset] })),
   removeDataset: (id) => set((state) => ({ datasets: state.datasets.filter((item) => item.id !== id) })),
   clear: () => set({ datasets: [] }),
+  managerOpen: false,
+  setManagerOpen: (managerOpen) => set({ managerOpen }),
 }));
 
 export function selectLocalObservations(datasets: LocalCsvDataset[]): Observation[] {

@@ -86,7 +86,7 @@ export default function MarkovHeatmapPanel({ observations, provenance }: MarkovH
     <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
       <div className="relative flex min-h-[460px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:col-span-8 lg:min-h-[580px]">
         <div className="min-h-[460px] w-full flex-1 lg:min-h-[580px]">
-          <ObservationMap observations={antioquiaObservations} selected={selected} onSelect={setSelected} focusTarget={focus} mapStyle={theme === 'light' ? LIGHT_STYLE : DARK_STYLE} showViirs showModis showHeatmap={false} />
+          <ObservationMap observations={antioquiaObservations} selected={selected} onSelect={setSelected} focusTarget={focus} mapStyle={theme === 'light' ? LIGHT_STYLE : DARK_STYLE} layers={{ heatmap: false, colombiaBoundary: false, antioquiaSubregions: true }} />
         </div>
 
         <div className="pointer-events-none absolute left-3 top-3 z-10">

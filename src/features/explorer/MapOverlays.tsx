@@ -1,29 +1,26 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Compass, HelpCircle, Layers, Map as MapIcon } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Activity, ChevronDown, ChevronUp, Compass, Flame, Globe, HelpCircle, Layers, Map as MapIcon, Moon, Mountain, Sparkles, Sun } from 'lucide-react';
 import NoveltyReportAccess from '@/components/layout/NoveltyReportAccess';
-import { MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapStylePreset } from './mapPresets';
+import { HIGH_INTENSITY_FRP_MW, MAP_FOCUS_PRESETS, MAP_STYLE_PRESETS, type MapFocusPreset, type MapLayerState, type MapStylePreset } from './mapPresets';
 
 interface MapOverlaysProps {
   focusId: string;
   styleId: MapStylePreset['id'];
   onStyleChange: (style: MapStylePreset) => void;
   onFocusChange: (preset: MapFocusPreset) => void;
-  observationCounts: { MODIS: number; VIIRS: number };
+  layers: MapLayerState;
+  onToggleLayer: (key: keyof MapLayerState) => void;
+  pointCount: number;
   frpCount: number;
-  showModis: boolean;
-  showViirs: boolean;
-  showHeatmap: boolean;
-  onToggleModis: () => void;
-  onToggleViirs: () => void;
-  onToggleHeatmap: () => void;
   /** Abre la guía/glosario; si falta, no se muestra el botón “Guía”. */
   onOpenGuide?: () => void;
   sourceLabel?: string;
 }
 
-const GLASS = 'border border-border-strong bg-card shadow-2xl';
+const PANEL = 'border border-border-strong bg-card shadow-2xl';
+const STYLE_ICONS: Record<MapStylePreset['id'], typeof MapIcon> = { liberty: MapIcon, satellite: Globe, topographic: Mountain, dark: Moon, positron: Sun };
 
-export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, observationCounts, frpCount, showModis, showViirs, showHeatmap, onToggleModis, onToggleViirs, onToggleHeatmap, onOpenGuide, sourceLabel }: MapOverlaysProps) {
+export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusChange, layers, onToggleLayer, pointCount, frpCount, onOpenGuide, sourceLabel }: MapOverlaysProps) {
   const [layersOpen, setLayersOpen] = useState(true);
   const [baseOpen, setBaseOpen] = useState(false);
   const activeStyle = MAP_STYLE_PRESETS.find((style) => style.id === styleId) ?? MAP_STYLE_PRESETS[0];
@@ -31,64 +28,77 @@ export default function MapOverlays({ focusId, styleId, onStyleChange, onFocusCh
   return <>
     <div className="pointer-events-none absolute left-3 right-14 top-3 z-20 flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-      <div className={`pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl p-1.5 ${GLASS}`}>
-        <span className="flex items-center gap-1 px-1.5 font-noto text-[11px] font-bold text-accent"><Compass className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Zona:</span></span>
-        {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors sm:text-xs ${focusId === preset.id ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:bg-surface-hover/60 hover:text-text-primary'}`}>{preset.label}</button>)}
-      </div>
-      <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
-        {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {(observationCounts.VIIRS + observationCounts.MODIS).toLocaleString()} pts</span>}
-        <NoveltyReportAccess variant="map" />
-        {onOpenGuide && <button type="button" onClick={onOpenGuide} className="flex items-center gap-1 rounded-lg bg-card px-2 py-1.5 text-xs font-semibold text-info shadow-sm hover:underline" aria-label="Abrir guía y glosario"><HelpCircle className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Guía</span></button>}
-      </div>
+        <div className={`pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl p-1.5 ${PANEL}`}>
+          <span className="flex items-center gap-1 px-1.5 font-noto text-[11px] font-bold text-accent"><Compass className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Zona:</span></span>
+          {MAP_FOCUS_PRESETS.map((preset) => <button key={preset.id} type="button" aria-pressed={focusId === preset.id} onClick={() => onFocusChange(preset)} className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors sm:text-xs ${focusId === preset.id ? 'bg-accent-solid text-accent-fg' : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'}`}>{preset.label}</button>)}
+        </div>
+        <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
+          {sourceLabel && <span className="hidden rounded-lg bg-card px-2 py-1 font-source text-[11px] font-bold text-success shadow-sm md:inline">● {sourceLabel} · {pointCount.toLocaleString()} pts</span>}
+          <NoveltyReportAccess variant="map" />
+          {onOpenGuide && <button type="button" onClick={onOpenGuide} className="flex items-center gap-1 rounded-lg bg-card px-2 py-1.5 text-xs font-semibold text-info shadow-sm hover:underline" aria-label="Abrir guía y glosario"><HelpCircle className="h-3.5 w-3.5" aria-hidden /><span className="hidden sm:inline">Guía</span></button>}
+        </div>
       </div>
 
-      <div className={`pointer-events-auto max-w-[260px] self-start overflow-hidden rounded-2xl ${GLASS}`}>
-        <button type="button" aria-expanded={baseOpen} onClick={() => setBaseOpen((value) => !value)} className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-xs font-bold text-text-primary transition-colors hover:bg-surface-hover/50 sm:py-2">
+      <div className={`pointer-events-auto max-w-[260px] self-start overflow-hidden rounded-2xl ${PANEL}`}>
+        <button type="button" aria-expanded={baseOpen} onClick={() => setBaseOpen((value) => !value)} className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-xs font-bold text-text-primary transition-colors hover:bg-surface-hover sm:py-2">
           <span className="flex items-center gap-2"><MapIcon className="h-4 w-4 text-accent" aria-hidden /><span>Base: <strong className="uppercase text-accent">{activeStyle.label}</strong></span></span>
           {baseOpen ? <ChevronUp className="h-3.5 w-3.5 text-text-secondary" /> : <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />}
         </button>
-        <div className={`${baseOpen ? 'block' : 'hidden'} border-t border-border p-3 text-xs`}>
-          <label className="flex items-center justify-between gap-2 text-text-secondary">
-            <span>Mapa base</span>
-            <select aria-label="Estilo del mapa base" value={styleId} onChange={(event) => { const style = MAP_STYLE_PRESETS.find((item) => item.id === event.target.value); if (style) onStyleChange(style); }} className="rounded-lg border border-border-strong bg-input-bg px-2 py-1 font-semibold text-text-primary outline-none focus-visible:ring-1 focus-visible:ring-cyan-400">
-              {MAP_STYLE_PRESETS.map((style) => <option key={style.id} value={style.id}>{style.label}</option>)}
-            </select>
-          </label>
-        </div>
+        {baseOpen && <div className="space-y-3 border-t border-border p-3 text-xs">
+          <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Estilo del mapa base">
+            {MAP_STYLE_PRESETS.map((style) => {
+              const Icon = STYLE_ICONS[style.id];
+              const active = style.id === styleId;
+              return <button key={style.id} type="button" aria-pressed={active} onClick={() => onStyleChange(style)} className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${active ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-secondary hover:bg-surface-hover hover:text-text-primary'}`}><Icon className="h-3.5 w-3.5" aria-hidden />{style.label}</button>;
+            })}
+          </div>
+          <div className="space-y-1.5 border-t border-border pt-2">
+            <Toggle label="Límite de Colombia" checked={layers.colombiaBoundary} onChange={() => onToggleLayer('colombiaBoundary')} />
+            <Toggle label="Subregiones de Antioquia" checked={layers.antioquiaSubregions} onChange={() => onToggleLayer('antioquiaSubregions')} />
+            <p className="text-[10px] leading-tight text-text-secondary">Contornos esquemáticos de referencia visual; no son límites oficiales.</p>
+          </div>
+        </div>}
       </div>
     </div>
 
-    <section className={`absolute bottom-6 left-3 z-20 w-60 space-y-2 rounded-2xl p-2.5 text-xs ${GLASS}`}>
+    <section className={`absolute bottom-6 left-3 z-20 w-60 space-y-2 rounded-2xl p-2.5 text-xs ${PANEL}`}>
       <button type="button" aria-expanded={layersOpen} onClick={() => setLayersOpen((value) => !value)} className="flex w-full items-center justify-between border-b border-border pb-1 font-noto text-[11px] font-bold text-text-primary">
         <span className="flex items-center gap-1.5"><Layers className="h-3.5 w-3.5 text-accent" aria-hidden />Capas Cartográficas</span>
         {layersOpen ? <ChevronUp className="h-3.5 w-3.5 text-text-secondary" /> : <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />}
       </button>
       {layersOpen && <div className="space-y-2 pt-0.5">
-        <LayerToggle label="Puntos rojos" detail="Focos VIIRS" color="bg-[#ef4444]" count={observationCounts.VIIRS} checked={showViirs} onChange={onToggleViirs} />
-        <LayerToggle label="Puntos amarillos" detail="Focos MODIS" color="bg-[#facc15]" count={observationCounts.MODIS} checked={showModis} onChange={onToggleModis} />
-        <div className="border-t border-border pt-1.5">
-          <LayerToggle label="Densidad térmica" detail="Peso FRP disponible (MW)" color="bg-orange-400" count={frpCount} checked={showHeatmap} onChange={onToggleHeatmap} />
-          {showHeatmap && <p className="pt-1 text-[10px] leading-tight text-text-secondary">La intensidad visual usa FRP informada; FRP nula queda excluida y no se interpreta como cero.</p>}
+        <Toggle icon={<Flame className="h-3.5 w-3.5 text-accent" />} label="Marcadores Térmicos" count={pointCount} checked={layers.points} onChange={() => onToggleLayer('points')} />
+        <Toggle icon={<Activity className="h-3.5 w-3.5 text-danger" />} label="Mapa Calor Observado" count={frpCount} checked={layers.heatmap} onChange={() => onToggleLayer('heatmap')} />
+        {layers.heatmap && <p className="text-[10px] leading-tight text-text-secondary">Ponderado por FRP informada; las observaciones sin FRP no participan.</p>}
+        <div className="space-y-1 border-t border-border pt-1.5">
+          <label className="flex cursor-not-allowed items-center justify-between gap-2 font-semibold text-predictive opacity-60">
+            <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" aria-hidden />Capa Predictiva Markov</span>
+            <input type="checkbox" disabled checked={false} readOnly aria-label="Capa Predictiva Markov" className="accent-accent" />
+          </label>
+          <p className="text-[10px] leading-tight text-text-secondary">Pendiente: se habilita cuando el AI-Pipeline publique un modelo evaluado.</p>
         </div>
       </div>}
     </section>
 
-    <div className={`absolute bottom-6 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-3 rounded-xl px-3.5 py-2 font-source text-[11px] lg:flex ${GLASS}`}>
-      <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full bg-[#ef4444] ring-1 ring-border-strong" /><span className="font-bold text-text-primary">VIIRS</span></span>
+    <div className={`absolute bottom-6 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-3 rounded-xl px-3.5 py-2 font-source text-[11px] lg:flex ${PANEL}`}>
+      <LegendDot color="bg-[#ef4444]" label="VIIRS" />
       <span className="h-3 w-px bg-border-strong" />
-      <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full bg-[#facc15] ring-1 ring-border-strong" /><span className="font-bold text-text-primary">MODIS</span></span>
+      <LegendDot color="bg-[#facc15]" label="MODIS" />
+      <span className="h-3 w-px bg-border-strong" />
+      <LegendDot color="bg-[#f97316]" label={`Alta (≥${HIGH_INTENSITY_FRP_MW} MW)`} />
     </div>
   </>;
 }
 
-function LayerToggle({ label, detail, color, count, checked, onChange }: { label: string; detail: string; color: string; count: number; checked: boolean; onChange: () => void }) {
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return <span className="flex items-center gap-1.5"><span className={`inline-block h-3 w-3 rounded-full ring-1 ring-border-strong ${color}`} /><span className="font-bold text-text-primary">{label}</span></span>;
+}
+
+function Toggle({ icon, label, count, checked, onChange }: { icon?: ReactNode; label: string; count?: number; checked: boolean; onChange: () => void }) {
   return <label className="flex cursor-pointer items-center justify-between gap-2 text-text-primary">
-    <span className="flex min-w-0 items-center gap-1.5">
-      <span className={`h-3 w-3 shrink-0 rounded-full ring-1 ring-border-strong ${color}`} aria-hidden />
-      <span className="min-w-0"><span className="block text-xs">{label}</span><span className="block text-[10px] text-text-secondary">{detail}</span></span>
-    </span>
+    <span className="flex items-center gap-1.5">{icon}{label}</span>
     <span className="flex items-center gap-2">
-      <span className="min-w-5 rounded border border-border-strong bg-input-bg px-1 text-center font-source text-[10px] text-text-secondary">{count}</span>
+      {count !== undefined && <span className="min-w-5 rounded border border-border-strong bg-input-bg px-1 text-center font-source text-[10px] text-text-secondary">{count.toLocaleString()}</span>}
       <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="accent-accent" />
     </span>
   </label>;

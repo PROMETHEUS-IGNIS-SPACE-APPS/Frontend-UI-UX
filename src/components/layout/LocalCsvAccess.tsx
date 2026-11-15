@@ -21,7 +21,8 @@ export default function LocalCsvAccess() {
   const addDataset = useLocalCsvStore((state) => state.addDataset);
   const removeDataset = useLocalCsvStore((state) => state.removeDataset);
   const clear = useLocalCsvStore((state) => state.clear);
-  const [managerOpen, setManagerOpen] = useState(false);
+  const managerOpen = useLocalCsvStore((state) => state.managerOpen);
+  const setManagerOpen = useLocalCsvStore((state) => state.setManagerOpen);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [messages, setMessages] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
