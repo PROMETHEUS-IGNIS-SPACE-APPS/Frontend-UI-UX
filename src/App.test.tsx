@@ -184,6 +184,7 @@ describe('App shell de pestañas', () => {
     expect(screen.getByRole('heading', { name: '4. Interpretación de los datos de PROMETHEUS IGNIS' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Aprendizaje Basado en Problemas (ABP)' })).toBeInTheDocument();
     expect(screen.getByText('1 / 36')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mensaje final de KAIRÓS' })).toHaveAccessibleDescription(/Paulo Freire/);
     expect(screen.queryByText('Actividades interactivas')).not.toBeInTheDocument();
   });
 

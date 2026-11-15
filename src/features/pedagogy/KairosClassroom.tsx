@@ -11,6 +11,7 @@ import {
   KAIROS_INTRO_PARAGRAPHS,
   KAIROS_INTRO_TITLE,
   KAIROS_SECTIONS,
+  KAIROS_SUN_MESSAGE,
   KAIROS_WIDE_SLIDES,
   type KairosSection,
 } from './kairosContent';
@@ -57,6 +58,29 @@ function InfographicCard({ section, notice, onExpand, audioActive, onToggleAudio
     {notice && <p role="note" className="mt-3 rounded-xl border border-[#D9692B]/40 bg-[#FDECCD] px-3 py-2 font-noto text-xs leading-relaxed text-[#6E3B21]"><strong className="text-[#7B3314]">Nota de lectura: </strong>{notice}</p>}
     {section.audioSrc && <PodcastPlayer src={section.audioSrc} title={section.title} active={audioActive} onToggle={onToggleAudio} onEnded={onAudioEnded} />}
   </article>;
+}
+
+/**
+ * Sun of the footer landscape (pie.webp, 1672 × 941): circle at x 776–990, top y 393.
+ * Percent positioning keeps the overlay on the drawn sun at every width; the bottom
+ * is clipped where the hills cover it. Hover, focus or tap reveals the closing message.
+ */
+function KairosSun() {
+  return <div className="group absolute inset-0">
+    <button
+      type="button"
+      aria-label="Mensaje final de KAIRÓS"
+      aria-describedby="kairos-sun-message"
+      className="kairos-sun absolute left-[46.4%] top-[41.8%] aspect-square w-[12.8%] cursor-help rounded-full focus-visible:outline-none"
+    />
+    <div
+      id="kairos-sun-message"
+      role="tooltip"
+      className="pointer-events-none absolute bottom-[60%] left-1/2 z-10 w-[min(34rem,92vw)] -translate-x-1/2 translate-y-2 rounded-2xl border border-[#D9692B]/40 bg-[#FDECCD]/95 p-4 text-left opacity-0 shadow-xl transition duration-300 group-has-[button:hover]:translate-y-0 group-has-[button:hover]:opacity-100 group-has-[button:focus]:translate-y-0 group-has-[button:focus]:opacity-100 sm:p-5"
+    >
+      {KAIROS_SUN_MESSAGE.map((paragraph) => <p key={paragraph.slice(0, 24)} className="mb-2 font-noto text-xs leading-relaxed text-[#4A2E1B] last:mb-0 sm:text-sm">{paragraph}</p>)}
+    </div>
+  </div>;
 }
 
 /** KAIRÓS, Aula Pedagógica: infografías de prevención. */
@@ -113,8 +137,8 @@ export default function KairosClassroom() {
         />)}
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-10">
-        <div className="lg:col-span-6">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7">
+        <div>
           <InfographicCard
             section={KAIROS_DATA_INFOGRAPHICS}
             notice={KAIROS_DATA_NOTICE}
@@ -124,7 +148,7 @@ export default function KairosClassroom() {
             onAudioEnded={releaseAudio}
           />
         </div>
-        <div className="flex flex-col justify-center gap-8 px-1 py-2 sm:px-4 lg:col-span-6 lg:px-6">
+        <div className="flex flex-col justify-center gap-8 px-1 py-2 sm:px-4 lg:col-span-2 lg:px-6">
           <div>
             <h2 className="mb-5 font-sans text-2xl font-bold leading-tight text-[#7B3314] sm:text-3xl">{KAIROS_EDUCATION_BLOCK.title}</h2>
             <div className="max-w-2xl space-y-4 font-noto text-sm leading-relaxed sm:text-justify sm:text-base">
@@ -166,10 +190,13 @@ export default function KairosClassroom() {
 
     <p className="mx-auto mb-8 mt-10 w-full max-w-3xl px-6 text-center font-noto text-xs font-medium leading-relaxed text-[#B8531E] sm:mb-12 sm:mt-16 sm:text-sm">{KAIROS_CLOSING}</p>
 
-    <div className="w-full select-none leading-none">
+    <div className="relative w-full select-none leading-none">
       {footerFailed
         ? <div aria-hidden className="aspect-[16/5] w-full bg-[#EBC374]/30" />
-        : <img src={KAIROS_FOOTER_IMAGE} alt="" loading="lazy" onError={() => setFooterFailed(true)} className="block h-auto w-full" />}
+        : <>
+          <img src={KAIROS_FOOTER_IMAGE} alt="" loading="lazy" onError={() => setFooterFailed(true)} className="block h-auto w-full" />
+          <KairosSun />
+        </>}
     </div>
 
     {lightbox && current && <div role="dialog" aria-modal="true" aria-label={current.title} className="fixed inset-0 z-[60] flex items-center justify-center bg-[#3B1E0D]/80 p-3 sm:p-6" onClick={() => setLightbox(null)}>

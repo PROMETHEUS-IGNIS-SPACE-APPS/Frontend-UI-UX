@@ -173,3 +173,9 @@ export const KAIROS_WIDE_SLIDES: KairosSlide[] = ABP_TITLES.map((title, index) =
 });
 
 export const KAIROS_CLOSING = 'Los griegos distinguían dos tiempos: kronos, el que pasa y se cuenta en horas, y kairós, el momento justo en que actuar cambia el destino. Por eso esta página se llama Kairós, porque frente al fuego el momento oportuno no llega por azar: lo construye la prevención.';
+
+/** Mensaje que aparece al pasar el cursor (o tocar) el sol del paisaje final. */
+export const KAIROS_SUN_MESSAGE = [
+  'El apartado Kairós: Aula pedagógica parte de una idea: la mejor forma de enfrentar un incendio es estar preparados. Las infografías y los podcasts enseñan qué hacer, el Aprendizaje Basado en Problemas lleva ese conocimiento a situaciones reales y el juego de simulación acerca la prevención a los niños de forma divertida. Así, cada persona puede aprender a su manera y cuidar de sí misma, de los demás y de su territorio.',
+  'Como afirma Paulo Freire: «Nadie educa a nadie —nadie se educa a sí mismo—, los hombres se educan entre sí con la mediación del mundo». Esa es la apuesta de este espacio: que la prevención de incendios se construya en comunidad.',
+];

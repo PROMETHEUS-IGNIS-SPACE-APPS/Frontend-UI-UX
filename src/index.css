@@ -368,3 +368,30 @@
     transition: none;
   }
 }
+
+/* Sol del paisaje final del Aula KAIRÓS: relieve sobre el sol dibujado y mensaje al pasar el cursor. */
+.kairos-sun {
+  background: radial-gradient(circle at 34% 30%, rgba(255, 244, 214, 0.75) 0%, rgba(255, 214, 150, 0.35) 22%, rgba(236, 132, 52, 0) 52%),
+    radial-gradient(circle at 68% 74%, rgba(120, 40, 10, 0.38) 0%, rgba(120, 40, 10, 0) 55%);
+  box-shadow: inset -0.5rem -0.6rem 1.1rem rgba(122, 45, 12, 0.35), inset 0.4rem 0.5rem 0.9rem rgba(255, 238, 200, 0.45);
+  /* Mask traced from the drawing: the relief only covers the visible sun, never the hills. */
+  -webkit-mask: url('/assets/kairos/sol-mascara.png') center / 100% 100% no-repeat;
+  mask: url('/assets/kairos/sol-mascara.png') center / 100% 100% no-repeat;
+  transition: filter 300ms ease-out;
+  animation: kairos-sun-glow 3.2s ease-in-out infinite;
+}
+
+.kairos-sun:hover,
+.kairos-sun:focus {
+  filter: brightness(1.15) saturate(1.2);
+  animation: none;
+}
+
+@keyframes kairos-sun-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kairos-sun { animation: none; transition: none; }
+}
