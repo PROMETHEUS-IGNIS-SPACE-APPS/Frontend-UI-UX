@@ -67,7 +67,7 @@ export default function Bomberito({ observations, onShowCell }: BomberitoProps) 
 
   return <>
     <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-[44] flex items-center gap-1 md:bottom-28 md:right-6">
-      {!open && <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! Tócame</span>}
+      {!open && <span aria-hidden className={`bomberito-bubble select-none whitespace-nowrap rounded-2xl rounded-r-sm border-2 border-[#B9200B] bg-white px-3 py-1.5 font-noto text-[11px] font-extrabold text-[#B9200B] shadow-lg ${seen ? 'bomberito-bubble--calm' : ''}`}>¡Hola! ¿Necesitas ayuda?</span>}
       {!open && <span aria-hidden className={`bomberito-point select-none text-2xl leading-none drop-shadow ${seen ? 'bomberito-point--calm' : ''}`}>👉</span>}
       <button type="button" onClick={toggle} aria-expanded={open} aria-label="Abrir Bomberito Centinela" title="Bomberito Centinela: toca para ver el modelo CENTINELA" className="group relative h-16 w-16 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 md:h-[4.5rem] md:w-[4.5rem]">
         {!open && <span aria-hidden className={`bomberito-ring absolute inset-0 rounded-full border-4 border-[#facc15] ${seen ? 'bomberito-ring--calm' : ''}`} />}
